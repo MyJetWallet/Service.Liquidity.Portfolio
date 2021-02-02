@@ -1,0 +1,22 @@
+{
+  "author": "MyJetWallet",
+  "classifications": [ "MyJetService" ],
+  "name": "MyJetService",
+  "identity": "MyJetService",
+  "shortName": "myjetservice",
+  "preferNameDirectory": "true",
+  "tags": {
+    "language": "C#"
+  },
+  "sourceName": "AssetsDictionary",
+  "symbols": {
+    "clientSecretsId": {
+      "type": "generated",
+      "generator": "guid",
+      "replaces": "user-secrets-id",
+      "parameters": {
+        "format":"N"
+      }
+    }
+  }
+}

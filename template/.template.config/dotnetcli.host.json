@@ -1,0 +1,16 @@
+{
+  "symbolInfo": {
+    "serviceNameKebab": {
+      "longName": "service-name-kebab",
+      "shortName": "snk"
+    },
+    "productNameKebab": {
+      "longName": "product-name-kebab",
+      "shortName": "pnk"
+    },
+    "productNameCamel": {
+      "longName": "product-name-camel",
+      "shortName": "pnc"
+    }
+  }
+}
