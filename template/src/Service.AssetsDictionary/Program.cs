@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Net;
@@ -49,8 +49,8 @@ namespace Service.AssetsDictionary
                 {
                     webBuilder.ConfigureKestrel(options =>
                     {
-                        options.Listen(IPAddress.Any, 5000, o => o.Protocols = HttpProtocols.Http1);
-                        options.Listen(IPAddress.Any, 5001, o => o.Protocols = HttpProtocols.Http2);
+                        options.Listen(IPAddress.Any, 8080, o => o.Protocols = HttpProtocols.Http1);
+                        options.Listen(IPAddress.Any, 80, o => o.Protocols = HttpProtocols.Http2);
                     });
 
                     webBuilder.UseUrls("http://*:5000", "http://*:5001");
