@@ -15,7 +15,7 @@ namespace Service.AssetsDictionary.Client
         public AssetsDictionaryClientFactory(string assetsDictionaryGrpcServiceUrl)
         {
             AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            _channel = GrpcChannel.ForAddress("http://localhost:5001");
+            _channel = GrpcChannel.ForAddress(assetsDictionaryGrpcServiceUrl);
             //_channel = channel.Intercept(new RequestDurationInterceptor());
             //_channel = channel;
         }

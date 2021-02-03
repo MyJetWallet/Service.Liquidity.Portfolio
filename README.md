@@ -36,9 +36,9 @@ To activate this feature you should set configuration variable 'SeqUrl' URL addr
 #### Use SEQ locally
 To collect and read logs locally you can run Seq locally by docker:
 `
-docker run -it -p 5341:5341 -p 8080:80 -e ACCEPT_EULA=Y datalust/seq
+docker run -it -p 5341:5341 -p 81:80 -e ACCEPT_EULA=Y datalust/seq
 `
-User interface you can see at http://localhost:8080
+User interface you can see at http://localhost:81
 
 
 ### Use GRPC and Rest
