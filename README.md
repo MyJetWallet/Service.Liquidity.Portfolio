@@ -43,8 +43,8 @@ User interface you can see at http://localhost:81
 
 ### Use GRPC and Rest
 Template service by default ready to work with GRPC services and REst services. application host two ports:
-* 5000 - protocol HTTP 1.1 to work with standard Rest api with aspnet and WebAPI.
-* 5001 - protocol HTTP 2.0 to wotk with GRPC services.
+* 8080 - protocol HTTP 1.1 to work with standard Rest api with aspnet and WebAPI.
+* 80 - protocol HTTP 2.0 to wotk with GRPC services.
 
 By default application do not support SSL and HTTPS. Client for GRPS should use http ptotocol with out encription.
 
