@@ -35,7 +35,12 @@ jobs:
 
     - name: Check Service dir
       run: ls ./publish-api
-      
+
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/tags/})"
+      id: extract_branch
+
     - name: Publish image
       uses: docker/build-push-action@v1
       with:
@@ -45,5 +50,5 @@ jobs:
         registry: docker.pkg.github.com
         repository: ${{ secrets.ORG_NAME }}/service.assetsdictionary/myjetwallet.service.assetsdictionary
         tag_with_ref: true
-        build_args: app_version=myjetwallet.service.assetsdictionary:${GITHUB_REF#refs/tags/},app_compilation_date=${{ steps.current-time.outputs.formattedTime }}
+        build_args: app_version=myjetwallet.service.assetsdictionary:${{ steps.extract_branch.outputs.branch }},app_compilation_date=${{ steps.current-time.outputs.formattedTime }}
 
