@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Autofac;
-using MyJetWallet.Sdk.Service;
+using MyJetWallet.Sdk.GrpcMetrics;
 using Prometheus;
 using ProtoBuf.Grpc.Server;
 using Service.AssetsDictionary.Modules;
@@ -21,9 +21,11 @@ namespace Service.AssetsDictionary
         {
             services.AddCodeFirstGrpc(options =>
             {
-                //options.Interceptors.Add<PrometheusMetricsInterceptor>();
+                options.Interceptors.Add<PrometheusMetricsInterceptor>();
                 options.BindMetricsInterceptors();
             });
+
+            services.AddHostedService<ApplicationLifetimeManager>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
