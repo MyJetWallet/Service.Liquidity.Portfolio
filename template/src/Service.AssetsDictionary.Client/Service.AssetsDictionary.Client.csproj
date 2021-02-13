@@ -26,6 +26,8 @@
     <Authors>MyJetWallet</Authors>
     <Company>MyJetWallet</Company>
     <Product>MyJetWallet</Product>
+    <PackageProjectUrl>https://github.com/MyJetWallet/Service.AssetsDictionary</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MyJetWallet/Service.AssetsDictionary</RepositoryUrl>
   </PropertyGroup>
 
   <Target Name="PackReferencedProjectOutputs" DependsOnTargets="BuildOnlySettings;ResolveReferences">
