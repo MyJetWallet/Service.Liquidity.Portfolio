@@ -6,8 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Autofac;
 using MyJetWallet.Sdk.GrpcMetrics;
+using MyJetWallet.Sdk.GrpcSchema;
 using Prometheus;
 using ProtoBuf.Grpc.Server;
+using Service.AssetsDictionary.Grpc;
 using Service.AssetsDictionary.Modules;
 using Service.AssetsDictionary.Services;
 using SimpleTrading.BaseMetrics;
@@ -45,7 +47,9 @@ namespace Service.AssetsDictionary
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<HelloService>();
+                endpoints.MapGrpcSchema<HelloService, IHelloService>();
+
+                endpoints.MapGrpcSchemaRegistry();
 
                 endpoints.MapGet("/", async context =>
                 {
