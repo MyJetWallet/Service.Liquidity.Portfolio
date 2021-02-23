@@ -57,13 +57,17 @@ namespace Service.AssetsDictionary
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    var httpPort = Environment.GetEnvironmentVariable("HTTP_PORT") ?? "8080";
+                    var grpcPort = Environment.GetEnvironmentVariable("GRPC_PORT") ?? "80";
+
+                    Console.WriteLine($"HTTP PORT: {httpPort}");
+                    Console.WriteLine($"GRPC PORT: {grpcPort}");
+
                     webBuilder.ConfigureKestrel(options =>
                     {
-                        options.Listen(IPAddress.Any, 8080, o => o.Protocols = HttpProtocols.Http1);
-                        options.Listen(IPAddress.Any, 80, o => o.Protocols = HttpProtocols.Http2);
+                        options.Listen(IPAddress.Any, int.Parse(httpPort), o => o.Protocols = HttpProtocols.Http1);
+                        options.Listen(IPAddress.Any, int.Parse(grpcPort), o => o.Protocols = HttpProtocols.Http2);
                     });
-
-                    webBuilder.UseUrls("http://*:5000", "http://*:5001");
 
                     webBuilder.UseStartup<Startup>();
                 })
