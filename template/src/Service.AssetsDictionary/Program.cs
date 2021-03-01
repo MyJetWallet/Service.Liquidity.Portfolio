@@ -18,6 +18,8 @@ namespace Service.AssetsDictionary
 
         public static SettingsModel Settings { get; private set; }
 
+        public static ILoggerFactory LogFactory { get; private set; }
+
         public static Func<T> ReloadedSettings<T>(Func<SettingsModel, T> getter)
         {
             return () =>
@@ -37,6 +39,8 @@ namespace Service.AssetsDictionary
             using var loggerFactory = LogConfigurator.Configure("MyJetWallet", Settings.SeqServiceUrl);
 
             var logger = loggerFactory.CreateLogger<Program>();
+
+            LogFactory = loggerFactory;
 
             try
             {
