@@ -7,5 +7,8 @@ namespace Service.AssetsDictionary.Settings
     {
         [YamlProperty("AssetsDictionary.SeqServiceUrl")]
         public string SeqServiceUrl { get; set; }
+
+        [YamlProperty("AssetsDictionary.ZipkinUrl")]
+        public string ZipkinUrl { get; set; }
     }
 }
