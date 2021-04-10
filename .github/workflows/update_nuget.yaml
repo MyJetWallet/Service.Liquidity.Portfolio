@@ -24,6 +24,7 @@ jobs:
       run: |
         cd template
         ls
+        dotnet restore
         dotnet outdated -u
       
     - name: Commit & Push changes
