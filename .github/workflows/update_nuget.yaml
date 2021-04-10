@@ -20,15 +20,10 @@ jobs:
     - name: install dotnet-outdated-tool
       run: dotnet tool install --global dotnet-outdated-tool
       
-    - name: change dir
-      run: cd template
-      
-    - name: ls
-      run: ls
-      
     - name: update nugets
       run: |
         cd template
+        ls
         dotnet outdated -u
       
     - name: Commit & Push changes
