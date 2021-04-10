@@ -34,8 +34,12 @@ jobs:
         message: auto-update nugets
 
     - name: Build
-      run: dotnet build --configuration Release /p:AssemblyVersion=0.0.0
+      run: |
+        cd template
+        dotnet build --configuration Release /p:AssemblyVersion=0.0.0
 
     - name: Test
-      run: dotnet test --no-build --configuration Release
+      run: |
+        cd template
+        dotnet test --no-build --configuration Release
 
