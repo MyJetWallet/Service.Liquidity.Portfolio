@@ -22,7 +22,10 @@ jobs:
       
     - name: change dir
       run: cd template
-
+      
+    - name: ls
+      run: ls
+      
     - name: update nugets
       run: dotnet outdated -u
       
