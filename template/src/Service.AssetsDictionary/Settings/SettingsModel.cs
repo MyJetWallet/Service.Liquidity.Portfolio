@@ -1,8 +1,8 @@
-﻿using SimpleTrading.SettingsReader;
+﻿using MyJetWallet.Sdk.Service;
+using MyYamlParser;
 
 namespace Service.AssetsDictionary.Settings
 {
-    [YamlAttributesOnly]
     public class SettingsModel
     {
         [YamlProperty("AssetsDictionary.SeqServiceUrl")]
@@ -10,5 +10,8 @@ namespace Service.AssetsDictionary.Settings
 
         [YamlProperty("AssetsDictionary.ZipkinUrl")]
         public string ZipkinUrl { get; set; }
+
+        [YamlProperty("AssetsDictionary.ElkLogs")]
+        public LogElkSettings ElkLogs { get; set; }
     }
 }
