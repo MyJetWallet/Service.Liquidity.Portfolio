@@ -1,26 +1,16 @@
-﻿using System;
-using Grpc.Core;
-using Grpc.Core.Interceptors;
-using Grpc.Net.Client;
-using JetBrains.Annotations;
-using MyJetWallet.Sdk.GrpcMetrics;
-using ProtoBuf.Grpc.Client;
+﻿using JetBrains.Annotations;
+using MyJetWallet.Sdk.Grpc;
 using Service.AssetsDictionary.Grpc;
 
 namespace Service.AssetsDictionary.Client
 {
     [UsedImplicitly]
-    public class AssetsDictionaryClientFactory
+    public class AssetsDictionaryClientFactory: MyGrpcClientFactory
     {
-        private readonly CallInvoker _channel;
-
-        public AssetsDictionaryClientFactory(string assetsDictionaryGrpcServiceUrl)
+        public AssetsDictionaryClientFactory(string grpcServiceUrl) : base(grpcServiceUrl)
         {
-            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-            var channel = GrpcChannel.ForAddress(assetsDictionaryGrpcServiceUrl);
-            _channel = channel.Intercept(new PrometheusMetricsInterceptor());
         }
 
-        public IHelloService GetHelloService() => _channel.CreateGrpcService<IHelloService>();
+        public IHelloService GetHelloService() => CreateGrpcService<IHelloService>();
     }
 }
