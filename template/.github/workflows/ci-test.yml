@@ -47,4 +47,11 @@ jobs:
         repository: ${{ secrets.ORG_NAME }}/service.assetsdictionary/myjetwallet.service.assetsdictionary-test
         tags: latest
         build_args: app_version=myjetwallet.service.assetsdictionary-test:latest,app_compilation_date=${{ steps.current-time.outputs.formattedTime }}
+        
+    - name: Restart service
+      uses: Myjetwallet/kube-restart-pods@master
+      env:
+        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA_TEST }}
+        NAMESPACE: services
+        POD: assetsdictionary
 
