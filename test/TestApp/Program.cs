@@ -16,7 +16,7 @@ namespace TestApp
             Console.ReadLine();
 
 
-            var factory = new Liquidity.PortfolioClientFactory("http://localhost:5001");
+            var factory = new PortfolioClientFactory("http://localhost:5001");
             var client = factory.GetHelloService();
 
             var resp = await  client.SayHelloAsync(new HelloRequest(){Name = "Alex"});

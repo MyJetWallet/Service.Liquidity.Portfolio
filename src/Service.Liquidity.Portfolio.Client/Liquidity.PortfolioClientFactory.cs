@@ -5,9 +5,9 @@ using Service.Liquidity.Portfolio.Grpc;
 namespace Service.Liquidity.Portfolio.Client
 {
     [UsedImplicitly]
-    public class Liquidity.PortfolioClientFactory: MyGrpcClientFactory
+    public class PortfolioClientFactory: MyGrpcClientFactory
     {
-        public Liquidity.PortfolioClientFactory(string grpcServiceUrl) : base(grpcServiceUrl)
+        public PortfolioClientFactory(string grpcServiceUrl) : base(grpcServiceUrl)
         {
         }
 
