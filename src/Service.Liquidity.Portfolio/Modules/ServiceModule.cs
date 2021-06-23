@@ -1,6 +1,4 @@
 ﻿using Autofac;
-using Autofac.Core;
-using Autofac.Core.Registration;
 
 namespace Service.Liquidity.Portfolio.Modules
 {

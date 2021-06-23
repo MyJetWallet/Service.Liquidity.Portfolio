@@ -5,13 +5,13 @@ namespace Service.Liquidity.Portfolio.Settings
 {
     public class SettingsModel
     {
-        [YamlProperty("Liquidity.Portfolio.SeqServiceUrl")]
+        [YamlProperty("LiquidityPortfolio.SeqServiceUrl")]
         public string SeqServiceUrl { get; set; }
 
-        [YamlProperty("Liquidity.Portfolio.ZipkinUrl")]
+        [YamlProperty("LiquidityPortfolio.ZipkinUrl")]
         public string ZipkinUrl { get; set; }
 
-        [YamlProperty("Liquidity.Portfolio.ElkLogs")]
+        [YamlProperty("LiquidityPortfolio.ElkLogs")]
         public LogElkSettings ElkLogs { get; set; }
     }
 }
