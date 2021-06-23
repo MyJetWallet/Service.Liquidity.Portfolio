@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Service.Service.Liquidity.Portfolio.Grpc;
-using Service.Service.Liquidity.Portfolio.Grpc.Models;
-using Service.Service.Liquidity.Portfolio.Settings;
+using Service.Liquidity.Portfolio.Grpc;
+using Service.Liquidity.Portfolio.Grpc.Models;
+using Service.Liquidity.Portfolio.Settings;
 
-namespace Service.Service.Liquidity.Portfolio.Services
+namespace Service.Liquidity.Portfolio.Services
 {
     public class HelloService: IHelloService
     {

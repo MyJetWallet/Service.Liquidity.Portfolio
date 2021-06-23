@@ -1,7 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 
-namespace Service.Service.Liquidity.Portfolio.Tests
+namespace Service.Liquidity.Portfolio.Tests
 {
     public class TestExample
     {

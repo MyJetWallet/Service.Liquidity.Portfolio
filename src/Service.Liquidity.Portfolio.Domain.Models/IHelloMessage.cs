@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Service.Service.Liquidity.Portfolio.Domain.Models
+namespace Service.Liquidity.Portfolio.Domain.Models
 {
     public interface IHelloMessage
     {

@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference PrivateAssets="All" Include="..\Service.Service.Liquidity.Portfolio.Domain.Models\Service.Service.Liquidity.Portfolio.Domain.Models.csproj" />
-    <ProjectReference PrivateAssets="All" Include="..\Service.Service.Liquidity.Portfolio.Grpc\Service.Service.Liquidity.Portfolio.Grpc.csproj" />
+    <ProjectReference PrivateAssets="All" Include="..\Service.Liquidity.Portfolio.Domain.Models\Service.Liquidity.Portfolio.Domain.Models.csproj" />
+    <ProjectReference PrivateAssets="All" Include="..\Service.Liquidity.Portfolio.Grpc\Service.Liquidity.Portfolio.Grpc.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,12 +24,12 @@
     <TargetsForTfmSpecificBuildOutput>
       $(TargetsForTfmSpecificBuildOutput);PackReferencedProjectOutputs
     </TargetsForTfmSpecificBuildOutput>
-    <PackageId>MyJetWallet.Service.Service.Liquidity.Portfolio.Client</PackageId>
+    <PackageId>MyJetWallet.Service.Liquidity.Portfolio.Client</PackageId>
     <Authors>MyJetWallet</Authors>
     <Company>MyJetWallet</Company>
     <Product>MyJetWallet</Product>
-    <PackageProjectUrl>https://github.com/MyJetWallet/Service.Service.Liquidity.Portfolio</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/MyJetWallet/Service.Service.Liquidity.Portfolio</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/MyJetWallet/Service.Liquidity.Portfolio</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MyJetWallet/Service.Liquidity.Portfolio</RepositoryUrl>
   </PropertyGroup>
 
   <Target Name="PackReferencedProjectOutputs" DependsOnTargets="BuildOnlySettings;ResolveReferences">

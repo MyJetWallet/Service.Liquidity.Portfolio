@@ -1,7 +1,7 @@
 using System.Runtime.Serialization;
-using Service.Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Domain.Models;
 
-namespace Service.Service.Liquidity.Portfolio.Grpc.Models
+namespace Service.Liquidity.Portfolio.Grpc.Models
 {
     [DataContract]
     public class HelloMessage : IHelloMessage

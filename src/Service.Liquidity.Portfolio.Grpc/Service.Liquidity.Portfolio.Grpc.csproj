@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Service.Service.Liquidity.Portfolio.Domain.Models\Service.Service.Liquidity.Portfolio.Domain.Models.csproj" />
+    <ProjectReference Include="..\Service.Liquidity.Portfolio.Domain.Models\Service.Liquidity.Portfolio.Domain.Models.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 ﻿using Autofac;
 
-namespace Service.Service.Liquidity.Portfolio.Modules
+namespace Service.Liquidity.Portfolio.Modules
 {
     public class SettingsModule : Module
     {

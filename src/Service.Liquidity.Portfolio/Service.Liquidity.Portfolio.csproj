@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <UserSecretsId>05552cb3-43c7-40a1-a7ba-0f2fe8730106</UserSecretsId>
+    <UserSecretsId>12e31c31-4261-4e10-a509-fc5600894cf7</UserSecretsId>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
@@ -24,8 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Service.Service.Liquidity.Portfolio.Domain\Service.Service.Liquidity.Portfolio.Domain.csproj" />
-    <ProjectReference Include="..\Service.Service.Liquidity.Portfolio.Grpc\Service.Service.Liquidity.Portfolio.Grpc.csproj" />
+    <ProjectReference Include="..\Service.Liquidity.Portfolio.Domain\Service.Liquidity.Portfolio.Domain.csproj" />
+    <ProjectReference Include="..\Service.Liquidity.Portfolio.Grpc\Service.Liquidity.Portfolio.Grpc.csproj" />
   </ItemGroup>
 
   <ItemGroup>

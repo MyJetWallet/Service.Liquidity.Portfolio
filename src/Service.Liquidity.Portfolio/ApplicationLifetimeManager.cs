@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 
-namespace Service.Service.Liquidity.Portfolio
+namespace Service.Liquidity.Portfolio
 {
     public class ApplicationLifetimeManager : ApplicationLifetimeManagerBase
     {

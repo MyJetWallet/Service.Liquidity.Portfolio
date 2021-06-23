@@ -8,9 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using MySettingsReader;
-using Service.Service.Liquidity.Portfolio.Settings;
+using Service.Liquidity.Portfolio.Settings;
 
-namespace Service.Service.Liquidity.Portfolio
+namespace Service.Liquidity.Portfolio
 {
     public class Program
     {
@@ -32,7 +32,7 @@ namespace Service.Service.Liquidity.Portfolio
 
         public static void Main(string[] args)
         {
-            Console.Title = "MyJetWallet Service.Service.Liquidity.Portfolio";
+            Console.Title = "MyJetWallet Service.Liquidity.Portfolio";
 
             Settings = SettingsReader.GetSettings<SettingsModel>(SettingsFileName);
 

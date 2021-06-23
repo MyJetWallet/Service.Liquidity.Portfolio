@@ -2,7 +2,7 @@
 using Autofac.Core;
 using Autofac.Core.Registration;
 
-namespace Service.Service.Liquidity.Portfolio.Modules
+namespace Service.Liquidity.Portfolio.Modules
 {
     public class ServiceModule: Module
     {

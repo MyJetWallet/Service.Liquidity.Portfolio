@@ -1,17 +1,17 @@
 ﻿using MyJetWallet.Sdk.Service;
 using MyYamlParser;
 
-namespace Service.Service.Liquidity.Portfolio.Settings
+namespace Service.Liquidity.Portfolio.Settings
 {
     public class SettingsModel
     {
-        [YamlProperty("Service.Liquidity.Portfolio.SeqServiceUrl")]
+        [YamlProperty("Liquidity.Portfolio.SeqServiceUrl")]
         public string SeqServiceUrl { get; set; }
 
-        [YamlProperty("Service.Liquidity.Portfolio.ZipkinUrl")]
+        [YamlProperty("Liquidity.Portfolio.ZipkinUrl")]
         public string ZipkinUrl { get; set; }
 
-        [YamlProperty("Service.Liquidity.Portfolio.ElkLogs")]
+        [YamlProperty("Liquidity.Portfolio.ElkLogs")]
         public LogElkSettings ElkLogs { get; set; }
     }
 }

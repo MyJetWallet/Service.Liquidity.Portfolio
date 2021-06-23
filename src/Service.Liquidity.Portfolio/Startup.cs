@@ -10,13 +10,13 @@ using MyJetWallet.Sdk.GrpcSchema;
 using MyJetWallet.Sdk.Service;
 using Prometheus;
 using ProtoBuf.Grpc.Server;
-using Service.Service.Liquidity.Portfolio.Grpc;
-using Service.Service.Liquidity.Portfolio.Modules;
-using Service.Service.Liquidity.Portfolio.Services;
+using Service.Liquidity.Portfolio.Grpc;
+using Service.Liquidity.Portfolio.Modules;
+using Service.Liquidity.Portfolio.Services;
 using SimpleTrading.BaseMetrics;
 using SimpleTrading.ServiceStatusReporterConnector;
 
-namespace Service.Service.Liquidity.Portfolio
+namespace Service.Liquidity.Portfolio
 {
     public class Startup
     {

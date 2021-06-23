@@ -31,7 +31,7 @@ jobs:
       run: ls
 
     - name: Publish Service
-      run: dotnet publish ./src/Service.Service.Liquidity.Portfolio/Service.Service.Liquidity.Portfolio.csproj --configuration Release /p:AssemblyVersion=${GITHUB_REF#refs/tags/} --output ./publish-api
+      run: dotnet publish ./src/Service.Liquidity.Portfolio/Service.Liquidity.Portfolio.csproj --configuration Release /p:AssemblyVersion=${GITHUB_REF#refs/tags/} --output ./publish-api
 
     - name: Check Service dir
       run: ls ./publish-api
@@ -48,7 +48,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
         path: ./publish-api
         registry: docker.pkg.github.com
-        repository: ${{ secrets.ORG_NAME }}/service.service.liquidity.portfolio/myjetwallet.service.service.liquidity.portfolio
+        repository: ${{ secrets.ORG_NAME }}/service.liquidity.portfolio/myjetwallet.service.liquidity.portfolio
         tag_with_ref: true
-        build_args: app_version=myjetwallet.service.service.liquidity.portfolio:${{ steps.extract_branch.outputs.branch }},app_compilation_date=${{ steps.current-time.outputs.formattedTime }}
+        build_args: app_version=myjetwallet.service.liquidity.portfolio:${{ steps.extract_branch.outputs.branch }},app_compilation_date=${{ steps.current-time.outputs.formattedTime }}
 

@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Service.Service.Liquidity.Portfolio.Client\Service.Service.Liquidity.Portfolio.Client.csproj" />
-    <ProjectReference Include="..\..\src\Service.Service.Liquidity.Portfolio.Grpc\Service.Service.Liquidity.Portfolio.Grpc.csproj" />
+    <ProjectReference Include="..\..\src\Service.Liquidity.Portfolio.Client\Service.Liquidity.Portfolio.Client.csproj" />
+    <ProjectReference Include="..\..\src\Service.Liquidity.Portfolio.Grpc\Service.Liquidity.Portfolio.Grpc.csproj" />
   </ItemGroup>
 
 </Project>
