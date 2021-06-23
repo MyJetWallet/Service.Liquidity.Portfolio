@@ -18,7 +18,6 @@
     <PackageReference Include="MyJetWallet.Sdk.GrpcSchema" Version="1.0.5" />    
     <PackageReference Include="MyJetWallet.Sdk.Service" Version="1.5.5" />
     <PackageReference Include="MyJetWallet.Sdk.ServiceBus" Version="1.0.2" />
-    <PackageReference Include="MyJetWallet.Service.BalanceHistory.Client" Version="1.6.7" />
     <PackageReference Include="MyJetWallet.Service.Liquidity.Engine.Client" Version="1.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="4.1.1" />
@@ -29,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Service.Liquidity.Portfolio.Postgres\Service.Liquidity.Portfolio.Postgres.csproj" />
     <ProjectReference Include="..\Service.Liquidity.Portfolio.Domain\Service.Liquidity.Portfolio.Domain.csproj" />
     <ProjectReference Include="..\Service.Liquidity.Portfolio.Grpc\Service.Liquidity.Portfolio.Grpc.csproj" />
   </ItemGroup>

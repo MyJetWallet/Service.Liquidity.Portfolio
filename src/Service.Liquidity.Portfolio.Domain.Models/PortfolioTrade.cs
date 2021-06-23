@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Runtime.Serialization;
-using Service.BalanceHistory.Domain.Models;
 using MyJetWallet.Domain.Orders;
+using Service.BalanceHistory.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Domain.Models
 {

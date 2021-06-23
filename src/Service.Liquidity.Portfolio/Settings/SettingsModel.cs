@@ -22,5 +22,8 @@ namespace Service.Liquidity.Portfolio.Settings
 
         [YamlProperty("LiquidityPortfolio.LiquidityEngineGrpcServiceUrl")]
         public string LiquidityEngineGrpcServiceUrl { get; set; }
+
+        [YamlProperty("LiquidityPortfolio.PostgresConnectionString")]
+        public string PostgresConnectionString { get; set; }
     }
 }
