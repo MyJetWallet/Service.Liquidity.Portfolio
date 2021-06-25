@@ -22,8 +22,7 @@ namespace Service.Liquidity.Portfolio.Postgres
         public async Task SaveAsync(List<Trade> trades)
         {
             await using var context = new TradeContext(_dbContextOptionsBuilder.Options);
-            context.Trades.AddRange(trades);
-            await context.SaveChangesAsync();
+            await context.Trades.UpsertRange(trades).On(e => e.TradeUId).NoUpdate().RunAsync();
         }
     }
 }

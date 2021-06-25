@@ -22,16 +22,14 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
 
             modelBuilder.Entity("Service.Liquidity.Portfolio.Domain.Models.Trade", b =>
                 {
-                    b.Property<long>("SequenceId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                    b.Property<string>("TradeUId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<double>("BaseVolume")
                         .HasColumnType("double precision");
 
                     b.Property<DateTime>("DateTime")
-                        .HasMaxLength(16)
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("InstrumentSymbol")
@@ -39,8 +37,8 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("OrderId")
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<double>("OrderVolume")
                         .HasColumnType("double precision");
@@ -51,12 +49,11 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     b.Property<double>("QuoteVolume")
                         .HasColumnType("double precision");
 
+                    b.Property<long>("SequenceId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("Side")
                         .HasColumnType("integer");
-
-                    b.Property<string>("TradeUId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
 
                     b.Property<int>("Type")
                         .HasMaxLength(64)
@@ -66,10 +63,7 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.HasKey("SequenceId");
-
-                    b.HasIndex("SequenceId")
-                        .IsUnique();
+                    b.HasKey("TradeUId");
 
                     b.ToTable("trade");
                 });
