@@ -7,10 +7,9 @@ namespace Service.Liquidity.Portfolio.Client
 {
     public static class AutofacHelper
     {
-        public static void PortfolioClient(this ContainerBuilder builder, string grpcServiceUrl)
+        public static void RegisterPortfolioClient(this ContainerBuilder builder, string grpcServiceUrl)
         {
             var factory = new PortfolioClientFactory(grpcServiceUrl);
-
             builder.RegisterInstance(factory.GetHelloService()).As<IAssetPortfolioService>().SingleInstance();
         }
     }
