@@ -11,7 +11,7 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         public const string TopicName = "spot-liquidity-engine-trade";
 
         [DataMember(Order = 1)] public string TradeId { get; set; }
-        [DataMember(Order = 2)] public string Source { get; set; }
+        [DataMember(Order = 2)] public string WalletId { get; set; }
         [DataMember(Order = 3)] public bool IsInternal { get; set; }
         [DataMember(Order = 4)] public string Symbol { get; set; }
         [DataMember(Order = 5)] public OrderSide Side { get; set; }
@@ -23,7 +23,7 @@ namespace Service.Liquidity.Portfolio.Domain.Models
 
         public PortfolioTrade(WalletTrade trade, string walletId)
         {
-            Source = walletId;
+            WalletId = walletId;
             IsInternal = true;
             Symbol = trade.InstrumentSymbol;
             Price = trade.Price;
@@ -35,12 +35,12 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             ReferenceId = string.Empty;
         }
 
-        public PortfolioTrade(string tradeId, string source, bool isInternal, string symbol, OrderSide side,
+        public PortfolioTrade(string tradeId, string walletId, bool isInternal, string symbol, OrderSide side,
             double price, double baseVolume,
             double quoteVolume, DateTime dateTime, string referenceId)
         {
             TradeId = tradeId;
-            Source = source;
+            WalletId = walletId;
             IsInternal = isInternal;
             Symbol = symbol;
             Side = side;

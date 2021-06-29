@@ -25,5 +25,8 @@ namespace Service.Liquidity.Portfolio.Settings
 
         [YamlProperty("LiquidityPortfolio.PostgresConnectionString")]
         public string PostgresConnectionString { get; set; }
+
+        [YamlProperty("LiquidityPortfolio.MyNoSqlReaderHostPort")]
+        public string MyNoSqlReaderHostPort { get; set; }
     }
 }

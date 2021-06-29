@@ -8,8 +8,8 @@ using Service.Liquidity.Portfolio.Postgres;
 
 namespace Service.Liquidity.Portfolio.Postgres.Migrations
 {
-    [DbContext(typeof(TradeContext))]
-    partial class TradeContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(DatabaseContext))]
+    partial class DatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -20,11 +20,31 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                 .HasAnnotation("ProductVersion", "5.0.7")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-            modelBuilder.Entity("Service.Liquidity.Portfolio.Domain.Models.Trade", b =>
+            modelBuilder.Entity("Service.Liquidity.Portfolio.Domain.Models.AssetBalance", b =>
                 {
-                    b.Property<string>("TradeUId")
+                    b.Property<string>("WalletId")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Asset")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<double>("Volume")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("WalletId", "Asset");
+
+                    b.ToTable("assetbalance");
+                });
+
+            modelBuilder.Entity("Service.Liquidity.Portfolio.Domain.Models.PortfolioTrade", b =>
+                {
+                    b.Property<string>("TradeId")
+                        .HasColumnType("text");
 
                     b.Property<double>("BaseVolume")
                         .HasColumnType("double precision");
@@ -32,16 +52,8 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<string>("InstrumentSymbol")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<string>("OrderId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<double>("OrderVolume")
-                        .HasColumnType("double precision");
+                    b.Property<bool>("IsInternal")
+                        .HasColumnType("boolean");
 
                     b.Property<double>("Price")
                         .HasColumnType("double precision");
@@ -49,21 +61,22 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     b.Property<double>("QuoteVolume")
                         .HasColumnType("double precision");
 
-                    b.Property<long>("SequenceId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("ReferenceId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<int>("Side")
                         .HasColumnType("integer");
 
-                    b.Property<int>("Type")
+                    b.Property<string>("Symbol")
                         .HasMaxLength(64)
-                        .HasColumnType("integer");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("WalletId")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.HasKey("TradeUId");
+                    b.HasKey("TradeId");
 
                     b.ToTable("trade");
                 });

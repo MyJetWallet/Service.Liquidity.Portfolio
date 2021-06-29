@@ -11,7 +11,7 @@ namespace Service.Liquidity.Portfolio.Client
         {
             var factory = new PortfolioClientFactory(grpcServiceUrl);
 
-            builder.RegisterInstance(factory.GetHelloService()).As<IHelloService>().SingleInstance();
+            builder.RegisterInstance(factory.GetHelloService()).As<IAssetPortfolioService>().SingleInstance();
         }
     }
 }

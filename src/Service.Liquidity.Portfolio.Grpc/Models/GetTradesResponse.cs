@@ -1,12 +1,13 @@
+﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Service.Liquidity.Portfolio.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Grpc.Models
 {
     [DataContract]
-    public class HelloMessage : IHelloMessage
+    public class GetTradesResponse
     {
         [DataMember(Order = 1)]
-        public string Message { get; set; }
+        public List<PortfolioTrade> Trades { get; set; }
     }
 }

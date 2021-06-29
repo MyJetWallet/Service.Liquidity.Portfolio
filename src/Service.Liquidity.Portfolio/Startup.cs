@@ -33,8 +33,8 @@ namespace Service.Liquidity.Portfolio
 
             services.AddHostedService<ApplicationLifetimeManager>();
             
-            TradeContext.LoggerFactory = Program.LogFactory;
-            services.AddDatabase(TradeContext.Schema, Program.Settings.PostgresConnectionString, o => new TradeContext(o));
+            DatabaseContext.LoggerFactory = Program.LogFactory;
+            services.AddDatabase(DatabaseContext.Schema, Program.Settings.PostgresConnectionString, o => new DatabaseContext(o));
 
             services.AddMyTelemetry("SP-", Program.Settings.ZipkinUrl);
         }
@@ -56,7 +56,7 @@ namespace Service.Liquidity.Portfolio
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcSchema<HelloService, IHelloService>();
+                endpoints.MapGrpcSchema<AssetPortfolioService, IAssetPortfolioService>();
 
                 endpoints.MapGrpcSchemaRegistry();
 
@@ -71,6 +71,7 @@ namespace Service.Liquidity.Portfolio
         {
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<ServiceModule>();
+            builder.RegisterModule(new ClientsModule());
         }
     }
 }

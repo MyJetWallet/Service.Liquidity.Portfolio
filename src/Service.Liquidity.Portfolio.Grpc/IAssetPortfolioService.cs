@@ -5,9 +5,12 @@ using Service.Liquidity.Portfolio.Grpc.Models;
 namespace Service.Liquidity.Portfolio.Grpc
 {
     [ServiceContract]
-    public interface IHelloService
+    public interface IAssetPortfolioService
     {
         [OperationContract]
-        Task<HelloMessage> SayHelloAsync(HelloRequest request);
+        Task<GetBalancesResponse> GetBalancesAsync();
+        
+        [OperationContract]
+        Task<GetTradesResponse> GetTradesAsync();
     }
 }
