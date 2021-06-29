@@ -10,7 +10,7 @@ using Service.Liquidity.Portfolio.Postgres;
 namespace Service.Liquidity.Portfolio.Postgres.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210629135426_InitialCreate")]
+    [Migration("20210629142457_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,19 +45,16 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
 
             modelBuilder.Entity("Service.Liquidity.Portfolio.Domain.Models.PortfolioTrade", b =>
                 {
-                    b.Property<string>("TradeId")
-                        .HasColumnType("text");
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<double>("BaseVolume")
                         .HasColumnType("double precision");
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<bool>("IsInternal")
                         .HasColumnType("boolean");
@@ -79,11 +76,15 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<string>("TradeId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<string>("WalletId")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.HasKey("TradeId");
+                    b.HasKey("Id");
 
                     b.ToTable("trade");
                 });

@@ -31,9 +31,9 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                 schema: "liquidityportfolio",
                 columns: table => new
                 {
-                    TradeId = table.Column<string>(type: "text", nullable: false),
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TradeId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     WalletId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     IsInternal = table.Column<bool>(type: "boolean", nullable: false),
                     Symbol = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
@@ -46,7 +46,7 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_trade", x => x.TradeId);
+                    table.PrimaryKey("PK_trade", x => x.Id);
                 });
         }
 
