@@ -12,7 +12,6 @@ namespace Service.Liquidity.Portfolio.Postgres
     public class DatabaseContext : DbContext
     {
         private Activity _activity;
-
         public DbSet<PortfolioTrade> Trades { get; set; }
         public DbSet<AssetBalance> Balances { get; set; }
 

@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
 using Service.Liquidity.Portfolio.Postgres;
@@ -22,21 +24,33 @@ namespace Service.Liquidity.Portfolio.Services
 
         public async Task<GetBalancesResponse> GetBalancesAsync()
         {
-            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            var response = new GetBalancesResponse()
+            var response = new GetBalancesResponse();
+            try
             {
-                Balances = ctx.Balances.ToList()
-            };
+                await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
+                response.Balances = ctx.Balances.ToList();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(JsonConvert.SerializeObject(exception));
+            }
+
             return response;
         }
 
         public async Task<GetTradesResponse> GetTradesAsync()
         {
-            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            var response = new GetTradesResponse()
+            var response = new GetTradesResponse();
+            try
             {
-                Trades = ctx.Trades.ToList()
-            };
+                await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
+                response.Trades = ctx.Trades.ToList();
+            } 
+            catch (Exception exception)
+            {
+                _logger.LogError(JsonConvert.SerializeObject(exception));
+            }
+
             return response;
         }
     }

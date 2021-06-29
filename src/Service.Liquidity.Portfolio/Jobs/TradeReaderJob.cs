@@ -6,6 +6,7 @@ using Autofac;
 using DotNetCoreDecorators;
 using Microsoft.EntityFrameworkCore;
 using MyJetWallet.Domain;
+using MyJetWallet.Sdk.Service;
 using Service.AssetsDictionary.Client;
 using Service.BalanceHistory.ServiceBus;
 using Service.Liquidity.Engine.Grpc;
@@ -33,26 +34,37 @@ namespace Service.Liquidity.Portfolio.Jobs
 
         private async ValueTask HandleTrades(IReadOnlyList<WalletTradeMessage> trades)
         {
-
-            var walletCollection = (await _walletManager.GetAllAsync()).Data.List;
-
-            var listForSave = new List<PortfolioTrade>();
-            
-            walletCollection.ForEach(async wallet =>
+            trades.Count.AddToActivityAsTag("trades count");
+            try
             {
-                var ourTrades = trades.Where(trade => trade.WalletId == wallet.WalletId).ToList();
-                var listForSaveByWallet = ourTrades.Select(elem => new PortfolioTrade(elem.Trade, elem.WalletId)).ToList();
-                
-                listForSave.AddRange(listForSaveByWallet);
+                var walletCollection = (await _walletManager.GetAllAsync()).Data.List;
+                var listForSave = new List<PortfolioTrade>();
 
-                await UpdateBalances(wallet.BrokerId, listForSaveByWallet);
-            });
-            
-            await SaveTrades(listForSave);
+                walletCollection.ForEach(async wallet =>
+                {
+                    var ourTrades = trades.Where(trade => trade.WalletId == wallet.WalletId).ToList();
+                    var listForSaveByWallet =
+                        ourTrades.Select(elem => new PortfolioTrade(elem.Trade, elem.WalletId)).ToList();
+
+                    listForSave.AddRange(listForSaveByWallet);
+
+                    await UpdateBalances(wallet.BrokerId, listForSaveByWallet);
+                });
+
+                await SaveTrades(listForSave);
+            }
+            catch (Exception exception)
+            {
+                exception.AddToActivityAsJsonTag("exception");
+            }
+
         }
 
         private async Task UpdateBalances(string brokerId, List<PortfolioTrade> listForSave)
         {
+            brokerId.AddToActivityAsTag("brokerId");
+            listForSave.AddToActivityAsJsonTag("listForSave");
+            
             var instruments = _spotInstrumentDictionaryClient.GetSpotInstrumentByBroker(new JetBrandIdentity
             {
                 BrokerId = brokerId
