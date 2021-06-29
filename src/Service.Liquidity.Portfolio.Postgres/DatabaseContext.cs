@@ -80,9 +80,7 @@ namespace Service.Liquidity.Portfolio.Postgres
 
         public async Task UpdateBalancesAsync(List<AssetBalance> balances)
         {
-            Balances//.Where(dbElem => balances
-                //.Any(newElem => dbElem.WalletId == newElem.WalletId 
-                //                        && dbElem.Asset == newElem.Asset))
+            Balances
                 .ToList()
                 .ForEach(dbElem =>
             {
@@ -99,7 +97,8 @@ namespace Service.Liquidity.Portfolio.Postgres
         
         public async Task SaveTradesAsync(IEnumerable<PortfolioTrade> trades)
         {
-            await Trades.UpsertRange(trades).On(e => e.TradeId).NoUpdate().RunAsync();
+            Trades.AddRange(trades);
+            await SaveChangesAsync();
         }
         
         public override void Dispose()

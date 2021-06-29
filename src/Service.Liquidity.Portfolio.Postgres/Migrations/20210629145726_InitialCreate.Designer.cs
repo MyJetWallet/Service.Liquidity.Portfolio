@@ -10,7 +10,7 @@ using Service.Liquidity.Portfolio.Postgres;
 namespace Service.Liquidity.Portfolio.Postgres.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210629142457_InitialCreate")]
+    [Migration("20210629145726_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

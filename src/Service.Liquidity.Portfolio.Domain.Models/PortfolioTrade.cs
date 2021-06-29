@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 using MyJetWallet.Domain.Orders;
 using Service.BalanceHistory.Domain.Models;
@@ -9,7 +10,7 @@ namespace Service.Liquidity.Portfolio.Domain.Models
     public class PortfolioTrade
     {
         public const string TopicName = "spot-liquidity-engine-trade";
-
+        
         [DataMember(Order = 1)] public long Id { get; set; }
         [DataMember(Order = 2)] public string TradeId { get; set; }
         [DataMember(Order = 3)] public string WalletId { get; set; }
