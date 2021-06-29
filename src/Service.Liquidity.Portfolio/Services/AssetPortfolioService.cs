@@ -66,13 +66,10 @@ namespace Service.Liquidity.Portfolio.Services
                 }
 
                 long idForNextQuery = 0;
-                trades.ForEach(trade =>
+                if (trades.Any())
                 {
-                    if (trade.Id < idForNextQuery)
-                    {
-                        idForNextQuery = trade.Id;
-                    }
-                });
+                    idForNextQuery = trades.Select(elem => elem.Id).Min();
+                }
 
                 response.Success = true;
                 response.Trades = trades;
