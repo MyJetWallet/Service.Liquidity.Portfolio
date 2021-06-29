@@ -65,18 +65,18 @@ namespace Service.Liquidity.Portfolio.Services
                         .ToList();
                 }
 
-                var dateForNextQuery = DateTime.UtcNow;
+                long idForNextQuery = 0;
                 trades.ForEach(trade =>
                 {
-                    if (trade.DateTime < dateForNextQuery)
+                    if (trade.Id < idForNextQuery)
                     {
-                        dateForNextQuery = trade.DateTime;
+                        idForNextQuery = trade.Id;
                     }
                 });
 
                 response.Success = true;
                 response.Trades = trades;
-                response.DateForNextQuery = dateForNextQuery;
+                response.IdForNextQuery = idForNextQuery;
             } 
             catch (Exception exception)
             {
