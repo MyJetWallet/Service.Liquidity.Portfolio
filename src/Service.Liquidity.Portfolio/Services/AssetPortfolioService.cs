@@ -38,17 +38,41 @@ namespace Service.Liquidity.Portfolio.Services
             return response;
         }
 
-        public async Task<GetTradesResponse> GetTradesAsync()
+        public async Task<GetTradesResponse> GetTradesAsync(GetTradesRequest request)
         {
+            var lastDate = request.LastDate == new DateTime(0001, 01, 01)
+                ? DateTime.UtcNow
+                : request.LastDate;
+            
             var response = new GetTradesResponse();
             try
             {
                 await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-                response.Trades = ctx.Trades.ToList();
+                var trades = ctx.Trades
+                    .Where(trade => trade.DateTime < lastDate)
+                    .OrderByDescending(trade => trade.DateTime)
+                    .Take(request.BatchSize)
+                    .ToList();
+
+                var dateForNextQuery = DateTime.UtcNow;
+                trades.ForEach(trade =>
+                {
+                    if (trade.DateTime < dateForNextQuery)
+                    {
+                        dateForNextQuery = trade.DateTime;
+                    }
+                });
+
+                response.Success = true;
+                response.Trades = trades;
+                response.DateForNextQuery = dateForNextQuery;
             } 
             catch (Exception exception)
             {
                 _logger.LogError(JsonConvert.SerializeObject(exception));
+                
+                response.Success = false;
+                response.ErrorMessage = exception.Message;
             }
 
             return response;
