@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Service.Liquidity.Portfolio.Postgres.Migrations
 {
@@ -31,6 +32,8 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                 columns: table => new
                 {
                     TradeId = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     WalletId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     IsInternal = table.Column<bool>(type: "boolean", nullable: false),
                     Symbol = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),

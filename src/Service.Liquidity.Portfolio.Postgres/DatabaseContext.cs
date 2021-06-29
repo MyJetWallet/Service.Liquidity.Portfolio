@@ -57,6 +57,7 @@ namespace Service.Liquidity.Portfolio.Postgres
         {
             modelBuilder.Entity<PortfolioTrade>().ToTable(TradeTableName);
             modelBuilder.Entity<PortfolioTrade>().HasKey(e => e.TradeId);
+            modelBuilder.Entity<PortfolioTrade>().Property(e => e.Id).UseIdentityColumn();
             modelBuilder.Entity<PortfolioTrade>().Property(e => e.WalletId).HasMaxLength(64);
             modelBuilder.Entity<PortfolioTrade>().Property(e => e.IsInternal);
             modelBuilder.Entity<PortfolioTrade>().Property(e => e.Symbol).HasMaxLength(64);

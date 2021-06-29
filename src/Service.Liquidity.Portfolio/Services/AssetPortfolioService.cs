@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
 using Service.Liquidity.Portfolio.Postgres;
@@ -40,19 +42,28 @@ namespace Service.Liquidity.Portfolio.Services
 
         public async Task<GetTradesResponse> GetTradesAsync(GetTradesRequest request)
         {
-            var lastDate = request.LastDate == new DateTime(0001, 01, 01)
-                ? DateTime.UtcNow
-                : request.LastDate;
-            
+           
             var response = new GetTradesResponse();
             try
             {
                 await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-                var trades = ctx.Trades
-                    .Where(trade => trade.DateTime < lastDate)
-                    .OrderByDescending(trade => trade.DateTime)
-                    .Take(request.BatchSize)
-                    .ToList();
+                List<PortfolioTrade> trades;
+                
+                if (request.LastId != 0)
+                {
+                    trades = ctx.Trades
+                        .Where(trade => trade.Id < request.LastId)
+                        .OrderByDescending(trade => trade.Id)
+                        .Take(request.BatchSize)
+                        .ToList();
+                }
+                else 
+                {
+                    trades = ctx.Trades
+                        .OrderByDescending(trade => trade.Id)
+                        .Take(request.BatchSize)
+                        .ToList();
+                }
 
                 var dateForNextQuery = DateTime.UtcNow;
                 trades.ForEach(trade =>
