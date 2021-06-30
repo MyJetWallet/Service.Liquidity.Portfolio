@@ -10,7 +10,7 @@ using Service.Liquidity.Portfolio.Postgres;
 namespace Service.Liquidity.Portfolio.Postgres.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210630130830_InitialCreate")]
+    [Migration("20210630145044_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -66,6 +66,10 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Symbol")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("TopicSource")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 

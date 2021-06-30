@@ -40,7 +40,8 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     Price = table.Column<double>(type: "double precision", nullable: false),
                     BaseVolume = table.Column<double>(type: "double precision", nullable: false),
                     QuoteVolume = table.Column<double>(type: "double precision", nullable: false),
-                    DateTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                    DateTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    TopicSource = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
                 },
                 constraints: table =>
                 {

@@ -41,7 +41,10 @@ namespace Service.Liquidity.Portfolio.Jobs
                         ToList();
                     
                     var listForSaveByWallet =
-                        ourTrades.Select(elem => new Trade(elem.Trade, elem.WalletId)).ToList();
+                        ourTrades.Select(elem => new Trade(elem.Trade.TradeUId,
+                            elem.WalletId, elem.Trade.InstrumentSymbol, elem.Trade.Side, elem.Trade.Price,
+                            elem.Trade.BaseVolume, elem.Trade.QuoteVolume, elem.Trade.DateTime,
+                            "spot-trades")).ToList();
 
                     listForSave.AddRange(listForSaveByWallet);
 

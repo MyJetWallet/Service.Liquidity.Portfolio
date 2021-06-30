@@ -67,6 +67,7 @@ namespace Service.Liquidity.Portfolio.Postgres
             modelBuilder.Entity<Trade>().Property(e => e.BaseVolume);
             modelBuilder.Entity<Trade>().Property(e => e.QuoteVolume);
             modelBuilder.Entity<Trade>().Property(e => e.DateTime);
+            modelBuilder.Entity<Trade>().Property(e => e.TopicSource).HasMaxLength(64);
         }
 
         public static DatabaseContext Create(DbContextOptionsBuilder<DatabaseContext> options)

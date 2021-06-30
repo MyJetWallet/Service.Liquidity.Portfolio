@@ -1,8 +1,6 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Serialization;
 using MyJetWallet.Domain.Orders;
-using Service.BalanceHistory.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Domain.Models
 {
@@ -18,22 +16,11 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 7)] public double BaseVolume { get; set; }
         [DataMember(Order = 8)] public double QuoteVolume { get; set; }
         [DataMember(Order = 9)] public DateTime DateTime { get; set; }
+        [DataMember(Order = 10)] public string TopicSource { get; set; }
 
-        public Trade(WalletTrade trade, string walletId)
-        {
-            WalletId = walletId;
-            Symbol = trade.InstrumentSymbol;
-            Price = trade.Price;
-            BaseVolume = trade.BaseVolume;
-            QuoteVolume = trade.QuoteVolume;
-            DateTime = trade.DateTime;
-            TradeId = trade.TradeUId;
-            Side = trade.Side;
-        }
-
-        public Trade(string tradeId, string walletId, string symbol, OrderSide side,
-            double price, double baseVolume,
-            double quoteVolume, DateTime dateTime)
+        public Trade(string tradeId, string walletId, string symbol,
+            OrderSide side, double price, double baseVolume,
+            double quoteVolume, DateTime dateTime, string topicSource)
         {
             TradeId = tradeId;
             WalletId = walletId;
@@ -43,6 +30,7 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             BaseVolume = baseVolume;
             QuoteVolume = quoteVolume;
             DateTime = dateTime;
+            TopicSource = topicSource;
         }
 
         public Trade()

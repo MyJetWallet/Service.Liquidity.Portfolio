@@ -28,7 +28,7 @@ namespace Service.Liquidity.Portfolio.Services
             _logger = logger;
         }
 
-        public async ValueTask SaveTrades(IEnumerable<Trade> trades)
+        public async ValueTask SaveTrades(List<Trade> trades)
         {
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             await ctx.SaveTradesAsync(trades);

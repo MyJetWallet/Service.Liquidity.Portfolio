@@ -67,6 +67,10 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<string>("TopicSource")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<string>("TradeId")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
