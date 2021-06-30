@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Autofac;
 using DotNetCoreDecorators;
 using ME.Contracts.OutgoingMessages;
+using MyJetWallet.Domain.Orders;
 using Service.Liquidity.Engine.Domain.Models.Portfolio;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Postgres;
@@ -23,9 +24,15 @@ namespace Service.Liquidity.Portfolio.Jobs
         private async ValueTask HandleTrades(IReadOnlyList<PortfolioTrade> trades)
         {
             var localTrades = trades
-                .Select(elem => new Trade(elem.TradeId, elem.AssociateWalletId,
-                                                        elem.AssociateSymbol, elem.Side, elem.Price,
-                                                        elem.BaseVolume, elem.QuoteVolume, elem.DateTime,
+                .Where(elem => !elem.IsInternal)
+                .Select(elem => new Trade(elem.TradeId,
+                                                        elem.AssociateWalletId,
+                                                        elem.AssociateSymbol,
+                                                        elem.Side,
+                                                        elem.Price,
+                                                        elem.Side == OrderSide.Buy ? elem.BaseVolume : -elem.BaseVolume,
+                                                        elem.Side == OrderSide.Buy ? -elem.QuoteVolume : elem.QuoteVolume,
+                                                        elem.DateTime,
                                                         PortfolioTrade.TopicName))
                 .ToList();
             foreach (var brokerId in trades.Select(elem => elem.AssociateBrokerId).Distinct())
