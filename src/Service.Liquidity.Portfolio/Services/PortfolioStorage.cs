@@ -1,69 +1,43 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Autofac;
-using DotNetCoreDecorators;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain;
 using MyJetWallet.Sdk.Service;
 using Service.AssetsDictionary.Client;
-using Service.BalanceHistory.ServiceBus;
-using Service.Liquidity.Engine.Grpc;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Postgres;
 
-namespace Service.Liquidity.Portfolio.Jobs
+namespace Service.Liquidity.Portfolio.Services
 {
-    public class TradeReaderJob: IStartable
+    public class PortfolioStorage : IPortfolioStorage
     {
-        private readonly ILpWalletManagerGrpc _walletManager;
         private readonly DbContextOptionsBuilder<DatabaseContext> _dbContextOptionsBuilder;
-        private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
+        private readonly ILogger<PortfolioStorage> _logger;
         
-        public TradeReaderJob(ISubscriber<IReadOnlyList<WalletTradeMessage>> subscriber,
-            ILpWalletManagerGrpc walletManager,
-            DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
-            ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient)
+        private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
+
+        public PortfolioStorage(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
+            ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
+            ILogger<PortfolioStorage> logger)
         {
-            _walletManager = walletManager;
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
             _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
-            subscriber.Subscribe(HandleTrades);
+            _logger = logger;
         }
 
-        private async ValueTask HandleTrades(IReadOnlyList<WalletTradeMessage> trades)
+        public async ValueTask SaveTrades(IEnumerable<Trade> trades)
         {
-            trades.Count.AddToActivityAsTag("trades count");
-            try
-            {
-                var walletCollection = (await _walletManager.GetAllAsync()).Data.List;
-                var listForSave = new List<PortfolioTrade>();
-
-                walletCollection.ForEach(async wallet =>
-                {
-                    var ourTrades = trades.Where(trade => trade.WalletId == wallet.WalletId).ToList();
-                    var listForSaveByWallet =
-                        ourTrades.Select(elem => new PortfolioTrade(elem.Trade, elem.WalletId)).ToList();
-
-                    listForSave.AddRange(listForSaveByWallet);
-
-                    await UpdateBalances(wallet.BrokerId, listForSaveByWallet);
-                });
-
-                await SaveTrades(listForSave);
-            }
-            catch (Exception exception)
-            {
-                exception.AddToActivityAsJsonTag("exception");
-            }
-
+            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
+            await ctx.SaveTradesAsync(trades);
         }
 
-        private async Task UpdateBalances(string brokerId, List<PortfolioTrade> listForSave)
+        public async ValueTask UpdateBalances(string brokerId, List<Trade> trades)
         {
             brokerId.AddToActivityAsTag("brokerId");
-            listForSave.AddToActivityAsJsonTag("listForSave");
+            trades.AddToActivityAsJsonTag("listForSave");
             
             var instruments = _spotInstrumentDictionaryClient.GetSpotInstrumentByBroker(new JetBrandIdentity
             {
@@ -72,7 +46,7 @@ namespace Service.Liquidity.Portfolio.Jobs
 
             var balances = new Dictionary<(string, string), double>();
 
-            listForSave.ForEach(trade =>
+            trades.ForEach(trade =>
             {
                 var tradeInstrument = instruments.FirstOrDefault(elem => elem.Symbol == trade.Symbol);
                 var baseAsset = tradeInstrument?.BaseAsset;
@@ -95,7 +69,6 @@ namespace Service.Liquidity.Portfolio.Jobs
                 {
                     balances.Add((trade.WalletId, quoteAsset), trade.QuoteVolume);
                 }
-
             });
 
             var balanceList = balances.Select(balance => new AssetBalance()
@@ -108,16 +81,6 @@ namespace Service.Liquidity.Portfolio.Jobs
             
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             await ctx.UpdateBalancesAsync(balanceList);
-        }
-
-        private async Task SaveTrades(IEnumerable<PortfolioTrade> listForSave)
-        {
-            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            await ctx.SaveTradesAsync(listForSave);
-        }
-
-        public void Start()
-        {
         }
     }
 }

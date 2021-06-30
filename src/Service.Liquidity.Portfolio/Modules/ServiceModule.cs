@@ -1,11 +1,12 @@
 ﻿using Autofac;
-using DotNetCoreDecorators;
 using MyJetWallet.Sdk.Service;
 using MyJetWallet.Sdk.ServiceBus;
 using MyServiceBus.Abstractions;
 using Service.BalanceHistory.Client;
+using Service.Liquidity.Engine.Domain.Models.Portfolio;
 using Service.Liquidity.Portfolio.Jobs;
-using Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Postgres;
+using Service.Liquidity.Portfolio.Services;
 
 namespace Service.Liquidity.Portfolio.Modules
 {
@@ -17,15 +18,26 @@ namespace Service.Liquidity.Portfolio.Modules
             builder.RegisterTradeHistoryServiceBusClient(serviceBusClient, $"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}", TopicQueueType.PermanentWithSingleConnection, true);
             
             builder
-                .RegisterType<TradeReaderJob>()
+                .RegisterType<BalanceHistoryTradeReaderJob>()
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
             
             builder
-                .RegisterInstance(new MyServiceBusPublisher<PortfolioTrade>(serviceBusClient, PortfolioTrade.TopicName, false))
-                .As<IPublisher<PortfolioTrade>>()
+                .RegisterType<LiquidityEngineTradeReaderJob>()
+                .As<IStartable>()
+                .AutoActivate()
                 .SingleInstance();
+            
+            builder
+                .RegisterType<PortfolioStorage>()
+                .As<IPortfolioStorage>()
+                .SingleInstance();
+
+            builder.RegisterMyServiceBusSubscriberBatch<PortfolioTrade>(serviceBusClient,
+                PortfolioTrade.TopicName,
+                $"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}",
+                TopicQueueType.PermanentWithSingleConnection);
         }
     }
 }

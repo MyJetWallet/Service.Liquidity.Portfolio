@@ -47,7 +47,7 @@ namespace Service.Liquidity.Portfolio.Services
             try
             {
                 await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-                List<PortfolioTrade> trades;
+                List<Trade> trades;
                 
                 if (request.LastId != 0)
                 {

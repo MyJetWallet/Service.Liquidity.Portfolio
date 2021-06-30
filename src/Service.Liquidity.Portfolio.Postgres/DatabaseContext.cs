@@ -12,7 +12,7 @@ namespace Service.Liquidity.Portfolio.Postgres
     public class DatabaseContext : DbContext
     {
         private Activity _activity;
-        public DbSet<PortfolioTrade> Trades { get; set; }
+        public DbSet<Trade> Trades { get; set; }
         public DbSet<AssetBalance> Balances { get; set; }
 
         private const string TradeTableName = "trade";
@@ -55,20 +55,18 @@ namespace Service.Liquidity.Portfolio.Postgres
 
         private void SetTradeEntity(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<PortfolioTrade>().ToTable(TradeTableName);
-            modelBuilder.Entity<PortfolioTrade>().Property(e => e.Id).UseIdentityColumn();
-            modelBuilder.Entity<PortfolioTrade>().HasKey(e => e.Id);
+            modelBuilder.Entity<Trade>().ToTable(TradeTableName);
+            modelBuilder.Entity<Trade>().Property(e => e.Id).UseIdentityColumn();
+            modelBuilder.Entity<Trade>().HasKey(e => e.Id);
             
-            modelBuilder.Entity<PortfolioTrade>().Property(e => e.TradeId).HasMaxLength(64);
-            modelBuilder.Entity<PortfolioTrade>().Property(e => e.WalletId).HasMaxLength(64);
-            modelBuilder.Entity<PortfolioTrade>().Property(e => e.IsInternal);
-            modelBuilder.Entity<PortfolioTrade>().Property(e => e.Symbol).HasMaxLength(64);
-            modelBuilder.Entity<PortfolioTrade>().Property(e => e.Side);
-            modelBuilder.Entity<PortfolioTrade>().Property(e => e.Price);
-            modelBuilder.Entity<PortfolioTrade>().Property(e => e.BaseVolume);
-            modelBuilder.Entity<PortfolioTrade>().Property(e => e.QuoteVolume);
-            modelBuilder.Entity<PortfolioTrade>().Property(e => e.DateTime);
-            modelBuilder.Entity<PortfolioTrade>().Property(e => e.ReferenceId).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.TradeId).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.WalletId).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.Symbol).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.Side);
+            modelBuilder.Entity<Trade>().Property(e => e.Price);
+            modelBuilder.Entity<Trade>().Property(e => e.BaseVolume);
+            modelBuilder.Entity<Trade>().Property(e => e.QuoteVolume);
+            modelBuilder.Entity<Trade>().Property(e => e.DateTime);
         }
 
         public static DatabaseContext Create(DbContextOptionsBuilder<DatabaseContext> options)
@@ -95,7 +93,7 @@ namespace Service.Liquidity.Portfolio.Postgres
             await Balances.UpsertRange(balances).On(e => new {e.WalletId, e.Asset}).RunAsync();
         }
         
-        public async Task SaveTradesAsync(IEnumerable<PortfolioTrade> trades)
+        public async Task SaveTradesAsync(IEnumerable<Trade> trades)
         {
             Trades.AddRange(trades);
             await SaveChangesAsync();

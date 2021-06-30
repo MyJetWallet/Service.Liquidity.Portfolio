@@ -41,7 +41,7 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     b.ToTable("assetbalance");
                 });
 
-            modelBuilder.Entity("Service.Liquidity.Portfolio.Domain.Models.PortfolioTrade", b =>
+            modelBuilder.Entity("Service.Liquidity.Portfolio.Domain.Models.Trade", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,18 +54,11 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<bool>("IsInternal")
-                        .HasColumnType("boolean");
-
                     b.Property<double>("Price")
                         .HasColumnType("double precision");
 
                     b.Property<double>("QuoteVolume")
                         .HasColumnType("double precision");
-
-                    b.Property<string>("ReferenceId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
 
                     b.Property<int>("Side")
                         .HasColumnType("integer");

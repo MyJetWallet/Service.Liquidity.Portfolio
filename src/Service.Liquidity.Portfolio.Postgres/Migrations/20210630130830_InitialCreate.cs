@@ -35,14 +35,12 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TradeId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     WalletId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    IsInternal = table.Column<bool>(type: "boolean", nullable: false),
                     Symbol = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     Side = table.Column<int>(type: "integer", nullable: false),
                     Price = table.Column<double>(type: "double precision", nullable: false),
                     BaseVolume = table.Column<double>(type: "double precision", nullable: false),
                     QuoteVolume = table.Column<double>(type: "double precision", nullable: false),
-                    DateTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    ReferenceId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
+                    DateTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
