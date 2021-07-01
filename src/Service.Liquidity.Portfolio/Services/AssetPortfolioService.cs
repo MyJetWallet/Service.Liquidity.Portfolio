@@ -67,6 +67,32 @@ namespace Service.Liquidity.Portfolio.Services
             return response;
         }
 
+        public async Task<UpdateBalanceResponse> UpdateBalance(UpdateBalanceRequest request)
+        {
+            if (request.AssetBalance == null ||
+                string.IsNullOrWhiteSpace(request.AssetBalance.BrokerId) ||
+                string.IsNullOrWhiteSpace(request.AssetBalance.ClientId) ||
+                string.IsNullOrWhiteSpace(request.AssetBalance.WalletId) ||
+                string.IsNullOrWhiteSpace(request.AssetBalance.Asset))
+            {
+                _logger.LogError($"Bad request entity: {JsonConvert.SerializeObject(request)}");
+                return new UpdateBalanceResponse() {Success = false, ErrorMessage = "Incorrect entity"};
+            }
+
+            try
+            {
+                await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
+                await ctx.UpdateBalancesAsync(new List<AssetBalance>() {request.AssetBalance});
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"Update failed: {JsonConvert.SerializeObject(exception)}");
+                return new UpdateBalanceResponse() {Success = false, ErrorMessage = exception.Message};
+            }
+
+            return new UpdateBalanceResponse() {Success = true};
+        }
+
         public async Task<GetTradesResponse> GetTradesAsync(GetTradesRequest request)
         {
            
