@@ -47,6 +47,8 @@ namespace Service.Liquidity.Portfolio.Postgres
         {
             modelBuilder.Entity<AssetBalance>().ToTable(BalanceTableName);
             modelBuilder.Entity<AssetBalance>().HasKey(e => new {e.WalletId, e.Asset});
+            modelBuilder.Entity<AssetBalance>().Property(e => e.BrokerId).HasMaxLength(64);
+            modelBuilder.Entity<AssetBalance>().Property(e => e.ClientId).HasMaxLength(64);
             modelBuilder.Entity<AssetBalance>().Property(e => e.WalletId).HasMaxLength(64);
             modelBuilder.Entity<AssetBalance>().Property(e => e.Asset).HasMaxLength(64);
             modelBuilder.Entity<AssetBalance>().Property(e => e.Volume);
@@ -60,6 +62,8 @@ namespace Service.Liquidity.Portfolio.Postgres
             modelBuilder.Entity<Trade>().HasKey(e => e.Id);
             
             modelBuilder.Entity<Trade>().Property(e => e.TradeId).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.BrokerId).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.ClientId).HasMaxLength(64);
             modelBuilder.Entity<Trade>().Property(e => e.WalletId).HasMaxLength(64);
             modelBuilder.Entity<Trade>().Property(e => e.Symbol).HasMaxLength(64);
             modelBuilder.Entity<Trade>().Property(e => e.Side);

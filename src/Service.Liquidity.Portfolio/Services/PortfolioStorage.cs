@@ -34,8 +34,10 @@ namespace Service.Liquidity.Portfolio.Services
             await ctx.SaveTradesAsync(trades);
         }
 
-        public async ValueTask UpdateBalances(string brokerId, List<Trade> trades)
+        public async ValueTask UpdateBalances(List<Trade> trades)
         {
+            var brokerId = trades.Select(elem => elem.BrokerId).Distinct().FirstOrDefault();
+            
             brokerId.AddToActivityAsTag("brokerId");
             trades.AddToActivityAsJsonTag("listForSave");
             
@@ -44,7 +46,8 @@ namespace Service.Liquidity.Portfolio.Services
                 BrokerId = brokerId
             });
 
-            var balances = new Dictionary<(string, string), double>();
+            // clientId, walletId, asset
+            var balances = new Dictionary<(string, string, string), double>();
 
             trades.ForEach(trade =>
             {
@@ -52,29 +55,31 @@ namespace Service.Liquidity.Portfolio.Services
                 var baseAsset = tradeInstrument?.BaseAsset;
                 var quoteAsset = tradeInstrument?.QuoteAsset;
 
-                if (balances.ContainsKey((trade.WalletId, baseAsset)))
+                if (balances.ContainsKey((trade.ClientId, trade.WalletId, baseAsset)))
                 {
-                    balances[(trade.WalletId, baseAsset)] += trade.BaseVolume;
+                    balances[(trade.ClientId, trade.WalletId, baseAsset)] += trade.BaseVolume;
                 }
                 else
                 {
-                    balances.Add((trade.WalletId, baseAsset), trade.BaseVolume);
+                    balances.Add((trade.ClientId, trade.WalletId, baseAsset), trade.BaseVolume);
                 }
 
-                if (balances.ContainsKey((trade.WalletId, quoteAsset)))
+                if (balances.ContainsKey((trade.ClientId, trade.WalletId, quoteAsset)))
                 {
-                    balances[(trade.WalletId, quoteAsset)] += trade.QuoteVolume;
+                    balances[(trade.ClientId, trade.WalletId, quoteAsset)] += trade.QuoteVolume;
                 }
                 else
                 {
-                    balances.Add((trade.WalletId, quoteAsset), trade.QuoteVolume);
+                    balances.Add((trade.ClientId, trade.WalletId, quoteAsset), trade.QuoteVolume);
                 }
             });
 
             var balanceList = balances.Select(balance => new AssetBalance()
             {
-                WalletId = balance.Key.Item1,
-                Asset = balance.Key.Item2,
+                BrokerId = brokerId,
+                ClientId = balance.Key.Item1,
+                WalletId = balance.Key.Item2,
+                Asset = balance.Key.Item3,
                 UpdateDate = DateTime.UtcNow,
                 Volume = balance.Value
             }).ToList();

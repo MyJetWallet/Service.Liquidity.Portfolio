@@ -10,7 +10,7 @@ using Service.Liquidity.Portfolio.Postgres;
 namespace Service.Liquidity.Portfolio.Postgres.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210630145044_InitialCreate")]
+    [Migration("20210701122303_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,6 +29,14 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("Asset")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("BrokerId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("ClientId")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
@@ -52,6 +60,14 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
 
                     b.Property<double>("BaseVolume")
                         .HasColumnType("double precision");
+
+                    b.Property<string>("BrokerId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("ClientId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("timestamp without time zone");

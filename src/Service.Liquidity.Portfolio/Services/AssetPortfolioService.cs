@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,11 +18,15 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly ILogger<AssetPortfolioService> _logger;
         
         private readonly DbContextOptionsBuilder<DatabaseContext> _dbContextOptionsBuilder;
+        private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
 
-        public AssetPortfolioService(ILogger<AssetPortfolioService> logger, DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder)
+        public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
+            DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
+            IAnotherAssetProjectionService anotherAssetProjectionService)
         {
             _logger = logger;
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
+            _anotherAssetProjectionService = anotherAssetProjectionService;
         }
 
         public async Task<GetBalancesResponse> GetBalancesAsync()
@@ -30,13 +35,35 @@ namespace Service.Liquidity.Portfolio.Services
             try
             {
                 await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-                response.Balances = ctx.Balances.ToList();
+                response.SetBalances(ctx.Balances.ToList());
+
+                const string projectionAsset = "USD";
+                response.Balances.ForEach(async elem =>
+                {
+                    if (elem.Volume == 0)
+                        return;
+                    if (elem.Asset == projectionAsset)
+                    {
+                        elem.UsdProjection = elem.Volume;
+                        return;
+                    }
+                    var usdProjectionEntity = await _anotherAssetProjectionService.GetProjectionAsync(
+                        new GetProjectionRequest()
+                        {
+                            BrokerId = elem.BrokerId,
+                            FromAsset = elem.Asset,
+                            FromVolume = elem.Volume,
+                            ToAsset = projectionAsset
+                        });
+                    
+                    // if usdProjectionEntity.Success = false - set zero UsdProjection
+                    elem.UsdProjection = usdProjectionEntity.ProjectionVolume;
+                });
             }
             catch (Exception exception)
             {
                 _logger.LogError(JsonConvert.SerializeObject(exception));
             }
-
             return response;
         }
 

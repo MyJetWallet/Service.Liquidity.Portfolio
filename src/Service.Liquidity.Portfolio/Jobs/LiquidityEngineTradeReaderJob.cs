@@ -26,18 +26,20 @@ namespace Service.Liquidity.Portfolio.Jobs
             var localTrades = trades
                 .Where(elem => !elem.IsInternal)
                 .Select(elem => new Trade(elem.TradeId,
-                                                        elem.AssociateWalletId,
-                                                        elem.AssociateSymbol,
-                                                        elem.Side,
-                                                        elem.Price,
-                                                        elem.Side == OrderSide.Buy ? elem.BaseVolume : -elem.BaseVolume,
-                                                        elem.Side == OrderSide.Buy ? -elem.QuoteVolume : elem.QuoteVolume,
-                                                        elem.DateTime,
-                                                        PortfolioTrade.TopicName))
+                    elem.AssociateBrokerId,
+                    elem.AssociateClientId,
+                    elem.AssociateWalletId,
+                    elem.AssociateSymbol,
+                    elem.Side,
+                    elem.Price,
+                    elem.Side == OrderSide.Buy ? -elem.BaseVolume : elem.BaseVolume,
+                    elem.Side == OrderSide.Buy ? elem.QuoteVolume : -elem.QuoteVolume,
+                    elem.DateTime,
+                    PortfolioTrade.TopicName))
                 .ToList();
             foreach (var brokerId in trades.Select(elem => elem.AssociateBrokerId).Distinct())
             {
-                await _portfolioStorage.UpdateBalances(brokerId, localTrades);
+                await _portfolioStorage.UpdateBalances(localTrades);
             }
             await _portfolioStorage.SaveTrades(localTrades);
         }

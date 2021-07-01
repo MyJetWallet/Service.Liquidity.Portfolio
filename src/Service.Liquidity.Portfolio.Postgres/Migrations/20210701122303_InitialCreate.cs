@@ -18,6 +18,8 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                 {
                     WalletId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     Asset = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    BrokerId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    ClientId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     Volume = table.Column<double>(type: "double precision", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
@@ -34,6 +36,8 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TradeId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    BrokerId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    ClientId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     WalletId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     Symbol = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     Side = table.Column<int>(type: "integer", nullable: false),

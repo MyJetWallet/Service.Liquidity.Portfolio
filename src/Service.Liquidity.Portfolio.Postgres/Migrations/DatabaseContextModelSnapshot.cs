@@ -30,6 +30,14 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<string>("BrokerId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("ClientId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("timestamp without time zone");
 
@@ -50,6 +58,14 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
 
                     b.Property<double>("BaseVolume")
                         .HasColumnType("double precision");
+
+                    b.Property<string>("BrokerId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("ClientId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("timestamp without time zone");
