@@ -32,8 +32,8 @@ namespace Service.Liquidity.Portfolio.Jobs
                     elem.AssociateSymbol,
                     elem.Side,
                     elem.Price,
-                    elem.Side == OrderSide.Buy ? -elem.BaseVolume : elem.BaseVolume,
-                    elem.Side == OrderSide.Buy ? elem.QuoteVolume : -elem.QuoteVolume,
+                    elem.Side == OrderSide.Buy ? elem.BaseVolume : -elem.BaseVolume,
+                    elem.Side == OrderSide.Buy ? -elem.QuoteVolume : elem.QuoteVolume,
                     elem.DateTime,
                     PortfolioTrade.TopicName))
                 .ToList();
