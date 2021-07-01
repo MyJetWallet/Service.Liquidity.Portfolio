@@ -11,7 +11,6 @@ using MyJetWallet.Sdk.Postgres;
 using MyJetWallet.Sdk.Service;
 using Prometheus;
 using ProtoBuf.Grpc.Server;
-using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Modules;
 using Service.Liquidity.Portfolio.Postgres;
@@ -57,6 +56,7 @@ namespace Service.Liquidity.Portfolio
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcSchema<AssetPortfolioService, IAssetPortfolioService>();
+                endpoints.MapGrpcSchema<AnotherAssetProjectionService, IAnotherAssetProjectionService>();
 
                 endpoints.MapGrpcSchemaRegistry();
 

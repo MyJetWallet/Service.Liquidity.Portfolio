@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MyJetWallet.Service.BalanceHistory.Client" Version="1.6.7" />
   </ItemGroup>
 
   <ItemGroup>
