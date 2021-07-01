@@ -78,11 +78,21 @@ namespace Service.Liquidity.Portfolio.Services
                 _logger.LogError($"Bad request entity: {JsonConvert.SerializeObject(request)}");
                 return new UpdateBalanceResponse() {Success = false, ErrorMessage = "Incorrect entity"};
             }
+            
+            if (request.BalanceDifference == 0)
+            {
+                const string message = "Balance difference is zero.";
+                _logger.LogError(message);
+                return new UpdateBalanceResponse() {Success = false, ErrorMessage = message};
+            }
 
             try
             {
                 await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-                await ctx.UpdateBalancesAsync(new List<AssetBalance>() {request.AssetBalance});
+                
+                var newBalance = request.AssetBalance.GetDomainModel();
+                newBalance.Volume = request.BalanceDifference;
+                await ctx.UpdateBalancesAsync(new List<AssetBalance>() {newBalance});
             }
             catch (Exception exception)
             {
