@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Service.Liquidity.Portfolio.Domain.Models;
@@ -15,17 +14,16 @@ namespace Service.Liquidity.Portfolio.Services
     public class AssetPortfolioService: IAssetPortfolioService
     {
         private readonly ILogger<AssetPortfolioService> _logger;
-        
-        private readonly DbContextOptionsBuilder<DatabaseContext> _dbContextOptionsBuilder;
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
+        private readonly IPortfolioStorage _portfolioStorage;
 
         public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
-            DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
-            IAnotherAssetProjectionService anotherAssetProjectionService)
+            IAnotherAssetProjectionService anotherAssetProjectionService,
+            IPortfolioStorage portfolioStorage)
         {
             _logger = logger;
-            _dbContextOptionsBuilder = dbContextOptionsBuilder;
             _anotherAssetProjectionService = anotherAssetProjectionService;
+            _portfolioStorage = portfolioStorage;
         }
 
         public async Task<GetBalancesResponse> GetBalancesAsync()
@@ -33,8 +31,7 @@ namespace Service.Liquidity.Portfolio.Services
             var response = new GetBalancesResponse();
             try
             {
-                await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-                response.SetBalances(ctx.Balances.ToList());
+                response.SetBalances(await _portfolioStorage.GetBalances());
 
                 const string projectionAsset = "USD";
                 response.Balances.ForEach(async elem =>
@@ -87,11 +84,9 @@ namespace Service.Liquidity.Portfolio.Services
 
             try
             {
-                await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-                
                 var newBalance = request.AssetBalance.GetDomainModel();
                 newBalance.Volume = request.BalanceDifference;
-                await ctx.UpdateBalancesAsync(new List<AssetBalance>() {newBalance});
+                await _portfolioStorage.UpdateBalances(new List<AssetBalance>() {newBalance});
             }
             catch (Exception exception)
             {
@@ -108,24 +103,7 @@ namespace Service.Liquidity.Portfolio.Services
             var response = new GetTradesResponse();
             try
             {
-                await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-                List<Trade> trades;
-                
-                if (request.LastId != 0)
-                {
-                    trades = ctx.Trades
-                        .Where(trade => trade.Id < request.LastId)
-                        .OrderByDescending(trade => trade.Id)
-                        .Take(request.BatchSize)
-                        .ToList();
-                }
-                else 
-                {
-                    trades = ctx.Trades
-                        .OrderByDescending(trade => trade.Id)
-                        .Take(request.BatchSize)
-                        .ToList();
-                }
+                var trades = await _portfolioStorage.GetTrades(request.LastId, request.BatchSize);
 
                 long idForNextQuery = 0;
                 if (trades.Any())
@@ -169,8 +147,8 @@ namespace Service.Liquidity.Portfolio.Services
                 request.QuoteVolume, "manual");
             try
             {
-                await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-                await ctx.SaveTradesAsync(new List<Trade>() {trade});
+                await _portfolioStorage.SaveTrades(new List<Trade>() {trade});
+                await _portfolioStorage.UpdateBalances(new List<Trade>() {trade});
             }
             catch (Exception exception)
             {
