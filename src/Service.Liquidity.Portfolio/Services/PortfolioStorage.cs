@@ -11,6 +11,7 @@ using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
 using Service.Liquidity.Portfolio.Postgres;
+using Service.Liquidity.Portfolio.Postgres.Model;
 
 namespace Service.Liquidity.Portfolio.Services
 {
@@ -136,6 +137,20 @@ namespace Service.Liquidity.Portfolio.Services
                     });
                 });
             await ctx.UpdateBalancesAsync(balances);
+        }
+
+        public async Task SaveChangeBalanceHistoryAsync(List<AssetBalance> balances, double volumeDifference)
+        {
+            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
+            await ctx.SaveChangeBalanceHistoryAsync(balances.Select(balance => new ChangeBalanceHistory()
+            {
+                BrokerId = balance.BrokerId,
+                ClientId = balance.ClientId,
+                WalletId = balance.WalletId,
+                Asset = balance.Asset,
+                UpdateDate = DateTime.UtcNow,
+                VolumeDifference = volumeDifference
+            }).ToList());
         }
 
         public async Task<List<AssetBalance>> GetBalances()

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Postgres.Model;
 
 namespace Service.Liquidity.Portfolio.Postgres
 {
@@ -14,9 +15,11 @@ namespace Service.Liquidity.Portfolio.Postgres
         private Activity _activity;
         public DbSet<Trade> Trades { get; set; }
         public DbSet<AssetBalance> Balances { get; set; }
+        public DbSet<ChangeBalanceHistory> ChangeBalanceHistories { get; set; }
 
         private const string TradeTableName = "trade";
         private const string BalanceTableName = "assetbalance";
+        private const string ChangeBalanceHistoryTableName = "changebalancehistory";
         
         public const string Schema = "liquidityportfolio";
         
@@ -39,8 +42,22 @@ namespace Service.Liquidity.Portfolio.Postgres
 
             SetTradeEntity(modelBuilder);
             SetBalanceEntity(modelBuilder);
+            SetChangeBalanceHistoryEntity(modelBuilder);
 
             base.OnModelCreating(modelBuilder);
+        }
+
+        private void SetChangeBalanceHistoryEntity(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ChangeBalanceHistory>().ToTable(ChangeBalanceHistoryTableName);
+            modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.Id).UseIdentityColumn();
+            modelBuilder.Entity<ChangeBalanceHistory>().HasKey(e => e.Id);
+            modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.BrokerId).HasMaxLength(64);
+            modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.ClientId).HasMaxLength(64);
+            modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.WalletId).HasMaxLength(64);
+            modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.Asset).HasMaxLength(64);
+            modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.VolumeDifference);
+            modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.UpdateDate);
         }
 
         private void SetBalanceEntity(ModelBuilder modelBuilder)
@@ -60,7 +77,6 @@ namespace Service.Liquidity.Portfolio.Postgres
             modelBuilder.Entity<Trade>().ToTable(TradeTableName);
             modelBuilder.Entity<Trade>().Property(e => e.Id).UseIdentityColumn();
             modelBuilder.Entity<Trade>().HasKey(e => e.Id);
-            
             modelBuilder.Entity<Trade>().Property(e => e.TradeId).HasMaxLength(64);
             modelBuilder.Entity<Trade>().Property(e => e.BrokerId).HasMaxLength(64);
             modelBuilder.Entity<Trade>().Property(e => e.ClientId).HasMaxLength(64);
@@ -89,6 +105,12 @@ namespace Service.Liquidity.Portfolio.Postgres
                 .UpsertRange(balances)
                 .On(e => new {e.WalletId, e.Asset})
                 .RunAsync();
+        }
+        
+        public async Task SaveChangeBalanceHistoryAsync(List<ChangeBalanceHistory> history)
+        {
+            ChangeBalanceHistories.AddRange(history);
+            await SaveChangesAsync();
         }
         
         public async Task SaveTradesAsync(IEnumerable<Trade> trades)

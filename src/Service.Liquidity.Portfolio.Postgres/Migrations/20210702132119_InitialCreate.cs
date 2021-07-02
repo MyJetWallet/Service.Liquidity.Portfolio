@@ -29,6 +29,25 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "changebalancehistory",
+                schema: "liquidityportfolio",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    BrokerId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    ClientId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    WalletId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    Asset = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    VolumeDifference = table.Column<double>(type: "double precision", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_changebalancehistory", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "trade",
                 schema: "liquidityportfolio",
                 columns: table => new
@@ -59,6 +78,10 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
         {
             migrationBuilder.DropTable(
                 name: "assetbalance",
+                schema: "liquidityportfolio");
+
+            migrationBuilder.DropTable(
+                name: "changebalancehistory",
                 schema: "liquidityportfolio");
 
             migrationBuilder.DropTable(

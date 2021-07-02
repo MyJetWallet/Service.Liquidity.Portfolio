@@ -80,6 +80,7 @@ namespace Service.Liquidity.Portfolio.Services
                 var newBalance = request.AssetBalance.GetDomainModel();
                 newBalance.Volume = request.BalanceDifference;
                 await _portfolioStorage.UpdateBalancesAsync(new List<AssetBalance>() {newBalance});
+                await _portfolioStorage.SaveChangeBalanceHistoryAsync(new List<AssetBalance>() {newBalance}, request.BalanceDifference);
             }
             catch (Exception exception)
             {
