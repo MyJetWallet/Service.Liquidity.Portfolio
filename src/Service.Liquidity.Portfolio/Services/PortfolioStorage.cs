@@ -77,34 +77,37 @@ namespace Service.Liquidity.Portfolio.Services
             });
 
             // clientId, walletId, asset
-            var balances = new Dictionary<(string, string, string), double>();
+            var balanceDictionary = new Dictionary<(string, string, string), double>();
 
             trades.ForEach(trade =>
             {
+                
+                _logger.LogInformation($"Trade is on balance. Id: {trade.Id}");
+                
                 var tradeInstrument = instruments.FirstOrDefault(elem => elem.Symbol == trade.Symbol);
                 var baseAsset = tradeInstrument?.BaseAsset;
                 var quoteAsset = tradeInstrument?.QuoteAsset;
 
-                if (balances.ContainsKey((trade.ClientId, trade.WalletId, baseAsset)))
+                if (balanceDictionary.ContainsKey((trade.ClientId, trade.WalletId, baseAsset)))
                 {
-                    balances[(trade.ClientId, trade.WalletId, baseAsset)] += trade.BaseVolume;
+                    balanceDictionary[(trade.ClientId, trade.WalletId, baseAsset)] += trade.BaseVolume;
                 }
                 else
                 {
-                    balances.Add((trade.ClientId, trade.WalletId, baseAsset), trade.BaseVolume);
+                    balanceDictionary.Add((trade.ClientId, trade.WalletId, baseAsset), trade.BaseVolume);
                 }
 
-                if (balances.ContainsKey((trade.ClientId, trade.WalletId, quoteAsset)))
+                if (balanceDictionary.ContainsKey((trade.ClientId, trade.WalletId, quoteAsset)))
                 {
-                    balances[(trade.ClientId, trade.WalletId, quoteAsset)] += trade.QuoteVolume;
+                    balanceDictionary[(trade.ClientId, trade.WalletId, quoteAsset)] += trade.QuoteVolume;
                 }
                 else
                 {
-                    balances.Add((trade.ClientId, trade.WalletId, quoteAsset), trade.QuoteVolume);
+                    balanceDictionary.Add((trade.ClientId, trade.WalletId, quoteAsset), trade.QuoteVolume);
                 }
             });
 
-            var balanceList = balances.Select(balance => new AssetBalance()
+            var balanceList = balanceDictionary.Select(balance => new AssetBalance()
             {
                 BrokerId = brokerId,
                 ClientId = balance.Key.Item1,
