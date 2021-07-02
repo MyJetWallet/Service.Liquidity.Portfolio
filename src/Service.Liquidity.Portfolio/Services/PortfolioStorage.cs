@@ -64,7 +64,7 @@ namespace Service.Liquidity.Portfolio.Services
             await ctx.SaveTradesAsync(trades);
         }
 
-        public async ValueTask UpdateBalances(List<Trade> trades)
+        public async ValueTask UpdateBalancesAsync(List<Trade> trades)
         {
             var brokerId = trades.Select(elem => elem.BrokerId).Distinct().FirstOrDefault();
             
@@ -117,13 +117,24 @@ namespace Service.Liquidity.Portfolio.Services
                 Volume = balance.Value
             }).ToList();
             
-            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            await ctx.UpdateBalancesAsync(balanceList);
+            await UpdateBalancesAsync(balanceList);
         }
 
-        public async ValueTask UpdateBalances(List<AssetBalance> balances)
+        public async ValueTask UpdateBalancesAsync(List<AssetBalance> balances)
         {
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
+            ctx.Balances
+                .ToList()
+                .ForEach(dbElem =>
+                {
+                    balances.ForEach(newElem =>
+                    {
+                        if (dbElem.WalletId == newElem.WalletId && dbElem.Asset == newElem.Asset)
+                        {
+                            newElem.Volume += dbElem.Volume;
+                        }
+                    });
+                });
             await ctx.UpdateBalancesAsync(balances);
         }
 

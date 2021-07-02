@@ -48,7 +48,7 @@ namespace Service.Liquidity.Portfolio.Jobs
 
                     listForSave.AddRange(listForSaveByWallet);
 
-                    await _portfolioStorage.UpdateBalances(listForSaveByWallet);
+                    await _portfolioStorage.UpdateBalancesAsync(listForSaveByWallet);
                 });
 
                 await _portfolioStorage.SaveTrades(listForSave);

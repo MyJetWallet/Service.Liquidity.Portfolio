@@ -85,19 +85,10 @@ namespace Service.Liquidity.Portfolio.Postgres
 
         public async Task UpdateBalancesAsync(List<AssetBalance> balances)
         {
-            Balances
-                .ToList()
-                .ForEach(dbElem =>
-            {
-                balances.ForEach(newElem =>
-                {
-                    if (dbElem.WalletId == newElem.WalletId && dbElem.Asset == newElem.Asset)
-                    {
-                        newElem.Volume += dbElem.Volume;
-                    }
-                });
-            });
-            await Balances.UpsertRange(balances).On(e => new {e.WalletId, e.Asset}).RunAsync();
+            await Balances
+                .UpsertRange(balances)
+                .On(e => new {e.WalletId, e.Asset})
+                .RunAsync();
         }
         
         public async Task SaveTradesAsync(IEnumerable<Trade> trades)
