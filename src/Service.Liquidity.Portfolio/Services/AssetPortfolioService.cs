@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -147,6 +146,39 @@ namespace Service.Liquidity.Portfolio.Services
             }
 
             return response;
+        }
+
+        public async Task<CreateTradeManualResponse> CreateManualTradeAsync(CreateTradeManualRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.BrokerId) ||
+                string.IsNullOrWhiteSpace(request.ClientId) ||
+                string.IsNullOrWhiteSpace(request.WalletId) ||
+                string.IsNullOrWhiteSpace(request.Symbol) ||
+                request.Price == 0 ||
+                request.BaseVolume == 0 ||
+                request.QuoteVolume == 0 ||
+                (request.BaseVolume > 0 && request.QuoteVolume > 0) ||
+                (request.BaseVolume < 0 && request.QuoteVolume < 0))
+            {
+                _logger.LogError($"Bad request entity: {JsonConvert.SerializeObject(request)}");
+                return new CreateTradeManualResponse() {Success = false, ErrorMessage = "Incorrect entity"};
+            }
+
+            var trade = new Trade(request.BrokerId, request.ClientId, request.WalletId,
+                request.Symbol, request.Price, request.BaseVolume,
+                request.QuoteVolume, "manual");
+            try
+            {
+                await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
+                await ctx.SaveTradesAsync(new List<Trade>() {trade});
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"Creating failed: {JsonConvert.SerializeObject(exception)}");
+                return new CreateTradeManualResponse() {Success = false, ErrorMessage = exception.Message};
+            }
+
+            return new CreateTradeManualResponse() {Success = true, Trade = trade};
         }
     }
 }

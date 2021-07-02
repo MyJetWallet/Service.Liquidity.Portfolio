@@ -37,6 +37,24 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             TopicSource = topicSource;
         }
 
+        public Trade(string brokerId, string clientId, string walletId,
+            string symbol, double price, double baseVolume,
+            double quoteVolume, string topicSource)
+        {
+            BrokerId = brokerId;
+            ClientId = clientId;
+            WalletId = walletId;
+            Symbol = symbol;
+            Price = price;
+            BaseVolume = baseVolume;
+            QuoteVolume = quoteVolume;
+            TopicSource = topicSource;
+            
+            TradeId = Guid.NewGuid().ToString();
+            DateTime = DateTime.UtcNow;
+            Side = baseVolume < 0 ? OrderSide.Sell : OrderSide.Buy;
+        }
+
         public Trade()
         {
         }
