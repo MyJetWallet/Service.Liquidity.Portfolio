@@ -59,6 +59,9 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     b.Property<double>("BaseVolume")
                         .HasColumnType("double precision");
 
+                    b.Property<double>("BaseVolumeInUsd")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("BrokerId")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
@@ -74,6 +77,9 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasColumnType("double precision");
 
                     b.Property<double>("QuoteVolume")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("QuoteVolumeInUsd")
                         .HasColumnType("double precision");
 
                     b.Property<int>("Side")

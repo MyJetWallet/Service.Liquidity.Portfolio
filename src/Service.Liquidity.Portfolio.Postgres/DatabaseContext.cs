@@ -70,6 +70,8 @@ namespace Service.Liquidity.Portfolio.Postgres
             modelBuilder.Entity<Trade>().Property(e => e.Price);
             modelBuilder.Entity<Trade>().Property(e => e.BaseVolume);
             modelBuilder.Entity<Trade>().Property(e => e.QuoteVolume);
+            modelBuilder.Entity<Trade>().Property(e => e.BaseVolumeInUsd);
+            modelBuilder.Entity<Trade>().Property(e => e.QuoteVolumeInUsd);
             modelBuilder.Entity<Trade>().Property(e => e.DateTime);
             modelBuilder.Entity<Trade>().Property(e => e.TopicSource).HasMaxLength(64);
         }

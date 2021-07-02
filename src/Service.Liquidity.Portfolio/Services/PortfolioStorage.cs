@@ -8,6 +8,8 @@ using MyJetWallet.Domain;
 using MyJetWallet.Sdk.Service;
 using Service.AssetsDictionary.Client;
 using Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Grpc;
+using Service.Liquidity.Portfolio.Grpc.Models;
 using Service.Liquidity.Portfolio.Postgres;
 
 namespace Service.Liquidity.Portfolio.Services
@@ -16,20 +18,48 @@ namespace Service.Liquidity.Portfolio.Services
     {
         private readonly DbContextOptionsBuilder<DatabaseContext> _dbContextOptionsBuilder;
         private readonly ILogger<PortfolioStorage> _logger;
-        
+        private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
 
         public PortfolioStorage(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
             ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
-            ILogger<PortfolioStorage> logger)
+            ILogger<PortfolioStorage> logger,
+            IAnotherAssetProjectionService anotherAssetProjectionService)
         {
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
             _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
             _logger = logger;
+            _anotherAssetProjectionService = anotherAssetProjectionService;
         }
 
         public async ValueTask SaveTrades(List<Trade> trades)
         {
+            trades.ForEach(async trade =>
+            {
+                var instrument = _spotInstrumentDictionaryClient.GetSpotInstrumentByBroker(new JetBrandIdentity
+                {
+                    BrokerId = trade.BrokerId
+                });
+
+                var projectionOnBaseAsset = await _anotherAssetProjectionService.GetProjectionAsync(new GetProjectionRequest()
+                {
+                    BrokerId = trade.BrokerId,
+                    FromAsset = instrument.FirstOrDefault(elem => elem.Symbol == trade.Symbol)?.BaseAsset,
+                    FromVolume = trade.BaseVolume,
+                    ToAsset = "USD"
+                });
+                trade.BaseVolumeInUsd = projectionOnBaseAsset.ProjectionVolume;
+                
+                var projectionOnQuoteAsset = await _anotherAssetProjectionService.GetProjectionAsync(new GetProjectionRequest()
+                {
+                    BrokerId = trade.BrokerId,
+                    FromAsset = instrument.FirstOrDefault(elem => elem.Symbol == trade.Symbol)?.QuoteAsset,
+                    FromVolume = trade.QuoteVolume,
+                    ToAsset = "USD"
+                });
+                trade.QuoteVolumeInUsd = projectionOnQuoteAsset.ProjectionVolume;
+            });
+            
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             await ctx.SaveTradesAsync(trades);
         }

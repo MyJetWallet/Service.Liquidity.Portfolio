@@ -10,7 +10,7 @@ using Service.Liquidity.Portfolio.Postgres;
 namespace Service.Liquidity.Portfolio.Postgres.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210701122303_InitialCreate")]
+    [Migration("20210702122759_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,6 +61,9 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     b.Property<double>("BaseVolume")
                         .HasColumnType("double precision");
 
+                    b.Property<double>("BaseVolumeInUsd")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("BrokerId")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
@@ -76,6 +79,9 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasColumnType("double precision");
 
                     b.Property<double>("QuoteVolume")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("QuoteVolumeInUsd")
                         .HasColumnType("double precision");
 
                     b.Property<int>("Side")

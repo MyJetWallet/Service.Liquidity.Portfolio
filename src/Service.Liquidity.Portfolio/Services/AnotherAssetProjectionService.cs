@@ -30,6 +30,18 @@ namespace Service.Liquidity.Portfolio.Services
             request.AddToActivityAsJsonTag("GetProjectionRequest");
             _logger.LogInformation($"Receive GetProjectionRequest: {JsonConvert.SerializeObject(request)}");
             
+            GetProjectionResponse response;
+            
+            if (request.FromAsset == request.ToAsset || request.FromVolume == 0)
+            {
+                response = new GetProjectionResponse()
+                {
+                    Success = true, ProjectionVolume = request.FromVolume, Request = request
+                };
+                response.AddToActivityAsJsonTag("GetProjectionResponse");
+                return response;
+            }
+
             var convertMap = await _baseCurrencyConverterService.GetConvertorMapToBaseCurrencyAsync(new GetConvertorMapToBaseCurrencyRequest()
             {
                 BrokerId = request.BrokerId,
@@ -71,8 +83,7 @@ namespace Service.Liquidity.Portfolio.Services
                 _logger.LogInformation($"Receive GetPrice response: {JsonConvert.SerializeObject(price)} for operation {operation}");
             }
 
-            var response =
-                new GetProjectionResponse() {Success = true, Request = request, ProjectionVolume = projectionVolume};
+            response = new GetProjectionResponse() {Success = true, Request = request, ProjectionVolume = projectionVolume};
             
             response.AddToActivityAsJsonTag("GetProjectionResponse");
             

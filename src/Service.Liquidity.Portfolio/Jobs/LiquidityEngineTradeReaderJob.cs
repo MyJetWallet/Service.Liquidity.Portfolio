@@ -37,10 +37,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                     elem.DateTime,
                     PortfolioTrade.TopicName))
                 .ToList();
-            foreach (var brokerId in trades.Select(elem => elem.AssociateBrokerId).Distinct())
-            {
-                await _portfolioStorage.UpdateBalances(localTrades);
-            }
+            await _portfolioStorage.UpdateBalances(localTrades);
             await _portfolioStorage.SaveTrades(localTrades);
         }
 

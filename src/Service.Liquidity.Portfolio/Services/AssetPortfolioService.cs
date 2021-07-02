@@ -36,13 +36,6 @@ namespace Service.Liquidity.Portfolio.Services
                 const string projectionAsset = "USD";
                 response.Balances.ForEach(async elem =>
                 {
-                    if (elem.Volume == 0)
-                        return;
-                    if (elem.Asset == projectionAsset)
-                    {
-                        elem.UsdProjection = elem.Volume;
-                        return;
-                    }
                     var usdProjectionEntity = await _anotherAssetProjectionService.GetProjectionAsync(
                         new GetProjectionRequest()
                         {

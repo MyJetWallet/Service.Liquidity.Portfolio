@@ -17,8 +17,10 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 8)] public double Price { get; set; }
         [DataMember(Order = 9)] public double BaseVolume { get; set; }
         [DataMember(Order = 10)] public double QuoteVolume { get; set; }
-        [DataMember(Order = 11)] public DateTime DateTime { get; set; }
-        [DataMember(Order = 12)] public string TopicSource { get; set; }
+        [DataMember(Order = 11)] public double BaseVolumeInUsd { get; set; }
+        [DataMember(Order = 12)] public double QuoteVolumeInUsd { get; set; }
+        [DataMember(Order = 13)] public DateTime DateTime { get; set; }
+        [DataMember(Order = 14)] public string TopicSource { get; set; }
 
         public Trade(string tradeId, string brokerId, string clientId, string walletId, string symbol,
             OrderSide side, double price, double baseVolume,
