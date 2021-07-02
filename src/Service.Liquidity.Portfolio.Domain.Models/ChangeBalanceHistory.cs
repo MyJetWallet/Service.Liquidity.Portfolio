@@ -1,6 +1,6 @@
 using System;
 
-namespace Service.Liquidity.Portfolio.Postgres.Model
+namespace Service.Liquidity.Portfolio.Domain.Models
 {
     public class ChangeBalanceHistory
     {

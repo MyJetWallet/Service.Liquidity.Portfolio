@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Service.Liquidity.Portfolio.Domain.Models;
-using Service.Liquidity.Portfolio.Postgres.Model;
 
 namespace Service.Liquidity.Portfolio.Postgres
 {

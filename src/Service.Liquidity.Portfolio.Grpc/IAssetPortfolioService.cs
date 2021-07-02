@@ -9,6 +9,8 @@ namespace Service.Liquidity.Portfolio.Grpc
     {
         [OperationContract]
         Task<GetBalancesResponse> GetBalancesAsync();
+        [OperationContract]
+        Task<GetChangeBalanceHistoryResponse> GetChangeBalanceHistoryAsync();
         
         [OperationContract]
         Task<UpdateBalanceResponse> UpdateBalance(UpdateBalanceRequest request);

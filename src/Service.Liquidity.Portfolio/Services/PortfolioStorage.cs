@@ -11,7 +11,6 @@ using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
 using Service.Liquidity.Portfolio.Postgres;
-using Service.Liquidity.Portfolio.Postgres.Model;
 
 namespace Service.Liquidity.Portfolio.Services
 {
@@ -157,6 +156,12 @@ namespace Service.Liquidity.Portfolio.Services
         {
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             return ctx.Balances.ToList();
+        }
+
+        public async Task<List<ChangeBalanceHistory>> GetHistories()
+        {
+            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
+            return ctx.ChangeBalanceHistories.ToList();
         }
 
         public async Task<List<Trade>> GetTrades(long lastId, int batchSize)

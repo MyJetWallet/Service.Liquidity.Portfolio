@@ -56,6 +56,23 @@ namespace Service.Liquidity.Portfolio.Services
             return response;
         }
 
+        public async Task<GetChangeBalanceHistoryResponse> GetChangeBalanceHistoryAsync()
+        {
+            var response = new GetChangeBalanceHistoryResponse();
+            try
+            {
+                response.Histories = await _portfolioStorage.GetHistories();
+                response.Success = true;
+            }
+            catch (Exception exception)
+            {
+                response.Success = false;
+                response.ErrorText = exception.Message;
+            }
+
+            return response;
+        }
+
         public async Task<UpdateBalanceResponse> UpdateBalance(UpdateBalanceRequest request)
         {
             if (request.AssetBalance == null ||
