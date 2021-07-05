@@ -22,7 +22,7 @@ namespace Service.Liquidity.Portfolio.Jobs
             _portfolioStorage = portfolioStorage;
             _logger = logger;
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
-            _timer = new MyTaskTimer(nameof(BalancePersistJob), TimeSpan.FromSeconds(5), _logger, DoTime);
+            _timer = new MyTaskTimer(nameof(BalancePersistJob), TimeSpan.FromSeconds(Program.Settings.UpdateDbBalancesTimerInSeconds), _logger, DoTime);
         }
 
         public void Start()
