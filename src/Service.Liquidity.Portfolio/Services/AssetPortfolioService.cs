@@ -31,7 +31,7 @@ namespace Service.Liquidity.Portfolio.Services
             var response = new GetBalancesResponse();
             try
             {
-                response.SetBalances(await _portfolioStorage.GetBalances());
+                response.SetBalances(_portfolioStorage.GetBalancesSnapshot());
 
                 const string projectionAsset = "USD";
                 response.Balances.ForEach(async elem =>
@@ -96,7 +96,7 @@ namespace Service.Liquidity.Portfolio.Services
             {
                 var newBalance = request.AssetBalance.GetDomainModel();
                 newBalance.Volume = request.BalanceDifference;
-                await _portfolioStorage.UpdateBalancesAsync(new List<AssetBalance>() {newBalance});
+                _portfolioStorage.UpdateBalances(new List<AssetBalance>() {newBalance});
                 await _portfolioStorage.SaveChangeBalanceHistoryAsync(new List<AssetBalance>() {newBalance}, request.BalanceDifference);
             }
             catch (Exception exception)
@@ -159,7 +159,7 @@ namespace Service.Liquidity.Portfolio.Services
             try
             {
                 await _portfolioStorage.SaveTrades(new List<Trade>() {trade});
-                await _portfolioStorage.UpdateBalancesAsync(new List<Trade>() {trade});
+                _portfolioStorage.UpdateBalances(new List<Trade>() {trade});
             }
             catch (Exception exception)
             {

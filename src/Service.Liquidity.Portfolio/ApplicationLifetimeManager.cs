@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.DataReader;
 using MyServiceBus.TcpClient;
+using Service.Liquidity.Portfolio.Jobs;
 
 namespace Service.Liquidity.Portfolio
 {
@@ -12,21 +13,27 @@ namespace Service.Liquidity.Portfolio
         private readonly ILogger<ApplicationLifetimeManager> _logger;
         private readonly MyServiceBusTcpClient _myServiceBusTcpClient;
         private readonly MyNoSqlTcpClient _myNoSqlTcpClient;
+        private readonly BalancePersistJob _balancePersistJob;
 
-        public ApplicationLifetimeManager(IHostApplicationLifetime appLifetime, ILogger<ApplicationLifetimeManager> logger, MyServiceBusTcpClient myServiceBusTcpClient, MyNoSqlTcpClient myNoSqlTcpClient)
+        public ApplicationLifetimeManager(IHostApplicationLifetime appLifetime,
+            ILogger<ApplicationLifetimeManager> logger,
+            MyServiceBusTcpClient myServiceBusTcpClient,
+            MyNoSqlTcpClient myNoSqlTcpClient,
+            BalancePersistJob balancePersistJob)
             : base(appLifetime)
         {
             _logger = logger;
             _myServiceBusTcpClient = myServiceBusTcpClient;
             _myNoSqlTcpClient = myNoSqlTcpClient;
+            _balancePersistJob = balancePersistJob;
         }
 
         protected override void OnStarted()
         {
-
             _logger.LogInformation("OnStarted has been called.");
-            _myServiceBusTcpClient.Start();
+            _balancePersistJob.Start();
             _myNoSqlTcpClient.Start();
+            _myServiceBusTcpClient.Start();
         }
 
         protected override void OnStopping()
@@ -37,6 +44,7 @@ namespace Service.Liquidity.Portfolio
             try
             {
                 _myServiceBusTcpClient.Stop();
+                _balancePersistJob.Stop();
             }
             catch (Exception ex)
             {

@@ -36,6 +36,11 @@ namespace Service.Liquidity.Portfolio.Modules
                 .SingleInstance();
             
             builder
+                .RegisterType<BalancePersistJob>()
+                .AsSelf()
+                .SingleInstance();
+            
+            builder
                 .RegisterType<AnotherAssetProjectionService>()
                 .As<IAnotherAssetProjectionService>()
                 .SingleInstance();

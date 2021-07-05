@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -20,6 +21,10 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly ILogger<PortfolioStorage> _logger;
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
+
+        private readonly object _locker = new object();
+
+        private readonly List<AssetBalance> _localBalances = new List<AssetBalance>();
 
         public PortfolioStorage(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
             ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
@@ -64,7 +69,7 @@ namespace Service.Liquidity.Portfolio.Services
             await ctx.SaveTradesAsync(trades);
         }
 
-        public async ValueTask UpdateBalancesAsync(List<Trade> trades)
+        public void UpdateBalances(List<Trade> trades)
         {
             var brokerId = trades.Select(elem => elem.BrokerId).Distinct().FirstOrDefault();
             
@@ -117,27 +122,39 @@ namespace Service.Liquidity.Portfolio.Services
                 Volume = balance.Value
             }).ToList();
             
-            await UpdateBalancesAsync(balanceList);
+            UpdateBalances(balanceList);
         }
 
-        public async ValueTask UpdateBalancesAsync(List<AssetBalance> balances)
+        public void UpdateBalances(List<AssetBalance> differenceBalances)
         {
-            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            ctx.Balances
-                .ToList()
-                .ForEach(dbElem =>
+            lock (_locker)
+            {
+                foreach (var difference in differenceBalances)
                 {
-                    balances.ForEach(newElem =>
+                    var balance = _localBalances.FirstOrDefault(elem =>
+                        elem.WalletId == difference.WalletId && elem.Asset == difference.Asset);
+                    if (balance == null)
                     {
-                        if (dbElem.WalletId == newElem.WalletId && dbElem.Asset == newElem.Asset)
-                        {
-                            newElem.Volume += dbElem.Volume;
-                        }
-                    });
-                });
-            await ctx.UpdateBalancesAsync(balances);
+                        balance = difference;
+                        _localBalances.Add(balance);
+                    }
+                    else
+                    {
+                        balance.Volume += difference.Volume;
+                    }
+                }
+            }
         }
-
+        
+        public List<AssetBalance> GetBalancesSnapshot()
+        {
+            lock(_locker)
+            {
+                var newList = _localBalances.Select(elem => elem.Copy()).ToList();
+                return newList;
+            }
+        }
+        
         public async Task SaveChangeBalanceHistoryAsync(List<AssetBalance> balances, double volumeDifference)
         {
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
@@ -150,12 +167,6 @@ namespace Service.Liquidity.Portfolio.Services
                 UpdateDate = DateTime.UtcNow,
                 VolumeDifference = volumeDifference
             }).ToList());
-        }
-
-        public async Task<List<AssetBalance>> GetBalances()
-        {
-            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            return ctx.Balances.ToList();
         }
 
         public async Task<List<ChangeBalanceHistory>> GetHistories()

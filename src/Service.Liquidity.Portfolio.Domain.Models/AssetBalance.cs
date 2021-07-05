@@ -14,5 +14,18 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         public AssetBalance()
         {
         }
+
+        public AssetBalance Copy()
+        {
+            return new AssetBalance()
+            {
+                BrokerId = this.BrokerId,
+                ClientId = this.ClientId,
+                WalletId = this.WalletId,
+                Asset = this.Asset,
+                Volume = this.Volume,
+                UpdateDate = this.UpdateDate
+            };
+        }
     }
 }
