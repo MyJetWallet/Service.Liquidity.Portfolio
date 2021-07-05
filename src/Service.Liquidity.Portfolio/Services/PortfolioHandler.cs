@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain;
 using MyJetWallet.Sdk.Service;
+using Newtonsoft.Json;
 using Service.AssetsDictionary.Client;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc;
@@ -15,29 +15,91 @@ using Service.Liquidity.Portfolio.Postgres;
 
 namespace Service.Liquidity.Portfolio.Services
 {
-    public class PortfolioStorage : IPortfolioStorage
+    public class PortfolioHandler : IPortfolioHandler
     {
         private readonly DbContextOptionsBuilder<DatabaseContext> _dbContextOptionsBuilder;
-        private readonly ILogger<PortfolioStorage> _logger;
+        private readonly ILogger<PortfolioHandler> _logger;
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
+        private readonly TradeCacheStorage _tradeCacheStorage;
 
         private readonly object _locker = new object();
 
         private readonly List<AssetBalance> _localBalances = new List<AssetBalance>();
 
-        public PortfolioStorage(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
+        public PortfolioHandler(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
             ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
-            ILogger<PortfolioStorage> logger,
-            IAnotherAssetProjectionService anotherAssetProjectionService)
+            ILogger<PortfolioHandler> logger,
+            IAnotherAssetProjectionService anotherAssetProjectionService,
+            TradeCacheStorage tradeCacheStorage)
         {
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
             _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
+            _tradeCacheStorage = tradeCacheStorage;
+        }
+        
+        public async ValueTask HandleTradesAsync(List<Trade> trades)
+        {
+            using var activity = MyTelemetry.StartActivity("HandleTradesAsync");
+            trades.Count.AddToActivityAsTag("Trades count");
+            
+            _logger.LogInformation("Receive trades count: {count}", trades.Count);
+
+            await SetUsdProjection(trades);
+            
+            foreach (var trade in trades)
+            {
+                try
+                {
+                    HandleTradeAsync(trade);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError("Catch exception: {errorMessaeJson} in trade {tradeJson}", exception.Message, JsonConvert.SerializeObject(trade));
+                }
+            }
+            
+            var tradesWithSuccess = trades.Where(trade => trade.ErrorMessage == string.Empty).ToList();
+            tradesWithSuccess.Count.AddToActivityAsTag("tradesWithSuccess");
+            
+            var tradesWithErrors = trades.Where(trade => trade.ErrorMessage != string.Empty).ToList();
+            tradesWithErrors.Count.AddToActivityAsTag("tradesWithErrors");
+            
+            await SaveTrades(trades);
+            
+            _logger.LogInformation("Handled trades with errors: {countWithErrors}; with success: {countWithSuccess}", tradesWithErrors.Count, tradesWithSuccess.Count);
         }
 
-        public async ValueTask SaveTrades(List<Trade> trades)
+        private void HandleTradeAsync(Trade trade)
+        {
+            using var activity = MyTelemetry.StartActivity("HandleTradeAsync");
+            
+            var cache = _tradeCacheStorage.GetFromCache(trade.TradeId);
+            if (cache != null)
+            {
+                trade.ErrorMessage = cache.ErrorMessage;
+                return;
+            }
+
+            try
+            {
+                UpdateBalanceByTrade(trade);
+            }
+            catch (Exception exception)
+            {
+                trade.ErrorMessage = exception.Message;
+                exception.FailActivity();
+                throw;
+            }
+            finally
+            {
+                _tradeCacheStorage.SaveInCache(trade);
+            }
+        }
+
+        private async ValueTask SetUsdProjection(List<Trade> trades)
         {
             trades.ForEach(async trade =>
             {
@@ -64,68 +126,57 @@ namespace Service.Liquidity.Portfolio.Services
                 });
                 trade.QuoteVolumeInUsd = projectionOnQuoteAsset.ProjectionVolume;
             });
-            
+        }
+
+        private async ValueTask SaveTrades(List<Trade> trades)
+        {
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             await ctx.SaveTradesAsync(trades);
         }
 
-        public void UpdateBalances(List<Trade> trades)
+        private void UpdateBalanceByTrade(Trade trade)
         {
-            var brokerId = trades.Select(elem => elem.BrokerId).Distinct().FirstOrDefault();
-            
-            brokerId.AddToActivityAsTag("brokerId");
-            trades.AddToActivityAsJsonTag("listForSave");
-            
             var instruments = _spotInstrumentDictionaryClient.GetSpotInstrumentByBroker(new JetBrandIdentity
             {
-                BrokerId = brokerId
+                BrokerId = trade.BrokerId
             });
 
-            // clientId, walletId, asset
-            var balanceDictionary = new Dictionary<(string, string, string), double>();
-
-            trades.ForEach(trade =>
+            var tradeInstrument = instruments.FirstOrDefault(elem => elem.Symbol == trade.Symbol);
+            if (tradeInstrument == null)
             {
-                
-                _logger.LogInformation($"Trade is on balance. Id: {trade.Id}");
-                
-                var tradeInstrument = instruments.FirstOrDefault(elem => elem.Symbol == trade.Symbol);
-                var baseAsset = tradeInstrument?.BaseAsset;
-                var quoteAsset = tradeInstrument?.QuoteAsset;
+                _logger.LogError("Not found instrument for trade: {tradeJson}", JsonConvert.SerializeObject(trade));
+                throw new Exception("Instrument not found.");
+            }
+            var baseAsset = tradeInstrument?.BaseAsset;
+            var quoteAsset = tradeInstrument?.QuoteAsset;
 
-                if (balanceDictionary.ContainsKey((trade.ClientId, trade.WalletId, baseAsset)))
-                {
-                    balanceDictionary[(trade.ClientId, trade.WalletId, baseAsset)] += trade.BaseVolume;
-                }
-                else
-                {
-                    balanceDictionary.Add((trade.ClientId, trade.WalletId, baseAsset), trade.BaseVolume);
-                }
+            var balanceList = new List<AssetBalance>();
 
-                if (balanceDictionary.ContainsKey((trade.ClientId, trade.WalletId, quoteAsset)))
-                {
-                    balanceDictionary[(trade.ClientId, trade.WalletId, quoteAsset)] += trade.QuoteVolume;
-                }
-                else
-                {
-                    balanceDictionary.Add((trade.ClientId, trade.WalletId, quoteAsset), trade.QuoteVolume);
-                }
-            });
-
-            var balanceList = balanceDictionary.Select(balance => new AssetBalance()
+            var baseAssetBalance = new AssetBalance()
             {
-                BrokerId = brokerId,
-                ClientId = balance.Key.Item1,
-                WalletId = balance.Key.Item2,
-                Asset = balance.Key.Item3,
+                BrokerId = trade.BrokerId,
+                ClientId = trade.ClientId,
+                WalletId = trade.WalletId,
+                Asset = baseAsset,
                 UpdateDate = DateTime.UtcNow,
-                Volume = balance.Value
-            }).ToList();
+                Volume = trade.BaseVolume
+            };
+            var quoteAssetBalance = new AssetBalance()
+            {
+                BrokerId = trade.BrokerId,
+                ClientId = trade.ClientId,
+                WalletId = trade.WalletId,
+                Asset = quoteAsset,
+                UpdateDate = DateTime.UtcNow,
+                Volume = trade.QuoteVolume
+            };
+            balanceList.Add(baseAssetBalance);
+            balanceList.Add(quoteAssetBalance);
             
-            UpdateBalances(balanceList);
+            UpdateBalance(balanceList);
         }
 
-        public void UpdateBalances(List<AssetBalance> differenceBalances)
+        public void UpdateBalance(List<AssetBalance> differenceBalances)
         {
             lock (_locker)
             {

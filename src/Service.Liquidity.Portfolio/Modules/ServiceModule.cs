@@ -31,12 +31,17 @@ namespace Service.Liquidity.Portfolio.Modules
                 .SingleInstance();
             
             builder
-                .RegisterType<PortfolioStorage>()
-                .As<IPortfolioStorage>()
+                .RegisterType<PortfolioHandler>()
+                .As<IPortfolioHandler>()
                 .SingleInstance();
             
             builder
                 .RegisterType<BalancePersistJob>()
+                .AsSelf()
+                .SingleInstance();
+            
+            builder
+                .RegisterType<TradeCacheStorage>()
                 .AsSelf()
                 .SingleInstance();
             

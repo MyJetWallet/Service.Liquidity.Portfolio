@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using MyJetWallet.Sdk.Service;
 using Newtonsoft.Json;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc;
@@ -15,15 +16,15 @@ namespace Service.Liquidity.Portfolio.Services
     {
         private readonly ILogger<AssetPortfolioService> _logger;
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
-        private readonly IPortfolioStorage _portfolioStorage;
+        private readonly IPortfolioHandler _portfolioHandler;
 
         public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
-            IPortfolioStorage portfolioStorage)
+            IPortfolioHandler portfolioHandler)
         {
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
-            _portfolioStorage = portfolioStorage;
+            _portfolioHandler = portfolioHandler;
         }
 
         public async Task<GetBalancesResponse> GetBalancesAsync()
@@ -31,7 +32,7 @@ namespace Service.Liquidity.Portfolio.Services
             var response = new GetBalancesResponse();
             try
             {
-                response.SetBalances(_portfolioStorage.GetBalancesSnapshot());
+                response.SetBalances(_portfolioHandler.GetBalancesSnapshot());
 
                 const string projectionAsset = "USD";
                 response.Balances.ForEach(async elem =>
@@ -61,7 +62,7 @@ namespace Service.Liquidity.Portfolio.Services
             var response = new GetChangeBalanceHistoryResponse();
             try
             {
-                response.Histories = await _portfolioStorage.GetHistories();
+                response.Histories = await _portfolioHandler.GetHistories();
                 response.Success = true;
             }
             catch (Exception exception)
@@ -96,8 +97,8 @@ namespace Service.Liquidity.Portfolio.Services
             {
                 var newBalance = request.AssetBalance.GetDomainModel();
                 newBalance.Volume = request.BalanceDifference;
-                _portfolioStorage.UpdateBalances(new List<AssetBalance>() {newBalance});
-                await _portfolioStorage.SaveChangeBalanceHistoryAsync(new List<AssetBalance>() {newBalance}, request.BalanceDifference);
+                _portfolioHandler.UpdateBalance(new List<AssetBalance>() {newBalance});
+                await _portfolioHandler.SaveChangeBalanceHistoryAsync(new List<AssetBalance>() {newBalance}, request.BalanceDifference);
             }
             catch (Exception exception)
             {
@@ -114,7 +115,7 @@ namespace Service.Liquidity.Portfolio.Services
             var response = new GetTradesResponse();
             try
             {
-                var trades = await _portfolioStorage.GetTrades(request.LastId, request.BatchSize);
+                var trades = await _portfolioHandler.GetTrades(request.LastId, request.BatchSize);
 
                 long idForNextQuery = 0;
                 if (trades.Any())
@@ -139,6 +140,11 @@ namespace Service.Liquidity.Portfolio.Services
 
         public async Task<CreateTradeManualResponse> CreateManualTradeAsync(CreateTradeManualRequest request)
         {
+            
+            using var activity = MyTelemetry.StartActivity("CreateManualTradeAsync");
+
+            request.AddToActivityAsJsonTag("CreateTradeManualRequest");
+            
             _logger.LogInformation($"CreateManualTradeAsync receive request: {JsonConvert.SerializeObject(request)}");
             
             if (string.IsNullOrWhiteSpace(request.BrokerId) ||
@@ -160,8 +166,7 @@ namespace Service.Liquidity.Portfolio.Services
                 request.QuoteVolume, "manual");
             try
             {
-                await _portfolioStorage.SaveTrades(new List<Trade>() {trade});
-                _portfolioStorage.UpdateBalances(new List<Trade>() {trade});
+                await _portfolioHandler.HandleTradesAsync(new List<Trade>() {trade});
             }
             catch (Exception exception)
             {

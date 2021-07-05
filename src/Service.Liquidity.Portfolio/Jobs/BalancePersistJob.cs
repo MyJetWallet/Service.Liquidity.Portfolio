@@ -10,16 +10,16 @@ namespace Service.Liquidity.Portfolio.Jobs
 {
     public class BalancePersistJob
     {
-        private readonly IPortfolioStorage _portfolioStorage;
+        private readonly IPortfolioHandler _portfolioHandler;
         private readonly DbContextOptionsBuilder<DatabaseContext> _dbContextOptionsBuilder;
         private readonly ILogger<BalancePersistJob> _logger;
         private readonly MyTaskTimer _timer;
 
-        public BalancePersistJob(IPortfolioStorage portfolioStorage,
+        public BalancePersistJob(IPortfolioHandler portfolioHandler,
             ILogger<BalancePersistJob> logger,
             DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder)
         {
-            _portfolioStorage = portfolioStorage;
+            _portfolioHandler = portfolioHandler;
             _logger = logger;
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
             _timer = new MyTaskTimer(nameof(BalancePersistJob), TimeSpan.FromSeconds(Program.Settings.UpdateDbBalancesTimerInSeconds), _logger, DoTime);
@@ -41,14 +41,14 @@ namespace Service.Liquidity.Portfolio.Jobs
             Console.WriteLine("GetSnapshotFromDb");
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             var dbBalances = await ctx.Balances.ToListAsync();
-            _portfolioStorage.UpdateBalances(dbBalances);
+            _portfolioHandler.UpdateBalance(dbBalances);
         }
 
         private async Task SaveSnapshotToDb()
         {
             Console.WriteLine("SaveSnapshotToDb");
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            var localBalances = _portfolioStorage.GetBalancesSnapshot();
+            var localBalances = _portfolioHandler.GetBalancesSnapshot();
             await ctx.UpdateBalancesAsync(localBalances);
         }
 

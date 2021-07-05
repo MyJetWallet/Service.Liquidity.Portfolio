@@ -33,6 +33,6 @@ namespace Service.Liquidity.Portfolio.Settings
         public string BaseCurrencyConverterGrpcServiceUrl { get; set; }
 
         [YamlProperty("LiquidityPortfolio.UpdateDbBalancesTimerInSeconds")]
-        public double UpdateDbBalancesTimerInSeconds { get; set; }
+        public int UpdateDbBalancesTimerInSeconds { get; set; }
     }
 }

@@ -20,11 +20,12 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 11)] public double BaseVolumeInUsd { get; set; }
         [DataMember(Order = 12)] public double QuoteVolumeInUsd { get; set; }
         [DataMember(Order = 13)] public DateTime DateTime { get; set; }
-        [DataMember(Order = 14)] public string TopicSource { get; set; }
+        [DataMember(Order = 14)] public string ErrorMessage { get; set; }
+        [DataMember(Order = 15)] public string Source { get; set; }
 
         public Trade(string tradeId, string brokerId, string clientId, string walletId, string symbol,
             OrderSide side, double price, double baseVolume,
-            double quoteVolume, DateTime dateTime, string topicSource)
+            double quoteVolume, DateTime dateTime, string source)
         {
             TradeId = tradeId;
             BrokerId = brokerId;
@@ -36,12 +37,12 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             BaseVolume = baseVolume;
             QuoteVolume = quoteVolume;
             DateTime = dateTime;
-            TopicSource = topicSource;
+            Source = source;
         }
 
         public Trade(string brokerId, string clientId, string walletId,
             string symbol, double price, double baseVolume,
-            double quoteVolume, string topicSource)
+            double quoteVolume, string source)
         {
             BrokerId = brokerId;
             ClientId = clientId;
@@ -50,9 +51,9 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             Price = price;
             BaseVolume = baseVolume;
             QuoteVolume = quoteVolume;
-            TopicSource = topicSource;
+            Source = source;
             
-            TradeId = Guid.NewGuid().ToString();
+            TradeId = Guid.NewGuid().ToString("N");
             DateTime = DateTime.UtcNow;
             Side = baseVolume < 0 ? OrderSide.Sell : OrderSide.Buy;
         }

@@ -87,7 +87,10 @@ namespace Service.Liquidity.Portfolio.Postgres
             modelBuilder.Entity<Trade>().Property(e => e.BaseVolumeInUsd);
             modelBuilder.Entity<Trade>().Property(e => e.QuoteVolumeInUsd);
             modelBuilder.Entity<Trade>().Property(e => e.DateTime);
-            modelBuilder.Entity<Trade>().Property(e => e.TopicSource).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.ErrorMessage).HasMaxLength(256);
+            modelBuilder.Entity<Trade>().Property(e => e.Source).HasMaxLength(64);
+            
+            modelBuilder.Entity<Trade>().HasIndex(e => e.TradeId).IsUnique();
         }
 
         public static DatabaseContext Create(DbContextOptionsBuilder<DatabaseContext> options)
@@ -113,8 +116,10 @@ namespace Service.Liquidity.Portfolio.Postgres
         
         public async Task SaveTradesAsync(IEnumerable<Trade> trades)
         {
-            Trades.AddRange(trades);
-            await SaveChangesAsync();
+            await Trades
+                .UpsertRange(trades)
+                .On(e => e.TradeId)
+                .RunAsync();
         }
         
         public override void Dispose()

@@ -15,14 +15,14 @@ namespace Service.Liquidity.Portfolio.Jobs
     public class BalanceHistoryTradeReaderJob: IStartable
     {
         private readonly ILpWalletManagerGrpc _walletManager;
-        private readonly IPortfolioStorage _portfolioStorage;
+        private readonly IPortfolioHandler _portfolioHandler;
         
         public BalanceHistoryTradeReaderJob(ISubscriber<IReadOnlyList<WalletTradeMessage>> subscriber,
             ILpWalletManagerGrpc walletManager,
-            IPortfolioStorage portfolioStorage)
+            IPortfolioHandler portfolioHandler)
         {
             _walletManager = walletManager;
-            _portfolioStorage = portfolioStorage;
+            _portfolioHandler = portfolioHandler;
             subscriber.Subscribe(HandleTrades);
         }
 
@@ -32,7 +32,7 @@ namespace Service.Liquidity.Portfolio.Jobs
             try
             {
                 var walletCollection = (await _walletManager.GetAllAsync()).Data.List;
-
+                
                 walletCollection.ForEach(async wallet =>
                 {
                     var ourTrades = trades
@@ -45,8 +45,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                             elem.Trade.BaseVolume, elem.Trade.QuoteVolume, elem.Trade.DateTime,
                             "spot-trades")).ToList();
                     
-                    await _portfolioStorage.SaveTrades(listForSaveByWallet);
-                    _portfolioStorage.UpdateBalances(listForSaveByWallet);
+                    await _portfolioHandler.HandleTradesAsync(listForSaveByWallet);
                 });
             }
             catch (Exception exception)

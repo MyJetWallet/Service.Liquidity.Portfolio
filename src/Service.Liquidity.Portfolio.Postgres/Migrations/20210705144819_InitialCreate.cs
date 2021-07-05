@@ -66,12 +66,20 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     BaseVolumeInUsd = table.Column<double>(type: "double precision", nullable: false),
                     QuoteVolumeInUsd = table.Column<double>(type: "double precision", nullable: false),
                     DateTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    TopicSource = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
+                    ErrorMessage = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    Source = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_trade", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_trade_TradeId",
+                schema: "liquidityportfolio",
+                table: "trade",
+                column: "TradeId",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

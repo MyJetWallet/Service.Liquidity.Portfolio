@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using DotNetCoreDecorators;
-using ME.Contracts.OutgoingMessages;
 using MyJetWallet.Domain.Orders;
 using Service.Liquidity.Engine.Domain.Models.Portfolio;
 using Service.Liquidity.Portfolio.Domain.Models;
@@ -13,11 +12,11 @@ namespace Service.Liquidity.Portfolio.Jobs
 {
     public class LiquidityEngineTradeReaderJob : IStartable
     {
-        private readonly IPortfolioStorage _portfolioStorage;
+        private readonly IPortfolioHandler _portfolioHandler;
         public LiquidityEngineTradeReaderJob(ISubscriber<IReadOnlyList<PortfolioTrade>> subscriber,
-            IPortfolioStorage portfolioStorage)
+            IPortfolioHandler portfolioHandler)
         {
-            _portfolioStorage = portfolioStorage;
+            _portfolioHandler = portfolioHandler;
             subscriber.Subscribe(HandleTrades);
         }
 
@@ -37,8 +36,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                     elem.DateTime,
                     PortfolioTrade.TopicName))
                 .ToList();
-            await _portfolioStorage.SaveTrades(localTrades);
-            _portfolioStorage.UpdateBalances(localTrades);
+            await _portfolioHandler.HandleTradesAsync(localTrades);
         }
 
         public void Start()
