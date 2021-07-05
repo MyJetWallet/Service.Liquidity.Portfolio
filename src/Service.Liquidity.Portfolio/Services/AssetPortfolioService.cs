@@ -139,6 +139,8 @@ namespace Service.Liquidity.Portfolio.Services
 
         public async Task<CreateTradeManualResponse> CreateManualTradeAsync(CreateTradeManualRequest request)
         {
+            _logger.LogInformation($"CreateManualTradeAsync receive request: {JsonConvert.SerializeObject(request)}");
+            
             if (string.IsNullOrWhiteSpace(request.BrokerId) ||
                 string.IsNullOrWhiteSpace(request.ClientId) ||
                 string.IsNullOrWhiteSpace(request.WalletId) ||
@@ -167,7 +169,10 @@ namespace Service.Liquidity.Portfolio.Services
                 return new CreateTradeManualResponse() {Success = false, ErrorMessage = exception.Message};
             }
 
-            return new CreateTradeManualResponse() {Success = true, Trade = trade};
+            var response = new CreateTradeManualResponse() {Success = true, Trade = trade};
+            
+            _logger.LogInformation($"CreateManualTradeAsync return reponse: {JsonConvert.SerializeObject(response)}");
+            return response;
         }
     }
 }

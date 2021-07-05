@@ -32,7 +32,6 @@ namespace Service.Liquidity.Portfolio.Jobs
             try
             {
                 var walletCollection = (await _walletManager.GetAllAsync()).Data.List;
-                var listForSave = new List<Trade>();
 
                 walletCollection.ForEach(async wallet =>
                 {
@@ -45,13 +44,10 @@ namespace Service.Liquidity.Portfolio.Jobs
                             elem.WalletId, elem.Trade.InstrumentSymbol, elem.Trade.Side, elem.Trade.Price,
                             elem.Trade.BaseVolume, elem.Trade.QuoteVolume, elem.Trade.DateTime,
                             "spot-trades")).ToList();
-
-                    listForSave.AddRange(listForSaveByWallet);
-
+                    
+                    await _portfolioStorage.SaveTrades(listForSaveByWallet);
                     _portfolioStorage.UpdateBalances(listForSaveByWallet);
                 });
-
-                await _portfolioStorage.SaveTrades(listForSave);
             }
             catch (Exception exception)
             {
