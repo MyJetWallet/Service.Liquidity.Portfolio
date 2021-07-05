@@ -37,8 +37,8 @@ namespace Service.Liquidity.Portfolio.Jobs
                     elem.DateTime,
                     PortfolioTrade.TopicName))
                 .ToList();
-            _portfolioStorage.UpdateBalances(localTrades);
             await _portfolioStorage.SaveTrades(localTrades);
+            _portfolioStorage.UpdateBalances(localTrades);
         }
 
         public void Start()
