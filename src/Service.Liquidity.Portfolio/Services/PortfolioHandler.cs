@@ -216,18 +216,34 @@ namespace Service.Liquidity.Portfolio.Services
             return ctx.ChangeBalanceHistories.ToList();
         }
 
-        public async Task<List<Trade>> GetTrades(long lastId, int batchSize)
+        public async Task<List<Trade>> GetTrades(long lastId, int batchSize, string assetFilter)
         {
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             if (lastId != 0)
             {
+                if (string.IsNullOrWhiteSpace(assetFilter))
+                {
+                    return ctx.Trades
+                        .Where(trade => trade.Id < lastId)
+                        .OrderByDescending(trade => trade.Id)
+                        .Take(batchSize)
+                        .ToList();
+                }
                 return ctx.Trades
-                    .Where(trade => trade.Id < lastId)
+                    .Where(trade => trade.Id < lastId && trade.Symbol.Contains(assetFilter))
+                    .OrderByDescending(trade => trade.Id)
+                    .Take(batchSize)
+                    .ToList();
+            }
+            if (string.IsNullOrWhiteSpace(assetFilter))
+            {
+                return ctx.Trades
                     .OrderByDescending(trade => trade.Id)
                     .Take(batchSize)
                     .ToList();
             }
             return ctx.Trades
+                .Where(trade => trade.Symbol.Contains(assetFilter))
                 .OrderByDescending(trade => trade.Id)
                 .Take(batchSize)
                 .ToList();

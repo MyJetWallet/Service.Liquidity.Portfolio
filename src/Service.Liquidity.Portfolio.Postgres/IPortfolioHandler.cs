@@ -13,6 +13,6 @@ namespace Service.Liquidity.Portfolio.Postgres
         Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory);
         List<AssetBalance> GetBalancesSnapshot();
         Task<List<ChangeBalanceHistory>> GetHistories();
-        Task<List<Trade>> GetTrades(long lastId, int batchSize);
+        Task<List<Trade>> GetTrades(long lastId, int batchSize, string assetFilter);
     }
 }

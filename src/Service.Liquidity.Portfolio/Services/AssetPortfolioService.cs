@@ -131,7 +131,7 @@ namespace Service.Liquidity.Portfolio.Services
             var response = new GetTradesResponse();
             try
             {
-                var trades = await _portfolioHandler.GetTrades(request.LastId, request.BatchSize);
+                var trades = await _portfolioHandler.GetTrades(request.LastId, request.BatchSize, request.AssetFilter);
 
                 long idForNextQuery = 0;
                 if (trades.Any())
