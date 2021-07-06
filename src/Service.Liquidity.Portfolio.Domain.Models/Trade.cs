@@ -10,29 +10,27 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 1)] public long Id { get; set; }
         [DataMember(Order = 2)] public string TradeId { get; set; }
         [DataMember(Order = 3)] public string BrokerId { get; set; }
-        [DataMember(Order = 4)] public string ClientId { get; set; }
-        [DataMember(Order = 5)] public string WalletId { get; set; }
-        [DataMember(Order = 6)] public string Symbol { get; set; }
-        [DataMember(Order = 7)] public OrderSide Side { get; set; }
-        [DataMember(Order = 8)] public double Price { get; set; }
-        [DataMember(Order = 9)] public double BaseVolume { get; set; }
-        [DataMember(Order = 10)] public double QuoteVolume { get; set; }
-        [DataMember(Order = 11)] public double BaseVolumeInUsd { get; set; }
-        [DataMember(Order = 12)] public double QuoteVolumeInUsd { get; set; }
-        [DataMember(Order = 13)] public DateTime DateTime { get; set; }
-        [DataMember(Order = 14)] public string ErrorMessage { get; set; }
-        [DataMember(Order = 15)] public string Source { get; set; }
-        [DataMember(Order = 16)] public string Comment { get; set; }
-        [DataMember(Order = 17)] public string User { get; set; }
+        [DataMember(Order = 4)] public string WalletName { get; set; }
+        [DataMember(Order = 5)] public string Symbol { get; set; }
+        [DataMember(Order = 6)] public OrderSide Side { get; set; }
+        [DataMember(Order = 7)] public double Price { get; set; }
+        [DataMember(Order = 8)] public double BaseVolume { get; set; }
+        [DataMember(Order = 9)] public double QuoteVolume { get; set; }
+        [DataMember(Order = 10)] public double BaseVolumeInUsd { get; set; }
+        [DataMember(Order = 11)] public double QuoteVolumeInUsd { get; set; }
+        [DataMember(Order = 12)] public DateTime DateTime { get; set; }
+        [DataMember(Order = 13)] public string ErrorMessage { get; set; }
+        [DataMember(Order = 14)] public string Source { get; set; }
+        [DataMember(Order = 15)] public string Comment { get; set; }
+        [DataMember(Order = 16)] public string User { get; set; }
 
-        public Trade(string tradeId, string brokerId, string clientId, string walletId, string symbol,
+        public Trade(string tradeId, string brokerId, string walletName, string symbol,
             OrderSide side, double price, double baseVolume,
             double quoteVolume, DateTime dateTime, string source)
         {
             TradeId = tradeId;
             BrokerId = brokerId;
-            ClientId = clientId;
-            WalletId = walletId;
+            WalletName = walletName;
             Symbol = symbol;
             Side = side;
             Price = price;
@@ -42,13 +40,12 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             Source = source;
         }
 
-        public Trade(string brokerId, string clientId, string walletId,
+        public Trade(string brokerId, string walletName,
             string symbol, double price, double baseVolume,
             double quoteVolume, string comment, string user, string source)
         {
             BrokerId = brokerId;
-            ClientId = clientId;
-            WalletId = walletId;
+            WalletName = walletName;
             Symbol = symbol;
             Price = price;
             BaseVolume = baseVolume;

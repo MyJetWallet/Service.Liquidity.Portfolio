@@ -6,8 +6,7 @@ namespace Service.Liquidity.Portfolio.Grpc.Models
     public class CreateTradeManualRequest
     {
         [DataMember(Order = 1)] public string BrokerId { get; set; }
-        [DataMember(Order = 2)] public string ClientId { get; set; }
-        [DataMember(Order = 3)] public string WalletId { get; set; }
+        [DataMember(Order = 3)] public string WalletName { get; set; }
         [DataMember(Order = 4)] public string Symbol { get; set; }
         [DataMember(Order = 6)] public double Price { get; set; }
         [DataMember(Order = 7)] public double BaseVolume { get; set; }

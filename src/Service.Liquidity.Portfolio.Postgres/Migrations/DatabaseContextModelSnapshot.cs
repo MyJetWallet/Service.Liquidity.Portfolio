@@ -22,7 +22,7 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
 
             modelBuilder.Entity("Service.Liquidity.Portfolio.Domain.Models.AssetBalance", b =>
                 {
-                    b.Property<string>("WalletId")
+                    b.Property<string>("WalletName")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
@@ -34,17 +34,13 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<string>("ClientId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<double>("Volume")
                         .HasColumnType("double precision");
 
-                    b.HasKey("WalletId", "Asset");
+                    b.HasKey("WalletName", "Asset");
 
                     b.ToTable("assetbalance");
                 });
@@ -64,17 +60,21 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<string>("ClientId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                    b.Property<string>("Comment")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("User")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<double>("VolumeDifference")
                         .HasColumnType("double precision");
 
-                    b.Property<string>("WalletId")
+                    b.Property<string>("WalletName")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
@@ -100,9 +100,9 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<string>("ClientId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                    b.Property<string>("Comment")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("timestamp without time zone");
@@ -135,11 +135,17 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<string>("WalletId")
+                    b.Property<string>("User")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("WalletName")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Source");
 
                     b.HasIndex("TradeId")
                         .IsUnique();

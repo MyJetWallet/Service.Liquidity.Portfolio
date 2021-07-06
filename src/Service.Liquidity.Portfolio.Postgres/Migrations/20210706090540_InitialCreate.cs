@@ -16,16 +16,15 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                 schema: "liquidityportfolio",
                 columns: table => new
                 {
-                    WalletId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    WalletName = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     Asset = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     BrokerId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    ClientId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     Volume = table.Column<double>(type: "double precision", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_assetbalance", x => new { x.WalletId, x.Asset });
+                    table.PrimaryKey("PK_assetbalance", x => new { x.WalletName, x.Asset });
                 });
 
             migrationBuilder.CreateTable(
@@ -36,11 +35,12 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     BrokerId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    ClientId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    WalletId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    WalletName = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     Asset = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     VolumeDifference = table.Column<double>(type: "double precision", nullable: false),
-                    UpdateDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false)
+                    UpdateDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Comment = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    User = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -56,8 +56,7 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TradeId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     BrokerId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    ClientId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    WalletId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    WalletName = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     Symbol = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     Side = table.Column<int>(type: "integer", nullable: false),
                     Price = table.Column<double>(type: "double precision", nullable: false),
@@ -67,12 +66,20 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     QuoteVolumeInUsd = table.Column<double>(type: "double precision", nullable: false),
                     DateTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     ErrorMessage = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    Source = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
+                    Source = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    Comment = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    User = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_trade", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_trade_Source",
+                schema: "liquidityportfolio",
+                table: "trade",
+                column: "Source");
 
             migrationBuilder.CreateIndex(
                 name: "IX_trade_TradeId",

@@ -78,8 +78,7 @@ namespace Service.Liquidity.Portfolio.Services
         {
             if (request.AssetBalance == null ||
                 string.IsNullOrWhiteSpace(request.AssetBalance.BrokerId) ||
-                string.IsNullOrWhiteSpace(request.AssetBalance.ClientId) ||
-                string.IsNullOrWhiteSpace(request.AssetBalance.WalletId) ||
+                string.IsNullOrWhiteSpace(request.AssetBalance.WalletName) ||
                 string.IsNullOrWhiteSpace(request.AssetBalance.Asset) ||
                 string.IsNullOrWhiteSpace(request.Comment) ||
                 string.IsNullOrWhiteSpace(request.User))
@@ -153,8 +152,7 @@ namespace Service.Liquidity.Portfolio.Services
             _logger.LogInformation($"CreateManualTradeAsync receive request: {JsonConvert.SerializeObject(request)}");
             
             if (string.IsNullOrWhiteSpace(request.BrokerId) ||
-                string.IsNullOrWhiteSpace(request.ClientId) ||
-                string.IsNullOrWhiteSpace(request.WalletId) ||
+                string.IsNullOrWhiteSpace(request.WalletName) ||
                 string.IsNullOrWhiteSpace(request.Symbol) ||
                 string.IsNullOrWhiteSpace(request.Comment) ||
                 string.IsNullOrWhiteSpace(request.User) ||
@@ -168,7 +166,7 @@ namespace Service.Liquidity.Portfolio.Services
                 return new CreateTradeManualResponse() {Success = false, ErrorMessage = "Incorrect entity"};
             }
 
-            var trade = new Trade(request.BrokerId, request.ClientId, request.WalletId,
+            var trade = new Trade(request.BrokerId, request.WalletName,
                 request.Symbol, request.Price, request.BaseVolume,
                 request.QuoteVolume, request.Comment, request.User, "manual");
             try

@@ -26,8 +26,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                 .Where(elem => !elem.IsInternal)
                 .Select(elem => new Trade(elem.TradeId,
                     elem.AssociateBrokerId,
-                    elem.AssociateClientId,
-                    elem.AssociateWalletId,
+                    elem.Source,
                     elem.AssociateSymbol,
                     elem.Side,
                     elem.Price,

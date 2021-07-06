@@ -155,8 +155,7 @@ namespace Service.Liquidity.Portfolio.Services
             var baseAssetBalance = new AssetBalance()
             {
                 BrokerId = trade.BrokerId,
-                ClientId = trade.ClientId,
-                WalletId = trade.WalletId,
+                WalletName = trade.WalletName,
                 Asset = baseAsset,
                 UpdateDate = DateTime.UtcNow,
                 Volume = trade.BaseVolume
@@ -164,8 +163,7 @@ namespace Service.Liquidity.Portfolio.Services
             var quoteAssetBalance = new AssetBalance()
             {
                 BrokerId = trade.BrokerId,
-                ClientId = trade.ClientId,
-                WalletId = trade.WalletId,
+                WalletName = trade.WalletName,
                 Asset = quoteAsset,
                 UpdateDate = DateTime.UtcNow,
                 Volume = trade.QuoteVolume
@@ -183,7 +181,7 @@ namespace Service.Liquidity.Portfolio.Services
                 foreach (var difference in differenceBalances)
                 {
                     var balance = _localBalances.FirstOrDefault(elem =>
-                        elem.WalletId == difference.WalletId && elem.Asset == difference.Asset);
+                        elem.WalletName == difference.WalletName && elem.Asset == difference.Asset);
                     if (balance == null)
                     {
                         balance = difference;
@@ -212,8 +210,7 @@ namespace Service.Liquidity.Portfolio.Services
             await ctx.SaveChangeBalanceHistoryAsync(balances.Select(balance => new ChangeBalanceHistory()
             {
                 BrokerId = balance.BrokerId,
-                ClientId = balance.ClientId,
-                WalletId = balance.WalletId,
+                WalletName = balance.WalletName,
                 Asset = balance.Asset,
                 UpdateDate = DateTime.UtcNow,
                 VolumeDifference = volumeDifference,

@@ -8,18 +8,16 @@ namespace Service.Liquidity.Portfolio.Grpc.Models
     public class AssetBalanceGrpc
     {
         [DataMember(Order = 1)] public string BrokerId { get; set; }
-        [DataMember(Order = 2)] public string ClientId { get; set; }
-        [DataMember(Order = 3)] public string WalletId { get; set; }
-        [DataMember(Order = 4)] public string Asset { get; set; }
-        [DataMember(Order = 5)] public double Volume { get; set; }
-        [DataMember(Order = 6)] public DateTime UpdateDate { get; set; }
-        [DataMember(Order = 7)] public double UsdProjection { get; set; }
+        [DataMember(Order = 2)] public string WalletName { get; set; }
+        [DataMember(Order = 3)] public string Asset { get; set; }
+        [DataMember(Order = 4)] public double Volume { get; set; }
+        [DataMember(Order = 5)] public DateTime UpdateDate { get; set; }
+        [DataMember(Order = 6)] public double UsdProjection { get; set; }
 
         public AssetBalanceGrpc(AssetBalance assetBalance)
         {
             BrokerId = assetBalance.BrokerId;
-            ClientId = assetBalance.ClientId;
-            WalletId = assetBalance.WalletId;
+            WalletName = assetBalance.WalletName;
             Asset = assetBalance.Asset;
             Volume = assetBalance.Volume;
             UpdateDate = assetBalance.UpdateDate;
@@ -33,8 +31,7 @@ namespace Service.Liquidity.Portfolio.Grpc.Models
             return new AssetBalance()
             {
                 BrokerId = this.BrokerId,
-                ClientId = this.ClientId,
-                WalletId = this.WalletId,
+                WalletName = this.WalletName,
                 Asset = this.Asset,
                 Volume = this.Volume,
                 UpdateDate = this.UpdateDate
