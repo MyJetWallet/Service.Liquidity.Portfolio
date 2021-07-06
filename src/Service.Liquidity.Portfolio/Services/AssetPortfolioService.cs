@@ -76,10 +76,9 @@ namespace Service.Liquidity.Portfolio.Services
 
         public async Task<UpdateBalanceResponse> UpdateBalance(UpdateBalanceRequest request)
         {
-            if (request.AssetBalance == null ||
-                string.IsNullOrWhiteSpace(request.AssetBalance.BrokerId) ||
-                string.IsNullOrWhiteSpace(request.AssetBalance.WalletName) ||
-                string.IsNullOrWhiteSpace(request.AssetBalance.Asset) ||
+            if (string.IsNullOrWhiteSpace(request.BrokerId) ||
+                string.IsNullOrWhiteSpace(request.WalletName) ||
+                string.IsNullOrWhiteSpace(request.Asset) ||
                 string.IsNullOrWhiteSpace(request.Comment) ||
                 string.IsNullOrWhiteSpace(request.User))
             {
@@ -96,13 +95,26 @@ namespace Service.Liquidity.Portfolio.Services
 
             try
             {
-                var newBalance = request.AssetBalance.GetDomainModel();
-                newBalance.Volume = request.BalanceDifference;
+                var updateDate = DateTime.UtcNow;
+                var newBalance = new AssetBalance()
+                {
+                    BrokerId = request.BrokerId,
+                    Asset = request.Asset,
+                    UpdateDate = updateDate,
+                    Volume = request.BalanceDifference,
+                    WalletName = request.WalletName
+                };
                 _portfolioHandler.UpdateBalance(new List<AssetBalance>() {newBalance});
-                await _portfolioHandler.SaveChangeBalanceHistoryAsync(new List<AssetBalance>() {newBalance},
-                    request.BalanceDifference,
-                    request.Comment,
-                    request.User);
+                await _portfolioHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
+                {
+                    Asset = request.Asset,
+                    BrokerId = request.BrokerId,
+                    Comment = request.Comment,
+                    UpdateDate = updateDate,
+                    User = request.User,
+                    VolumeDifference = request.BalanceDifference,
+                    WalletName = request.WalletName
+                });
             }
             catch (Exception exception)
             {

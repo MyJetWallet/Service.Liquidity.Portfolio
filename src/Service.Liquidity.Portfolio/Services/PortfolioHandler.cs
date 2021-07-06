@@ -204,19 +204,10 @@ namespace Service.Liquidity.Portfolio.Services
             }
         }
         
-        public async Task SaveChangeBalanceHistoryAsync(List<AssetBalance> balances, double volumeDifference, string comment, string user)
+        public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory)
         {
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            await ctx.SaveChangeBalanceHistoryAsync(balances.Select(balance => new ChangeBalanceHistory()
-            {
-                BrokerId = balance.BrokerId,
-                WalletName = balance.WalletName,
-                Asset = balance.Asset,
-                UpdateDate = DateTime.UtcNow,
-                VolumeDifference = volumeDifference,
-                Comment = comment,
-                User = user
-            }).ToList());
+            await ctx.SaveChangeBalanceHistoryAsync(balanceHistory);
         }
 
         public async Task<List<ChangeBalanceHistory>> GetHistories()

@@ -110,9 +110,9 @@ namespace Service.Liquidity.Portfolio.Postgres
                 .RunAsync();
         }
         
-        public async Task SaveChangeBalanceHistoryAsync(List<ChangeBalanceHistory> history)
+        public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory history)
         {
-            ChangeBalanceHistories.AddRange(history);
+            ChangeBalanceHistories.Add(history);
             await SaveChangesAsync();
         }
         
