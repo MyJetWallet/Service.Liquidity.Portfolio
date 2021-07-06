@@ -80,7 +80,9 @@ namespace Service.Liquidity.Portfolio.Services
                 string.IsNullOrWhiteSpace(request.AssetBalance.BrokerId) ||
                 string.IsNullOrWhiteSpace(request.AssetBalance.ClientId) ||
                 string.IsNullOrWhiteSpace(request.AssetBalance.WalletId) ||
-                string.IsNullOrWhiteSpace(request.AssetBalance.Asset))
+                string.IsNullOrWhiteSpace(request.AssetBalance.Asset) ||
+                string.IsNullOrWhiteSpace(request.Comment) ||
+                string.IsNullOrWhiteSpace(request.User))
             {
                 _logger.LogError($"Bad request entity: {JsonConvert.SerializeObject(request)}");
                 return new UpdateBalanceResponse() {Success = false, ErrorMessage = "Incorrect entity"};
@@ -98,7 +100,10 @@ namespace Service.Liquidity.Portfolio.Services
                 var newBalance = request.AssetBalance.GetDomainModel();
                 newBalance.Volume = request.BalanceDifference;
                 _portfolioHandler.UpdateBalance(new List<AssetBalance>() {newBalance});
-                await _portfolioHandler.SaveChangeBalanceHistoryAsync(new List<AssetBalance>() {newBalance}, request.BalanceDifference);
+                await _portfolioHandler.SaveChangeBalanceHistoryAsync(new List<AssetBalance>() {newBalance},
+                    request.BalanceDifference,
+                    request.Comment,
+                    request.User);
             }
             catch (Exception exception)
             {

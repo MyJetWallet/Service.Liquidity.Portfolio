@@ -9,7 +9,7 @@ namespace Service.Liquidity.Portfolio.Postgres
     {
         ValueTask HandleTradesAsync(List<Trade> trades);
         void UpdateBalance(List<AssetBalance> differenceBalances);
-        Task SaveChangeBalanceHistoryAsync(List<AssetBalance> balances, double volumeDifference);
+        Task SaveChangeBalanceHistoryAsync(List<AssetBalance> balances, double volumeDifference, string comment, string user);
         List<AssetBalance> GetBalancesSnapshot();
         Task<List<ChangeBalanceHistory>> GetHistories();
         Task<List<Trade>> GetTrades(long lastId, int batchSize);

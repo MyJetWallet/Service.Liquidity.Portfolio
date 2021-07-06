@@ -13,5 +13,8 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 5)] public string Asset { get; set; }
         [DataMember(Order = 6)] public double VolumeDifference { get; set; }
         [DataMember(Order = 7)] public DateTime UpdateDate { get; set; }
+        [DataMember(Order = 8)] public string Comment { get; set; }
+        [DataMember(Order = 9)] public string User { get; set; }
+        
     }
 }

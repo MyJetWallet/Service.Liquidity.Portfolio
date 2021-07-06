@@ -56,6 +56,8 @@ namespace Service.Liquidity.Portfolio.Postgres
             modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.Asset).HasMaxLength(64);
             modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.VolumeDifference);
             modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.UpdateDate);
+            modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.Comment).HasMaxLength(256);
+            modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.User).HasMaxLength(64);
         }
 
         private void SetBalanceEntity(ModelBuilder modelBuilder)
