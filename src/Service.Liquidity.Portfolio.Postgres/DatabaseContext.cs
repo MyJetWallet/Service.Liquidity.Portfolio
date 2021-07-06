@@ -91,8 +91,11 @@ namespace Service.Liquidity.Portfolio.Postgres
             modelBuilder.Entity<Trade>().Property(e => e.DateTime);
             modelBuilder.Entity<Trade>().Property(e => e.ErrorMessage).HasMaxLength(256);
             modelBuilder.Entity<Trade>().Property(e => e.Source).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.Comment).HasMaxLength(256);
+            modelBuilder.Entity<Trade>().Property(e => e.User).HasMaxLength(64);
             
             modelBuilder.Entity<Trade>().HasIndex(e => e.TradeId).IsUnique();
+            modelBuilder.Entity<Trade>().HasIndex(e => e.Source);
         }
 
         public static DatabaseContext Create(DbContextOptionsBuilder<DatabaseContext> options)

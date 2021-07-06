@@ -12,5 +12,7 @@ namespace Service.Liquidity.Portfolio.Grpc.Models
         [DataMember(Order = 6)] public double Price { get; set; }
         [DataMember(Order = 7)] public double BaseVolume { get; set; }
         [DataMember(Order = 8)] public double QuoteVolume { get; set; }
+        [DataMember(Order = 9)] public string Comment { get; set; }
+        [DataMember(Order = 10)] public string User { get; set; }
     }
 }

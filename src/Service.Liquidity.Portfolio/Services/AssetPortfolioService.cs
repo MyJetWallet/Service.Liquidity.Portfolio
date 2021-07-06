@@ -156,6 +156,8 @@ namespace Service.Liquidity.Portfolio.Services
                 string.IsNullOrWhiteSpace(request.ClientId) ||
                 string.IsNullOrWhiteSpace(request.WalletId) ||
                 string.IsNullOrWhiteSpace(request.Symbol) ||
+                string.IsNullOrWhiteSpace(request.Comment) ||
+                string.IsNullOrWhiteSpace(request.User) ||
                 request.Price == 0 ||
                 request.BaseVolume == 0 ||
                 request.QuoteVolume == 0 ||
@@ -168,7 +170,7 @@ namespace Service.Liquidity.Portfolio.Services
 
             var trade = new Trade(request.BrokerId, request.ClientId, request.WalletId,
                 request.Symbol, request.Price, request.BaseVolume,
-                request.QuoteVolume, "manual");
+                request.QuoteVolume, request.Comment, request.User, "manual");
             try
             {
                 await _portfolioHandler.HandleTradesAsync(new List<Trade>() {trade});
