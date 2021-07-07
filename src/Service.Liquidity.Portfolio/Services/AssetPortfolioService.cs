@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
+using Service.Liquidity.Portfolio.Grpc.Models.GetBalances;
 using Service.Liquidity.Portfolio.Postgres;
 
 namespace Service.Liquidity.Portfolio.Services
@@ -32,29 +33,100 @@ namespace Service.Liquidity.Portfolio.Services
             var response = new GetBalancesResponse();
             try
             {
-                response.SetBalances(_portfolioHandler.GetBalancesSnapshot());
-
-                const string projectionAsset = "USD";
-                response.Balances.ForEach(async elem =>
-                {
-                    var usdProjectionEntity = await _anotherAssetProjectionService.GetProjectionAsync(
-                        new GetProjectionRequest()
-                        {
-                            BrokerId = elem.BrokerId,
-                            FromAsset = elem.Asset,
-                            FromVolume = elem.Volume,
-                            ToAsset = projectionAsset
-                        });
-                    
-                    // if usdProjectionEntity.Success = false - set zero UsdProjection
-                    elem.UsdProjection = usdProjectionEntity.ProjectionVolume;
-                });
+                var balancesSnapshot = _portfolioHandler.GetBalancesSnapshot();
+                
+                response.BalanceByWallet = GetBalanceByWallet(balancesSnapshot);
+                response.BalanceByAsset = GetBalanceByAsset(balancesSnapshot);
             }
             catch (Exception exception)
             {
                 _logger.LogError(JsonConvert.SerializeObject(exception));
             }
             return response;
+        }
+
+        private List<NetBalanceByAsset> GetBalanceByAsset(List<AssetBalance> balancesSnapshot)
+        {
+            var balanceByAssetCollection = new List<NetBalanceByAsset>();
+            
+            var assets = balancesSnapshot
+                .Select(elem => elem.Asset)
+                .Distinct();
+            
+            var wallets = balancesSnapshot
+                .Select(elem => elem.WalletName)
+                .Distinct();
+
+            foreach (var asset in assets)
+            {
+                var balanceByAsset = new NetBalanceByAsset {Asset = asset, WalletBalances =  new List<NetBalanceByWallet>()};
+
+                foreach (var wallet in wallets)
+                {
+                    var balanceByWallet = new NetBalanceByWallet()
+                    {
+                        BrokerId = balancesSnapshot.First(elem => elem.WalletName == wallet).BrokerId,
+                        WalletName = wallet
+                    };
+                    var sumByWallet = balancesSnapshot
+                        .Where(elem => elem.WalletName == wallet && elem.Asset == asset)
+                        .Sum(elem => elem.Volume);
+                    
+                    if (sumByWallet != 0)
+                    {
+                        balanceByWallet.NetVolume = sumByWallet;
+                        balanceByWallet.NetUsdVolume = balancesSnapshot
+                            .Where(elem => elem.WalletName == wallet && elem.Asset == asset)
+                            .Sum(GetUsdProjectionByBalance);
+                    }
+                    balanceByAsset.WalletBalances.Add(balanceByWallet);
+                }
+
+                balanceByAsset.NetVolume = balanceByAsset.WalletBalances.Sum(elem => elem.NetVolume);
+                balanceByAsset.NetUsdVolume = balanceByAsset.WalletBalances.Sum(elem => elem.NetUsdVolume);
+                balanceByAsset.State = AssetBalanceState.Normal;
+                
+                balanceByAssetCollection.Add(balanceByAsset);
+            }
+
+            return balanceByAssetCollection;
+        }
+
+        private List<NetBalanceByWallet> GetBalanceByWallet(IReadOnlyCollection<AssetBalance> balancesSnapshot)
+        {
+            var balanceByWallet = balancesSnapshot
+                .Select(elem => elem.WalletName)
+                .Distinct()
+                .Select(walletName => new NetBalanceByWallet() {WalletName = walletName})
+                .ToList();
+
+            foreach (var balanceByWalletElem in balanceByWallet)
+            {
+                var balanceByWalletCollection = balancesSnapshot
+                    .Where(assetBalance => balanceByWalletElem.WalletName == assetBalance.WalletName)
+                    .ToList();
+
+                balanceByWalletElem.BrokerId = balanceByWalletCollection.First().BrokerId;
+                balanceByWalletElem.NetUsdVolume = balanceByWalletCollection
+                    .Sum(GetUsdProjectionByBalance);
+            }
+            return balanceByWallet;
+        }
+
+        private double GetUsdProjectionByBalance(AssetBalance balance)
+        {
+            const string projectionAsset = "USD";
+            
+            var usdProjectionEntity = _anotherAssetProjectionService.GetProjectionAsync(
+                new GetProjectionRequest()
+                {
+                    BrokerId = balance.BrokerId,
+                    FromAsset = balance.Asset,
+                    FromVolume = balance.Volume,
+                    ToAsset = projectionAsset
+                }).Result;
+
+            return Math.Round(usdProjectionEntity.ProjectionVolume, 2);
         }
 
         public async Task<GetChangeBalanceHistoryResponse> GetChangeBalanceHistoryAsync()

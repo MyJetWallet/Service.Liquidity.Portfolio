@@ -1,6 +1,7 @@
 using System.ServiceModel;
 using System.Threading.Tasks;
 using Service.Liquidity.Portfolio.Grpc.Models;
+using Service.Liquidity.Portfolio.Grpc.Models.GetBalances;
 
 namespace Service.Liquidity.Portfolio.Grpc
 {
