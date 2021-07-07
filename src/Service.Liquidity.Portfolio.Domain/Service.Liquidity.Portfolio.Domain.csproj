@@ -5,11 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="6.2.0" />
+    <PackageReference Include="MyNoSqlServer.DataWriter" Version="1.3.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models" />
-    <Folder Include="Services" />
+    <ProjectReference Include="..\Service.Liquidity.Portfolio.Domain.Models\Service.Liquidity.Portfolio.Domain.Models.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+      <HintPath>..\..\..\..\..\..\..\usr\local\share\dotnet\shared\Microsoft.AspNetCore.App\5.0.6\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -34,5 +34,8 @@ namespace Service.Liquidity.Portfolio.Settings
 
         [YamlProperty("LiquidityPortfolio.UpdateDbBalancesTimerInSeconds")]
         public int UpdateDbBalancesTimerInSeconds { get; set; }
+
+        [YamlProperty("LiquidityPortfolio.MyNoSqlWriterUrl")]
+        public string MyNoSqlWriterUrl { get; set; }
     }
 }

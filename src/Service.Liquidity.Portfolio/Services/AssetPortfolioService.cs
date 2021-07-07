@@ -84,7 +84,7 @@ namespace Service.Liquidity.Portfolio.Services
 
                 balanceByAsset.NetVolume = balanceByAsset.WalletBalances.Sum(elem => elem.NetVolume);
                 balanceByAsset.NetUsdVolume = balanceByAsset.WalletBalances.Sum(elem => elem.NetUsdVolume);
-                balanceByAsset.State = AssetBalanceState.Normal;
+                balanceByAsset.BalanceState = AssetBalanceState.Normal;
                 
                 balanceByAssetCollection.Add(balanceByAsset);
             }

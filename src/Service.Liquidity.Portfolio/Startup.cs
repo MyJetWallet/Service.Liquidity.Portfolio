@@ -57,6 +57,7 @@ namespace Service.Liquidity.Portfolio
             {
                 endpoints.MapGrpcSchema<AssetPortfolioService, IAssetPortfolioService>();
                 endpoints.MapGrpcSchema<AnotherAssetProjectionService, IAnotherAssetProjectionService>();
+                endpoints.MapGrpcSchema<AssetPortfolioSettingsManager, IAssetPortfolioSettingsManager>();
 
                 endpoints.MapGrpcSchemaRegistry();
 
