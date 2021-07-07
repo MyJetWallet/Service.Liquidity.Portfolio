@@ -13,6 +13,7 @@ using Service.Liquidity.Portfolio.Grpc.Models;
 using Service.Liquidity.Portfolio.Jobs;
 using Service.Liquidity.Portfolio.Postgres;
 using Service.Liquidity.Portfolio.Services;
+using Service.Liquidity.Portfolio.Services.Grpc;
 
 namespace Service.Liquidity.Portfolio.Modules
 {

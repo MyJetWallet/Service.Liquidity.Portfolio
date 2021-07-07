@@ -9,7 +9,7 @@ using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
 using Service.MatchingEngine.PriceSource.Client;
 
-namespace Service.Liquidity.Portfolio.Services
+namespace Service.Liquidity.Portfolio.Services.Grpc
 {
     public class AnotherAssetProjectionService : IAnotherAssetProjectionService
     {

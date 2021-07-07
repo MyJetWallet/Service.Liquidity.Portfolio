@@ -6,26 +6,30 @@ using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Newtonsoft.Json;
 using Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
 using Service.Liquidity.Portfolio.Grpc.Models.GetBalances;
 using Service.Liquidity.Portfolio.Postgres;
 
-namespace Service.Liquidity.Portfolio.Services
+namespace Service.Liquidity.Portfolio.Services.Grpc
 {
     public class AssetPortfolioService: IAssetPortfolioService
     {
         private readonly ILogger<AssetPortfolioService> _logger;
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly IPortfolioHandler _portfolioHandler;
+        private readonly IAssetPortfolioSettingsStorage _assetPortfolioSettingsStorage;
 
         public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
-            IPortfolioHandler portfolioHandler)
+            IPortfolioHandler portfolioHandler,
+            IAssetPortfolioSettingsStorage assetPortfolioSettingsStorage)
         {
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
             _portfolioHandler = portfolioHandler;
+            _assetPortfolioSettingsStorage = assetPortfolioSettingsStorage;
         }
 
         public async Task<GetBalancesResponse> GetBalancesAsync()
@@ -84,7 +88,13 @@ namespace Service.Liquidity.Portfolio.Services
 
                 balanceByAsset.NetVolume = balanceByAsset.WalletBalances.Sum(elem => elem.NetVolume);
                 balanceByAsset.NetUsdVolume = balanceByAsset.WalletBalances.Sum(elem => elem.NetUsdVolume);
-                balanceByAsset.BalanceState = AssetBalanceState.Normal;
+
+                var assetBalanceSettings = _assetPortfolioSettingsStorage.GetAssetPortfolioSettingsByAsset(asset);
+                if (assetBalanceSettings != null)
+                {
+                    balanceByAsset.Settings = assetBalanceSettings;
+                    balanceByAsset.SetState(assetBalanceSettings);
+                }
                 
                 balanceByAssetCollection.Add(balanceByAsset);
             }
