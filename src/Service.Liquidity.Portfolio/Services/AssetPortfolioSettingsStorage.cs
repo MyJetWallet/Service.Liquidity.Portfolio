@@ -6,15 +6,16 @@ using Microsoft.Extensions.Logging;
 using MyNoSqlServer.Abstractions;
 using Newtonsoft.Json;
 using Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Domain.Services;
 
-namespace Service.Liquidity.Portfolio.Domain.Services
+namespace Service.Liquidity.Portfolio.Services
 {
     public class AssetPortfolioSettingsStorage : IAssetPortfolioSettingsStorage, IStartable
     {
         private readonly ILogger<AssetPortfolioSettingsStorage> _logger;
         private readonly IMyNoSqlServerDataWriter<AssetPortfolioSettingsNoSql> _settingsDataWriter;
         
-        private Dictionary<string, AssetPortfolioSettings> _settings = new();
+        private Dictionary<string, AssetPortfolioSettings> _settings = new Dictionary<string, AssetPortfolioSettings>();
 
         public AssetPortfolioSettingsStorage(ILogger<AssetPortfolioSettingsStorage> logger,
             IMyNoSqlServerDataWriter<AssetPortfolioSettingsNoSql> settingsDataWriter)
