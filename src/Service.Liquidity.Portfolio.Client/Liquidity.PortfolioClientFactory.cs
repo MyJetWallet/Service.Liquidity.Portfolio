@@ -11,6 +11,8 @@ namespace Service.Liquidity.Portfolio.Client
         {
         }
 
-        public IAssetPortfolioService GetHelloService() => CreateGrpcService<IAssetPortfolioService>();
+        public IAssetPortfolioService GetAssetPortfolioService() => CreateGrpcService<IAssetPortfolioService>();
+        
+        public IAssetPortfolioSettingsManager GetAssetPortfolioSettingsService() => CreateGrpcService<IAssetPortfolioSettingsManager>();
     }
 }

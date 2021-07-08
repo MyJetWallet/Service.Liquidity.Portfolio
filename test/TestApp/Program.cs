@@ -17,7 +17,7 @@ namespace TestApp
 
 
             var factory = new PortfolioClientFactory("http://localhost:5001");
-            var client = factory.GetHelloService();
+            var client = factory.GetAssetPortfolioService();
             
             Console.WriteLine("End");
             Console.ReadLine();
