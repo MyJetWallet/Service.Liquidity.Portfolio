@@ -15,7 +15,7 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
             _assetPortfolioSettingsStorage = assetPortfolioSettingsStorage;
         }
 
-        public GetAssetPortfolioSettingsResponse GetAssetPortfolioSettings()
+        public async Task<GetAssetPortfolioSettingsResponse> GetAssetPortfolioSettingsAsync()
         {
             var settings = _assetPortfolioSettingsStorage.GetAssetPortfolioSettings();
 

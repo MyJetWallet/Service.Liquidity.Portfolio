@@ -9,7 +9,7 @@ namespace Service.Liquidity.Portfolio.Grpc
     public interface IAssetPortfolioSettingsManager
     {
         [OperationContract]
-        GetAssetPortfolioSettingsResponse GetAssetPortfolioSettings();
+        Task<GetAssetPortfolioSettingsResponse> GetAssetPortfolioSettingsAsync();
         
         [OperationContract]
         Task UpdateAssetPortfolioSettingsAsync(AssetPortfolioSettings settings);
