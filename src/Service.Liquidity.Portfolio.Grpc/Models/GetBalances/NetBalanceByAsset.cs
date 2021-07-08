@@ -25,13 +25,13 @@ namespace Service.Liquidity.Portfolio.Grpc.Models.GetBalances
             if (assetBalanceSettings.Asset != Asset)
                 throw new Exception("Bad asset settings");
 
-            if (NetVolume < assetBalanceSettings.Warning)
+            if (NetVolume < assetBalanceSettings.NetWarningLevel)
             {
                 BalanceState = AssetBalanceState.Normal;
-            } else if (NetVolume < assetBalanceSettings.Danger)
+            } else if (NetVolume < assetBalanceSettings.NetDangerLevel)
             {
                 BalanceState = AssetBalanceState.Warning;
-            } else if (NetVolume < assetBalanceSettings.Critical)
+            } else if (NetVolume < assetBalanceSettings.NetCriticalLevel)
             {
                 BalanceState = AssetBalanceState.Danger;
             } else
