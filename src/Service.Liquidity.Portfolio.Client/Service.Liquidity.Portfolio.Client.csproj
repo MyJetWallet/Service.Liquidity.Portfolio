@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Service.Liquidity.Portfolio.ServiceBus\Service.Liquidity.Portfolio.ServiceBus.csproj" />
     <ProjectReference PrivateAssets="All" Include="..\Service.Liquidity.Portfolio.Domain.Models\Service.Liquidity.Portfolio.Domain.Models.csproj" />
     <ProjectReference PrivateAssets="All" Include="..\Service.Liquidity.Portfolio.Grpc\Service.Liquidity.Portfolio.Grpc.csproj" />
   </ItemGroup>

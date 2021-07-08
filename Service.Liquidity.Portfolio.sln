@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Liquidity.Portfolio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Liquidity.Portfolio.Postgres", "src\Service.Liquidity.Portfolio.Postgres\Service.Liquidity.Portfolio.Postgres.csproj", "{F60E5FB6-0F6F-40EF-9484-36EFC3F05248}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Liquidity.Portfolio.ServiceBus", "Service.Liquidity.Portfolio.ServiceBus\Service.Liquidity.Portfolio.ServiceBus.csproj", "{264A50F6-7212-4BC9-B43B-387C721F1C02}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,10 @@ Global
 		{F60E5FB6-0F6F-40EF-9484-36EFC3F05248}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F60E5FB6-0F6F-40EF-9484-36EFC3F05248}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F60E5FB6-0F6F-40EF-9484-36EFC3F05248}.Release|Any CPU.Build.0 = Release|Any CPU
+		{264A50F6-7212-4BC9-B43B-387C721F1C02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{264A50F6-7212-4BC9-B43B-387C721F1C02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{264A50F6-7212-4BC9-B43B-387C721F1C02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{264A50F6-7212-4BC9-B43B-387C721F1C02}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,6 +89,7 @@ Global
 		{FF868A2B-24FA-42B0-8400-95EDEE689678} = {D11EB899-A148-4C9B-B340-B907EF71C4A2}
 		{5CFE74A4-CDBB-4E2D-9C0A-9CEF20DCB38B} = {446301A0-97F2-4921-BA0B-32B76039C73B}
 		{F60E5FB6-0F6F-40EF-9484-36EFC3F05248} = {446301A0-97F2-4921-BA0B-32B76039C73B}
+		{264A50F6-7212-4BC9-B43B-387C721F1C02} = {446301A0-97F2-4921-BA0B-32B76039C73B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6BF00C9D-AD55-40F2-8FE3-E5C3559B3E26}

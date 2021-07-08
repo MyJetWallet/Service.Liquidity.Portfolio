@@ -10,6 +10,7 @@ using Service.Liquidity.Engine.Domain.Models.Portfolio;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
+using Service.Liquidity.Portfolio.Grpc.Models.GetBalances;
 using Service.Liquidity.Portfolio.Jobs;
 using Service.Liquidity.Portfolio.Postgres;
 using Service.Liquidity.Portfolio.Services;
@@ -25,6 +26,7 @@ namespace Service.Liquidity.Portfolio.Modules
             builder.RegisterTradeHistoryServiceBusClient(serviceBusClient, $"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}", TopicQueueType.PermanentWithSingleConnection, true);
             
             builder.RegisterMyNoSqlWriter<AssetPortfolioSettingsNoSql>(Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), AssetPortfolioSettingsNoSql.TableName);
+            builder.RegisterMyServiceBusPublisher<NetBalanceByAsset>(serviceBusClient, NetBalanceByAsset.TopicName, true);
             
             builder
                 .RegisterType<AssetPortfolioSettingsStorage>()
@@ -41,6 +43,12 @@ namespace Service.Liquidity.Portfolio.Modules
             
             builder
                 .RegisterType<LiquidityEngineTradeReaderJob>()
+                .As<IStartable>()
+                .AutoActivate()
+                .SingleInstance();
+            
+            builder
+                .RegisterType<AssetBalanceWriterJob>()
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
@@ -63,6 +71,11 @@ namespace Service.Liquidity.Portfolio.Modules
             builder
                 .RegisterType<AnotherAssetProjectionService>()
                 .As<IAnotherAssetProjectionService>()
+                .SingleInstance();
+            
+            builder
+                .RegisterType<AssetPortfolioService>()
+                .As<IAssetPortfolioService>()
                 .SingleInstance();
 
             builder.RegisterMyServiceBusSubscriberBatch<PortfolioTrade>(serviceBusClient,

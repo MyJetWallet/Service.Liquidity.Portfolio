@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using Service.Liquidity.Portfolio.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Grpc.Models.GetBalances
 {
