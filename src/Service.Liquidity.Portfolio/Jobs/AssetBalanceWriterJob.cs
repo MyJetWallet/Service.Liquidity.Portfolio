@@ -37,7 +37,6 @@ namespace Service.Liquidity.Portfolio.Jobs
         private async Task HandleBalances()
         {
             var actualBalances = await _assetPortfolioService.GetBalancesAsync();
-
             foreach (var balanceByAsset in actualBalances.BalanceByAsset)
             {
                 var lastBalanceInfo =
@@ -48,7 +47,6 @@ namespace Service.Liquidity.Portfolio.Jobs
                     await PublishBalance(balanceByAsset);
                 }
             }
-
             LastBalancesCache = actualBalances;
         }
 
