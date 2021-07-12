@@ -37,10 +37,10 @@ namespace Service.Liquidity.Portfolio.Jobs
             {
                 localTrades.Add(new Trade(elem.Id,
                     elem.AssociateBrokerId,
+                    elem.AssociateSymbol,
                     elem.BaseAsset,
                     elem.QuoteAsset,
                     elem.Source,
-                    elem.AssociateSymbol,
                     elem.Side,
                     elem.Price,
                     elem.Side == OrderSide.Buy ? elem.Volume : -elem.Volume,
