@@ -20,7 +20,6 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly DbContextOptionsBuilder<DatabaseContext> _dbContextOptionsBuilder;
         private readonly ILogger<PortfolioHandler> _logger;
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
-        private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
         private readonly TradeCacheStorage _tradeCacheStorage;
 
         private readonly object _locker = new object();
@@ -28,13 +27,11 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly List<AssetBalance> _localBalances = new List<AssetBalance>();
 
         public PortfolioHandler(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
-            ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
             ILogger<PortfolioHandler> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
             TradeCacheStorage tradeCacheStorage)
         {
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
-            _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
             _tradeCacheStorage = tradeCacheStorage;
@@ -103,15 +100,10 @@ namespace Service.Liquidity.Portfolio.Services
         {
             trades.ForEach(async trade =>
             {
-                var instrument = _spotInstrumentDictionaryClient.GetSpotInstrumentByBroker(new JetBrandIdentity
-                {
-                    BrokerId = trade.BrokerId
-                });
-
                 var projectionOnBaseAsset = await _anotherAssetProjectionService.GetProjectionAsync(new GetProjectionRequest()
                 {
-                    BrokerId = trade.BrokerId,
-                    FromAsset = instrument.FirstOrDefault(elem => elem.Symbol == trade.Symbol)?.BaseAsset,
+                    BrokerId = trade.AssociateBrokerId,
+                    FromAsset = trade.BaseAsset,
                     FromVolume = trade.BaseVolume,
                     ToAsset = "USD"
                 });
@@ -119,8 +111,8 @@ namespace Service.Liquidity.Portfolio.Services
                 
                 var projectionOnQuoteAsset = await _anotherAssetProjectionService.GetProjectionAsync(new GetProjectionRequest()
                 {
-                    BrokerId = trade.BrokerId,
-                    FromAsset = instrument.FirstOrDefault(elem => elem.Symbol == trade.Symbol)?.QuoteAsset,
+                    BrokerId = trade.AssociateBrokerId,
+                    FromAsset = trade.QuoteAsset,
                     FromVolume = trade.QuoteVolume,
                     ToAsset = "USD"
                 });
@@ -136,25 +128,14 @@ namespace Service.Liquidity.Portfolio.Services
 
         private void UpdateBalanceByTrade(Trade trade)
         {
-            var instruments = _spotInstrumentDictionaryClient.GetSpotInstrumentByBroker(new JetBrandIdentity
-            {
-                BrokerId = trade.BrokerId
-            });
-
-            var tradeInstrument = instruments.FirstOrDefault(elem => elem.Symbol == trade.Symbol);
-            if (tradeInstrument == null)
-            {
-                _logger.LogError("Not found instrument for trade: {tradeJson}", JsonConvert.SerializeObject(trade));
-                throw new Exception("Instrument not found.");
-            }
-            var baseAsset = tradeInstrument?.BaseAsset;
-            var quoteAsset = tradeInstrument?.QuoteAsset;
+            var baseAsset = trade.BaseAsset;
+            var quoteAsset = trade.QuoteAsset;
 
             var balanceList = new List<AssetBalance>();
 
             var baseAssetBalance = new AssetBalance()
             {
-                BrokerId = trade.BrokerId,
+                BrokerId = trade.AssociateBrokerId,
                 WalletName = trade.WalletName,
                 Asset = baseAsset,
                 UpdateDate = DateTime.UtcNow,
@@ -162,7 +143,7 @@ namespace Service.Liquidity.Portfolio.Services
             };
             var quoteAssetBalance = new AssetBalance()
             {
-                BrokerId = trade.BrokerId,
+                BrokerId = trade.AssociateBrokerId,
                 WalletName = trade.WalletName,
                 Asset = quoteAsset,
                 UpdateDate = DateTime.UtcNow,
@@ -230,7 +211,7 @@ namespace Service.Liquidity.Portfolio.Services
                         .ToList();
                 }
                 return ctx.Trades
-                    .Where(trade => trade.Id < lastId && trade.Symbol.Contains(assetFilter))
+                    .Where(trade => trade.Id < lastId && (trade.BaseAsset.Contains(assetFilter) || trade.QuoteAsset.Contains(assetFilter)))
                     .OrderByDescending(trade => trade.Id)
                     .Take(batchSize)
                     .ToList();
@@ -243,7 +224,7 @@ namespace Service.Liquidity.Portfolio.Services
                     .ToList();
             }
             return ctx.Trades
-                .Where(trade => trade.Symbol.Contains(assetFilter))
+                .Where(trade => trade.BaseAsset.Contains(assetFilter) || trade.QuoteAsset.Contains(assetFilter))
                 .OrderByDescending(trade => trade.Id)
                 .Take(batchSize)
                 .ToList();

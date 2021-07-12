@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using MyJetWallet.Domain;
 using MyJetWallet.Sdk.Service;
 using Newtonsoft.Json;
+using Service.AssetsDictionary.Client;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
@@ -20,16 +22,19 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly IPortfolioHandler _portfolioHandler;
         private readonly IAssetPortfolioSettingsStorage _assetPortfolioSettingsStorage;
+        private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
 
         public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
             IPortfolioHandler portfolioHandler,
-            IAssetPortfolioSettingsStorage assetPortfolioSettingsStorage)
+            IAssetPortfolioSettingsStorage assetPortfolioSettingsStorage,
+            ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient)
         {
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
             _portfolioHandler = portfolioHandler;
             _assetPortfolioSettingsStorage = assetPortfolioSettingsStorage;
+            _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
         }
 
         public async Task<GetBalancesResponse> GetBalancesAsync()
@@ -259,10 +264,23 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
                 _logger.LogError($"Bad request entity: {JsonConvert.SerializeObject(request)}");
                 return new CreateTradeManualResponse() {Success = false, ErrorMessage = "Incorrect entity"};
             }
-
-            var trade = new Trade(request.BrokerId, request.WalletName,
-                request.Symbol, request.Price, request.BaseVolume,
-                request.QuoteVolume, request.Comment, request.User, "manual");
+            var instruments = _spotInstrumentDictionaryClient.GetSpotInstrumentByBroker(new JetBrandIdentity
+            {
+                BrokerId = request.BrokerId
+            });
+            var instrument = instruments.FirstOrDefault(e => e.Symbol == request.Symbol);
+            
+            var trade = new Trade(request.BrokerId,
+                request.Symbol,
+                instrument?.BaseAsset,
+                instrument?.QuoteAsset,
+                request.WalletName,
+                request.Price, 
+                request.BaseVolume,
+                request.QuoteVolume, 
+                request.Comment, 
+                request.User, 
+                "manual");
             try
             {
                 await _portfolioHandler.HandleTradesAsync(new List<Trade>() {trade});

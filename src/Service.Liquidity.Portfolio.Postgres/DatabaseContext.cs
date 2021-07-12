@@ -76,9 +76,11 @@ namespace Service.Liquidity.Portfolio.Postgres
             modelBuilder.Entity<Trade>().Property(e => e.Id).UseIdentityColumn();
             modelBuilder.Entity<Trade>().HasKey(e => e.Id);
             modelBuilder.Entity<Trade>().Property(e => e.TradeId).HasMaxLength(64);
-            modelBuilder.Entity<Trade>().Property(e => e.BrokerId).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.AssociateBrokerId).HasMaxLength(64);
             modelBuilder.Entity<Trade>().Property(e => e.WalletName).HasMaxLength(64);
-            modelBuilder.Entity<Trade>().Property(e => e.Symbol).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.AssociateSymbol).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.BaseAsset).HasMaxLength(64);
+            modelBuilder.Entity<Trade>().Property(e => e.QuoteAsset).HasMaxLength(64);
             modelBuilder.Entity<Trade>().Property(e => e.Side);
             modelBuilder.Entity<Trade>().Property(e => e.Price);
             modelBuilder.Entity<Trade>().Property(e => e.BaseVolume);
@@ -93,6 +95,8 @@ namespace Service.Liquidity.Portfolio.Postgres
             
             modelBuilder.Entity<Trade>().HasIndex(e => e.TradeId).IsUnique();
             modelBuilder.Entity<Trade>().HasIndex(e => e.Source);
+            modelBuilder.Entity<Trade>().HasIndex(e => e.BaseAsset);
+            modelBuilder.Entity<Trade>().HasIndex(e => e.QuoteAsset);
         }
 
         public static DatabaseContext Create(DbContextOptionsBuilder<DatabaseContext> options)

@@ -10,7 +10,7 @@ using Service.Liquidity.Portfolio.Postgres;
 namespace Service.Liquidity.Portfolio.Postgres.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210706090540_InitialCreate")]
+    [Migration("20210712144859_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -92,15 +92,23 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<string>("AssociateBrokerId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("AssociateSymbol")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("BaseAsset")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<double>("BaseVolume")
                         .HasColumnType("double precision");
 
                     b.Property<double>("BaseVolumeInUsd")
                         .HasColumnType("double precision");
-
-                    b.Property<string>("BrokerId")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("Comment")
                         .HasMaxLength(256)
@@ -116,6 +124,10 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     b.Property<double>("Price")
                         .HasColumnType("double precision");
 
+                    b.Property<string>("QuoteAsset")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<double>("QuoteVolume")
                         .HasColumnType("double precision");
 
@@ -126,10 +138,6 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Source")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<string>("Symbol")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
@@ -146,6 +154,10 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                         .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BaseAsset");
+
+                    b.HasIndex("QuoteAsset");
 
                     b.HasIndex("Source");
 

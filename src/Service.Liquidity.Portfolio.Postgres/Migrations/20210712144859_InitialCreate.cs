@@ -55,9 +55,11 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TradeId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    BrokerId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    AssociateBrokerId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     WalletName = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    Symbol = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    AssociateSymbol = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    BaseAsset = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    QuoteAsset = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     Side = table.Column<int>(type: "integer", nullable: false),
                     Price = table.Column<double>(type: "double precision", nullable: false),
                     BaseVolume = table.Column<double>(type: "double precision", nullable: false),
@@ -74,6 +76,18 @@ namespace Service.Liquidity.Portfolio.Postgres.Migrations
                 {
                     table.PrimaryKey("PK_trade", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_trade_BaseAsset",
+                schema: "liquidityportfolio",
+                table: "trade",
+                column: "BaseAsset");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_trade_QuoteAsset",
+                schema: "liquidityportfolio",
+                table: "trade",
+                column: "QuoteAsset");
 
             migrationBuilder.CreateIndex(
                 name: "IX_trade_Source",
