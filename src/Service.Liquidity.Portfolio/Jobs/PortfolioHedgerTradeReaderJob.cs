@@ -46,7 +46,11 @@ namespace Service.Liquidity.Portfolio.Jobs
                     elem.Side == OrderSide.Buy ? elem.Volume : -elem.Volume,
                     elem.Side == OrderSide.Buy ? -elem.OppositeVolume : elem.OppositeVolume,
                     elem.Timestamp,
-                    ExchangeTradeMessage.TopicName));
+                    ExchangeTradeMessage.TopicName)
+                {
+                    Comment = elem.Comment,
+                    User = elem.User
+                });
             }
 
             await _portfolioHandler.HandleTradesAsync(localTrades);
