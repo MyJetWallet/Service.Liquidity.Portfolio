@@ -48,8 +48,6 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
                 BaseAsset = request.ToAsset
             });
 
-            _logger.LogInformation($"Receive GetConvertorMapToBaseCurrencyAsync response: {JsonConvert.SerializeObject(convertMap)}");
-            
             var route = convertMap.Maps.FirstOrDefault(map => map.AssetSymbol == request.FromAsset);
 
             route.AddToActivityAsJsonTag("route");
