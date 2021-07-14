@@ -23,6 +23,7 @@ namespace Service.Liquidity.Portfolio.Jobs
             _logger = logger;
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
             _timer = new MyTaskTimer(nameof(BalancePersistJob), TimeSpan.FromSeconds(Program.Settings.UpdateDbBalancesTimerInSeconds), _logger, DoTime);
+            Console.WriteLine($"BalancePersistJob timer: {TimeSpan.FromSeconds(Program.Settings.UpdateDbBalancesTimerInSeconds)}");
         }
 
         public void Start()

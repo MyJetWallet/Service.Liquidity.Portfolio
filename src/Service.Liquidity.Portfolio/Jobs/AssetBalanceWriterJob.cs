@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
@@ -27,6 +27,7 @@ namespace Service.Liquidity.Portfolio.Jobs
             _publisher = publisher;
             _assetPortfolioService = assetPortfolioService;
             _timer = new MyTaskTimer(nameof(BalancePersistJob), TimeSpan.FromSeconds(Program.Settings.AssetBalancePublisherTimeInSecond), _logger, DoTime);
+            Console.WriteLine($"AssetBalanceWriterJob timer: {TimeSpan.FromSeconds(Program.Settings.AssetBalancePublisherTimeInSecond)}");
         }
 
         private async Task DoTime()
