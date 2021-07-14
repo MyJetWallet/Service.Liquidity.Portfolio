@@ -44,6 +44,7 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
 
         public async Task<GetBalancesResponse> GetBalancesAsync()
         {
+            _logger.LogInformation("Call GetBalancesAsync");
             var response = new GetBalancesResponse();
             try
             {

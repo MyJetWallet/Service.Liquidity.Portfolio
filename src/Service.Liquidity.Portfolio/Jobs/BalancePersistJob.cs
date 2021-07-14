@@ -50,6 +50,8 @@ namespace Service.Liquidity.Portfolio.Jobs
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             var localBalances = _portfolioHandler.GetBalancesSnapshot();
             await ctx.UpdateBalancesAsync(localBalances);
+
+            _logger.LogInformation("Save Snapshot to db");
         }
 
         public void Stop()

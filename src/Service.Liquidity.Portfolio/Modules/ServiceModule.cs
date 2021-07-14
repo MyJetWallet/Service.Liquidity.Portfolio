@@ -85,11 +85,10 @@ namespace Service.Liquidity.Portfolio.Modules
                 .RegisterType<AnotherAssetProjectionService>()
                 .As<IAnotherAssetProjectionService>()
                 .SingleInstance();
-            
+
             builder
                 .RegisterType<AssetPortfolioService>()
-                .As<IAssetPortfolioService>()
-                .SingleInstance();
+                .As<IAssetPortfolioService>();
 
             builder.RegisterMyServiceBusSubscriberBatch<PortfolioTrade>(serviceBusClient,
                 PortfolioTrade.TopicName,
