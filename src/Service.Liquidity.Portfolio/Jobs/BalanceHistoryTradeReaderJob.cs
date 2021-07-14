@@ -6,8 +6,10 @@ using Autofac;
 using DotNetCoreDecorators;
 using MyJetWallet.Domain;
 using MyJetWallet.Sdk.Service;
+using MyNoSqlServer.Abstractions;
 using Service.AssetsDictionary.Client;
 using Service.BalanceHistory.ServiceBus;
+using Service.Liquidity.Engine.Domain.Models.NoSql;
 using Service.Liquidity.Engine.Grpc;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Postgres;
@@ -16,17 +18,17 @@ namespace Service.Liquidity.Portfolio.Jobs
 {
     public class BalanceHistoryTradeReaderJob: IStartable
     {
-        private readonly ILpWalletManagerGrpc _walletManager;
         private readonly IPortfolioHandler _portfolioHandler;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
+        private readonly IMyNoSqlServerDataReader<LpWalletNoSql> _noSqlDataReader;
         
         public BalanceHistoryTradeReaderJob(ISubscriber<IReadOnlyList<WalletTradeMessage>> subscriber,
-            ILpWalletManagerGrpc walletManager,
-            IPortfolioHandler portfolioHandler, ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient)
+            IPortfolioHandler portfolioHandler, ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
+            IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader)
         {
-            _walletManager = walletManager;
             _portfolioHandler = portfolioHandler;
             _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
+            _noSqlDataReader = noSqlDataReader;
             subscriber.Subscribe(HandleTrades);
         }
 
@@ -35,12 +37,12 @@ namespace Service.Liquidity.Portfolio.Jobs
             trades.Count.AddToActivityAsTag("trades count");
             try
             {
-                var walletCollection = (await _walletManager.GetAllAsync()).Data.List;
+                var walletCollection = _noSqlDataReader.Get().ToList();
 
                 walletCollection.ForEach(async wallet =>
                 {
                     var ourTrades = trades
-                        .Where(trade => trade.WalletId == wallet.WalletId).
+                        .Where(trade => trade.WalletId == wallet.Wallet.WalletId).
                         ToList();
 
                     var listForSaveByWallet = new List<Trade>();
@@ -52,14 +54,14 @@ namespace Service.Liquidity.Portfolio.Jobs
                         });
 
                         var instrument = instruments.FirstOrDefault(e => e.Symbol == elem.Trade.InstrumentSymbol);
-                        
+
                         listForSaveByWallet.Add(new Trade(
-                            elem.Trade.TradeUId, 
-                            wallet.BrokerId,
+                            elem.Trade.TradeUId,
+                            wallet.Wallet.BrokerId,
                             elem.Trade.InstrumentSymbol,
                             instrument?.BaseAsset,
                             instrument?.QuoteAsset,
-                            wallet.Name,
+                            wallet.Wallet.Name,
                             elem.Trade.Side, 
                             elem.Trade.Price,
                             elem.Trade.BaseVolume, 

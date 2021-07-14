@@ -14,18 +14,21 @@ namespace Service.Liquidity.Portfolio
         private readonly MyServiceBusTcpClient _myServiceBusTcpClient;
         private readonly MyNoSqlTcpClient _myNoSqlTcpClient;
         private readonly BalancePersistJob _balancePersistJob;
+        private readonly MyNoSqlTcpClient[] _myNoSqlTcpClientManagers;
+
 
         public ApplicationLifetimeManager(IHostApplicationLifetime appLifetime,
             ILogger<ApplicationLifetimeManager> logger,
             MyServiceBusTcpClient myServiceBusTcpClient,
             MyNoSqlTcpClient myNoSqlTcpClient,
-            BalancePersistJob balancePersistJob)
+            BalancePersistJob balancePersistJob, MyNoSqlTcpClient[] myNoSqlTcpClientManagers)
             : base(appLifetime)
         {
             _logger = logger;
             _myServiceBusTcpClient = myServiceBusTcpClient;
             _myNoSqlTcpClient = myNoSqlTcpClient;
             _balancePersistJob = balancePersistJob;
+            _myNoSqlTcpClientManagers = myNoSqlTcpClientManagers;
         }
 
         protected override void OnStarted()
@@ -34,12 +37,29 @@ namespace Service.Liquidity.Portfolio
             _balancePersistJob.Start();
             _myNoSqlTcpClient.Start();
             _myServiceBusTcpClient.Start();
+            
+            foreach(var client in _myNoSqlTcpClientManagers)
+            {
+                client.Start();
+            }
         }
 
         protected override void OnStopping()
         {
             _logger.LogInformation("OnStopping has been called.");
             _myNoSqlTcpClient.Stop();
+            
+            foreach(var client in _myNoSqlTcpClientManagers)
+            {
+                try
+                {
+                    client.Start();
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            }
             
             try
             {
