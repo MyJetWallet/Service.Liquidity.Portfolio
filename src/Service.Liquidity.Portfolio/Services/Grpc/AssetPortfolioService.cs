@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain;
 using MyJetWallet.Sdk.Service;
+using MyNoSqlServer.Abstractions;
 using Newtonsoft.Json;
 using Service.AssetsDictionary.Client;
+using Service.Liquidity.Engine.Domain.Models.NoSql;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
@@ -23,18 +25,21 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
         private readonly IPortfolioHandler _portfolioHandler;
         private readonly IAssetPortfolioSettingsStorage _assetPortfolioSettingsStorage;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
+        private readonly IMyNoSqlServerDataReader<LpWalletNoSql> _noSqlDataReader;
 
         public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
             IPortfolioHandler portfolioHandler,
             IAssetPortfolioSettingsStorage assetPortfolioSettingsStorage,
-            ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient)
+            ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
+            IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader)
         {
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
             _portfolioHandler = portfolioHandler;
             _assetPortfolioSettingsStorage = assetPortfolioSettingsStorage;
             _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
+            _noSqlDataReader = noSqlDataReader;
         }
 
         public async Task<GetBalancesResponse> GetBalancesAsync()
@@ -125,6 +130,14 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
                 balanceByWalletElem.NetUsdVolume = balanceByWalletCollection
                     .Sum(GetUsdProjectionByBalance);
             }
+            
+            var walletCollection = _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
+            
+            balanceByWallet.ForEach(elem =>
+            {
+                elem.IsInternal = walletCollection.Contains(elem.WalletName);
+            });
+            
             return balanceByWallet;
         }
 

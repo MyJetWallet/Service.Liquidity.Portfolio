@@ -9,5 +9,6 @@ namespace Service.Liquidity.Portfolio.Grpc.Models.GetBalances
         [DataMember(Order = 2)] public string WalletName { get; set; }
         [DataMember(Order = 3)] public double NetVolume { get; set; }
         [DataMember(Order = 4)] public double NetUsdVolume { get; set; }
+        [DataMember(Order = 5)] public bool IsInternal { get; set; }
     }
 }
