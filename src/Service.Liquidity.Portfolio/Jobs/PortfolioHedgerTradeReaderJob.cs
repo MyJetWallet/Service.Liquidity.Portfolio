@@ -18,7 +18,6 @@ namespace Service.Liquidity.Portfolio.Jobs
         private readonly IPortfolioHandler _portfolioHandler;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
 
-        
         public PortfolioHedgerTradeReaderJob(ISubscriber<IReadOnlyList<ExchangeTradeMessage>> subscriber, 
             IPortfolioHandler portfolioHandler, 
             ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient)
