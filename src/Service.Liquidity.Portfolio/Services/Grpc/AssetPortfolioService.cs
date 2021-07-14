@@ -48,7 +48,7 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
             try
             {
                 var balancesSnapshot = _portfolioHandler.GetBalancesSnapshot();
-                
+                // todo: calculate USD for all balances
                 response.BalanceByWallet = GetBalanceByWallet(balancesSnapshot);
                 response.BalanceByAsset = GetBalanceByAsset(balancesSnapshot);
             }
@@ -61,6 +61,8 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
 
         private List<NetBalanceByAsset> GetBalanceByAsset(List<AssetBalance> balancesSnapshot)
         {
+            using var a = MyTelemetry.StartActivity("GetBalanceByAsset");
+            
             var balanceByAssetCollection = new List<NetBalanceByAsset>();
             
             var assets = balancesSnapshot
@@ -114,6 +116,8 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
 
         private List<NetBalanceByWallet> GetBalanceByWallet(IReadOnlyCollection<AssetBalance> balancesSnapshot)
         {
+            using var a = MyTelemetry.StartActivity("GetBalanceByWallet");
+            
             var balanceByWallet = balancesSnapshot
                 .Select(elem => elem.WalletName)
                 .Distinct()

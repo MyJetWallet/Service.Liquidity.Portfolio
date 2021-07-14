@@ -178,6 +178,8 @@ namespace Service.Liquidity.Portfolio.Services
         
         public List<AssetBalance> GetBalancesSnapshot()
         {
+            using var a = MyTelemetry.StartActivity("GetBalancesSnapshot");
+            
             lock(_locker)
             {
                 var newList = _localBalances.Select(elem => elem.Copy()).ToList();
