@@ -50,8 +50,11 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
             {
                 var balancesSnapshot = _portfolioHandler.GetBalancesSnapshot();
                 // todo: calculate USD for all balances
-                response.BalanceByWallet = GetBalanceByWallet(balancesSnapshot);
-                response.BalanceByAsset = GetBalanceByAsset(balancesSnapshot);
+                
+                var internalWallets = _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
+
+                response.BalanceByWallet = GetBalanceByWallet(balancesSnapshot, internalWallets);
+                response.BalanceByAsset = GetBalanceByAsset(balancesSnapshot, internalWallets);
             }
             catch (Exception exception)
             {
@@ -60,7 +63,8 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
             return response;
         }
 
-        private List<NetBalanceByAsset> GetBalanceByAsset(List<AssetBalance> balancesSnapshot)
+        private List<NetBalanceByAsset> GetBalanceByAsset(IReadOnlyCollection<AssetBalance> balancesSnapshot,
+            ICollection<string> internalWallets)
         {
             using var a = MyTelemetry.StartActivity("GetBalanceByAsset");
             
@@ -72,7 +76,8 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
             
             var wallets = balancesSnapshot
                 .Select(elem => elem.WalletName)
-                .Distinct();
+                .Distinct()
+                .ToList();
 
             foreach (var asset in assets)
             {
@@ -96,11 +101,26 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
                             .Where(elem => elem.WalletName == wallet && elem.Asset == asset)
                             .Sum(GetUsdProjectionByBalance);
                     }
+
+                    balanceByWallet.IsInternal = internalWallets.Contains(wallet);
                     balanceByAsset.WalletBalances.Add(balanceByWallet);
                 }
 
-                balanceByAsset.NetVolume = balanceByAsset.WalletBalances.Sum(elem => elem.NetVolume);
-                balanceByAsset.NetUsdVolume = balanceByAsset.WalletBalances.Sum(elem => elem.NetUsdVolume);
+                var netVolumeByInternalWallets = balanceByAsset.WalletBalances
+                    .Where(elem => internalWallets.Contains(elem.WalletName))
+                    .Sum(elem => elem.NetVolume);
+                var netVolumeByExternalWallets = balanceByAsset.WalletBalances
+                    .Where(elem => !internalWallets.Contains(elem.WalletName))
+                    .Sum(elem => elem.NetVolume);
+                balanceByAsset.NetVolume = netVolumeByInternalWallets-netVolumeByExternalWallets;
+
+                var netUsdVolumeByInternalWallets = balanceByAsset.WalletBalances
+                    .Where(elem => internalWallets.Contains(elem.WalletName))
+                    .Sum(elem => elem.NetUsdVolume);
+                var netUsdVolumeByExternalWallets = balanceByAsset.WalletBalances
+                    .Where(elem => !internalWallets.Contains(elem.WalletName))
+                    .Sum(elem => elem.NetUsdVolume);
+                balanceByAsset.NetUsdVolume = netUsdVolumeByInternalWallets-netUsdVolumeByExternalWallets;
 
                 var assetBalanceSettings = _assetPortfolioSettingsStorage.GetAssetPortfolioSettingsByAsset(asset);
                 if (assetBalanceSettings != null)
@@ -115,7 +135,8 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
             return balanceByAssetCollection;
         }
 
-        private List<NetBalanceByWallet> GetBalanceByWallet(IReadOnlyCollection<AssetBalance> balancesSnapshot)
+        private List<NetBalanceByWallet> GetBalanceByWallet(IReadOnlyCollection<AssetBalance> balancesSnapshot,
+            ICollection<string> internalWallets)
         {
             using var a = MyTelemetry.StartActivity("GetBalanceByWallet");
             
@@ -135,12 +156,10 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
                 balanceByWalletElem.NetUsdVolume = balanceByWalletCollection
                     .Sum(GetUsdProjectionByBalance);
             }
-            
-            var walletCollection = _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
-            
+
             balanceByWallet.ForEach(elem =>
             {
-                elem.IsInternal = walletCollection.Contains(elem.WalletName);
+                elem.IsInternal = internalWallets.Contains(elem.WalletName);
             });
             
             return balanceByWallet;
