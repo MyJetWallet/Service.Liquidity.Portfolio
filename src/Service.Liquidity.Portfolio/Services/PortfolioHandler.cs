@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DotNetCoreDecorators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MyJetWallet.Domain;
 using MyJetWallet.Sdk.Service;
 using Newtonsoft.Json;
-using Service.AssetsDictionary.Client;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
@@ -21,6 +20,7 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly ILogger<PortfolioHandler> _logger;
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly TradeCacheStorage _tradeCacheStorage;
+        private readonly IPublisher<PortfolioTrade> _publisher;
 
         private readonly object _locker = new object();
 
@@ -29,15 +29,16 @@ namespace Service.Liquidity.Portfolio.Services
         public PortfolioHandler(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
             ILogger<PortfolioHandler> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
-            TradeCacheStorage tradeCacheStorage)
+            TradeCacheStorage tradeCacheStorage, IPublisher<PortfolioTrade> publisher)
         {
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
             _tradeCacheStorage = tradeCacheStorage;
+            _publisher = publisher;
         }
         
-        public async ValueTask HandleTradesAsync(List<Trade> trades)
+        public async ValueTask HandleTradesAsync(List<PortfolioTrade> trades)
         {
             using var activity = MyTelemetry.StartActivity("HandleTradesAsync");
             trades.Count.AddToActivityAsTag("Trades count");
@@ -69,34 +70,34 @@ namespace Service.Liquidity.Portfolio.Services
             _logger.LogInformation("Handled trades with errors: {countWithErrors}; with success: {countWithSuccess}", tradesWithErrors.Count, tradesWithSuccess.Count);
         }
 
-        private void HandleTradeAsync(Trade trade)
+        private void HandleTradeAsync(PortfolioTrade portfolioTrade)
         {
             using var activity = MyTelemetry.StartActivity("HandleTradeAsync");
             
-            var cache = _tradeCacheStorage.GetFromCache(trade.TradeId);
+            var cache = _tradeCacheStorage.GetFromCache(portfolioTrade.TradeId);
             if (cache != null)
             {
-                trade.ErrorMessage = cache.ErrorMessage;
+                portfolioTrade.ErrorMessage = cache.ErrorMessage;
                 return;
             }
 
             try
             {
-                UpdateBalanceByTrade(trade);
+                UpdateBalanceByTrade(portfolioTrade);
             }
             catch (Exception exception)
             {
-                trade.ErrorMessage = exception.Message;
+                portfolioTrade.ErrorMessage = exception.Message;
                 exception.FailActivity();
                 throw;
             }
             finally
             {
-                _tradeCacheStorage.SaveInCache(trade);
+                _tradeCacheStorage.SaveInCache(portfolioTrade);
             }
         }
 
-        private async ValueTask SetUsdProjection(List<Trade> trades)
+        private async ValueTask SetUsdProjection(List<PortfolioTrade> trades)
         {
             trades.ForEach(async trade =>
             {
@@ -120,34 +121,39 @@ namespace Service.Liquidity.Portfolio.Services
             });
         }
 
-        private async ValueTask SaveTrades(List<Trade> trades)
+        private async ValueTask SaveTrades(List<PortfolioTrade> trades)
         {
-            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            await ctx.SaveTradesAsync(trades);
+            //await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
+            //await ctx.SaveTradesAsync(trades);
+            
+            trades.ForEach(async elem =>
+            {
+                await _publisher.PublishAsync(elem);
+            });
         }
 
-        private void UpdateBalanceByTrade(Trade trade)
+        private void UpdateBalanceByTrade(PortfolioTrade portfolioTrade)
         {
-            var baseAsset = trade.BaseAsset;
-            var quoteAsset = trade.QuoteAsset;
+            var baseAsset = portfolioTrade.BaseAsset;
+            var quoteAsset = portfolioTrade.QuoteAsset;
 
             var balanceList = new List<AssetBalance>();
 
             var baseAssetBalance = new AssetBalance()
             {
-                BrokerId = trade.AssociateBrokerId,
-                WalletName = trade.WalletName,
+                BrokerId = portfolioTrade.AssociateBrokerId,
+                WalletName = portfolioTrade.WalletName,
                 Asset = baseAsset,
                 UpdateDate = DateTime.UtcNow,
-                Volume = trade.BaseVolume
+                Volume = portfolioTrade.BaseVolume
             };
             var quoteAssetBalance = new AssetBalance()
             {
-                BrokerId = trade.AssociateBrokerId,
-                WalletName = trade.WalletName,
+                BrokerId = portfolioTrade.AssociateBrokerId,
+                WalletName = portfolioTrade.WalletName,
                 Asset = quoteAsset,
                 UpdateDate = DateTime.UtcNow,
-                Volume = trade.QuoteVolume
+                Volume = portfolioTrade.QuoteVolume
             };
             balanceList.Add(baseAssetBalance);
             balanceList.Add(quoteAssetBalance);
@@ -199,7 +205,7 @@ namespace Service.Liquidity.Portfolio.Services
             return ctx.ChangeBalanceHistories.ToList();
         }
 
-        public async Task<List<Trade>> GetTrades(long lastId, int batchSize, string assetFilter)
+        public async Task<List<PortfolioTrade>> GetTrades(long lastId, int batchSize, string assetFilter)
         {
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             if (lastId != 0)

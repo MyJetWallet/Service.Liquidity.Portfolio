@@ -8,6 +8,6 @@ namespace Service.Liquidity.Portfolio.Grpc.Models
     {
         [DataMember(Order = 1)] public bool Success { get; set; }
         [DataMember(Order = 2)] public string ErrorMessage { get; set; }
-        [DataMember(Order = 3)] public Trade Trade { get; set; }
+        [DataMember(Order = 3)] public PortfolioTrade PortfolioTrade { get; set; }
     }
 }

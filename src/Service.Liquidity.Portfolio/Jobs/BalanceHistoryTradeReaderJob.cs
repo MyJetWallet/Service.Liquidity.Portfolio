@@ -45,7 +45,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                         .Where(trade => trade.WalletId == wallet.Wallet.WalletId).
                         ToList();
 
-                    var listForSaveByWallet = new List<Trade>();
+                    var listForSaveByWallet = new List<PortfolioTrade>();
                     foreach (var elem in ourTrades)
                     {
                         var instruments = _spotInstrumentDictionaryClient.GetSpotInstrumentByBroker(new JetBrandIdentity
@@ -55,7 +55,7 @@ namespace Service.Liquidity.Portfolio.Jobs
 
                         var instrument = instruments.FirstOrDefault(e => e.Symbol == elem.Trade.InstrumentSymbol);
 
-                        listForSaveByWallet.Add(new Trade(
+                        listForSaveByWallet.Add(new PortfolioTrade(
                             elem.Trade.TradeUId,
                             wallet.Wallet.BrokerId,
                             elem.Trade.InstrumentSymbol,

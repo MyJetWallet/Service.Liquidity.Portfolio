@@ -21,7 +21,7 @@ namespace Service.Liquidity.Portfolio.Services
             SetTradeCacheOnInit().GetAwaiter().GetResult();
         }
 
-        public void SaveInCache(Trade trade)
+        public void SaveInCache(PortfolioTrade portfolioTrade)
         {
             lock (_tradeCache)
             {
@@ -32,7 +32,7 @@ namespace Service.Liquidity.Portfolio.Services
                     _tradeCache.RemoveAt(0);
                 }
 
-                var cacheEntity = new TradeCache(trade.TradeId, trade.ErrorMessage);
+                var cacheEntity = new TradeCache(portfolioTrade.TradeId, portfolioTrade.ErrorMessage);
                 _tradeCache.Add(cacheEntity);
             }
         }
