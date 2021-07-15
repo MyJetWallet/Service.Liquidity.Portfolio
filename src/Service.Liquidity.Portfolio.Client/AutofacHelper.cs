@@ -3,6 +3,7 @@ using Autofac;
 using DotNetCoreDecorators;
 using MyServiceBus.Abstractions;
 using MyServiceBus.TcpClient;
+using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models.GetBalances;
 using Service.Liquidity.Portfolio.ServiceBus;
@@ -39,6 +40,24 @@ namespace Service.Liquidity.Portfolio.Client
                 builder
                     .RegisterInstance(new AssetBalanceServiceBusSubscriber(client, queueName, queryType, false))
                     .As<ISubscriber<NetBalanceByAsset>>()
+                    .SingleInstance();
+            }
+        }
+        
+        public static void RegisterPortfolioTradeServiceBusClient(this ContainerBuilder builder, MyServiceBusTcpClient client, string queueName, TopicQueueType queryType, bool batchSubscriber)
+        {
+            if (batchSubscriber)
+            {
+                builder
+                    .RegisterInstance(new PortfolioTradeServiceBusSubscriber(client, queueName, queryType, true))
+                    .As<ISubscriber<IReadOnlyList<PortfolioTrade>>>()
+                    .SingleInstance();
+            }
+            else
+            {
+                builder
+                    .RegisterInstance(new PortfolioTradeServiceBusSubscriber(client, queueName, queryType, false))
+                    .As<ISubscriber<PortfolioTrade>>()
                     .SingleInstance();
             }
         }
