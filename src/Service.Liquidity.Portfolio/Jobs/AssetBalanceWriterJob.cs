@@ -13,18 +13,15 @@ namespace Service.Liquidity.Portfolio.Jobs
     public class AssetBalanceWriterJob : IStartable
     {
         private readonly ILogger<AssetBalanceWriterJob> _logger;
-        private readonly IPublisher<NetBalanceByAsset> _publisher;
         private readonly MyTaskTimer _timer;
         private readonly IAssetPortfolioService _assetPortfolioService;
         
         private GetBalancesResponse LastBalancesCache { get; set; }
 
         public AssetBalanceWriterJob(ILogger<AssetBalanceWriterJob> logger,
-            IPublisher<NetBalanceByAsset> publisher,
             IAssetPortfolioService assetPortfolioService)
         {
             _logger = logger;
-            _publisher = publisher;
             _assetPortfolioService = assetPortfolioService;
             _timer = new MyTaskTimer(nameof(BalancePersistJob), TimeSpan.FromSeconds(Program.Settings.AssetBalancePublisherTimeInSecond), _logger, DoTime);
             Console.WriteLine($"AssetBalanceWriterJob timer: {TimeSpan.FromSeconds(Program.Settings.AssetBalancePublisherTimeInSecond)}");
@@ -53,7 +50,6 @@ namespace Service.Liquidity.Portfolio.Jobs
 
         private async Task PublishBalance(NetBalanceByAsset balanceByAsset)
         {
-            await _publisher.PublishAsync(balanceByAsset);
         }
 
         private async Task SetActualBalances()
