@@ -248,34 +248,5 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
 
             return new UpdateBalanceResponse() {Success = true};
         }
-
-        public async Task<GetTradesResponse> GetTradesAsync(GetTradesRequest request)
-        {
-           
-            var response = new GetTradesResponse();
-            try
-            {
-                var trades = await _portfolioHandler.GetTrades(request.LastId, request.BatchSize, request.AssetFilter);
-
-                long idForNextQuery = 0;
-                if (trades.Any())
-                {
-                    idForNextQuery = trades.Select(elem => elem.Id).Min();
-                }
-
-                response.Success = true;
-                response.Trades = trades;
-                response.IdForNextQuery = idForNextQuery;
-            } 
-            catch (Exception exception)
-            {
-                _logger.LogError(JsonConvert.SerializeObject(exception));
-                
-                response.Success = false;
-                response.ErrorMessage = exception.Message;
-            }
-
-            return response;
         }
-    }
 }

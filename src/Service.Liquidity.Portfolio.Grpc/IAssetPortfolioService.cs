@@ -15,8 +15,5 @@ namespace Service.Liquidity.Portfolio.Grpc
         
         [OperationContract]
         Task<UpdateBalanceResponse> UpdateBalance(UpdateBalanceRequest request);
-        
-        [OperationContract]
-        Task<GetTradesResponse> GetTradesAsync(GetTradesRequest request);
     }
 }
