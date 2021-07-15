@@ -30,11 +30,11 @@ namespace Service.Liquidity.Portfolio.Jobs
         private async ValueTask HandleTrades(IReadOnlyList<ExchangeTradeMessage> trades)
         {
 
-            var localTrades = new List<PortfolioTrade>();
+            var localTrades = new List<AssetPortfolioTrade>();
 
             foreach (var elem in trades)
             {
-                localTrades.Add(new PortfolioTrade(elem.Id,
+                localTrades.Add(new AssetPortfolioTrade(elem.Id,
                     elem.AssociateBrokerId,
                     elem.AssociateSymbol,
                     elem.BaseAsset,

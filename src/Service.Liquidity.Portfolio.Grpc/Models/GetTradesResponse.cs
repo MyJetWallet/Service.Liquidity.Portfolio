@@ -11,6 +11,6 @@ namespace Service.Liquidity.Portfolio.Grpc.Models
         [DataMember(Order = 1)] public bool Success { get; set; }
         [DataMember(Order = 2)] public string ErrorMessage { get; set; }
         [DataMember(Order = 3)] public long IdForNextQuery { get; set; }
-        [DataMember(Order = 4)] public List<PortfolioTrade> Trades { get; set; }
+        [DataMember(Order = 4)] public List<AssetPortfolioTrade> Trades { get; set; }
     }
 }

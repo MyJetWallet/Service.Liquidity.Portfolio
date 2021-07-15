@@ -14,7 +14,6 @@ using Service.Liquidity.Portfolio.Postgres;
 using Service.Liquidity.Portfolio.Services;
 using Service.Liquidity.Portfolio.Services.Grpc;
 using Service.Liquidity.PortfolioHedger.Client;
-using PortfolioTrade = Service.Liquidity.Portfolio.Domain.Models.PortfolioTrade;
 
 namespace Service.Liquidity.Portfolio.Modules
 {
@@ -36,7 +35,7 @@ namespace Service.Liquidity.Portfolio.Modules
             builder.RegisterMyNoSqlWriter<AssetPortfolioSettingsNoSql>(Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), AssetPortfolioSettingsNoSql.TableName);
             builder.RegisterMyServiceBusPublisher<NetBalanceByAsset>(serviceBusClient, NetBalanceByAsset.TopicName, true);
             
-            builder.RegisterMyServiceBusPublisher<PortfolioTrade>(serviceBusClient, PortfolioTrade.TopicName, true);
+            builder.RegisterMyServiceBusPublisher<AssetPortfolioTrade>(serviceBusClient, AssetPortfolioTrade.TopicName, true);
             
             builder
                 .RegisterType<AssetPortfolioSettingsStorage>()

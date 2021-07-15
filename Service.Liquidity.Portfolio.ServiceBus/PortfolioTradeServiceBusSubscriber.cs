@@ -6,11 +6,11 @@ using Service.Liquidity.Portfolio.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.ServiceBus
 {
-    public class PortfolioTradeServiceBusSubscriber : Subscriber<PortfolioTrade>
+    public class PortfolioTradeServiceBusSubscriber : Subscriber<AssetPortfolioTrade>
     {
         public PortfolioTradeServiceBusSubscriber(MyServiceBusTcpClient client, string queueName, TopicQueueType queryType, bool batchSubscriber) :
-            base(client, PortfolioTrade.TopicName, queueName, queryType,
-                bytes => bytes.ByteArrayToServiceBusContract<PortfolioTrade>(), batchSubscriber)
+            base(client, AssetPortfolioTrade.TopicName, queueName, queryType,
+                bytes => bytes.ByteArrayToServiceBusContract<AssetPortfolioTrade>(), batchSubscriber)
         {
         }
     }

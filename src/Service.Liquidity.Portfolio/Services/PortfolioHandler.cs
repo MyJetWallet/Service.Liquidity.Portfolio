@@ -20,7 +20,7 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly ILogger<PortfolioHandler> _logger;
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly TradeCacheStorage _tradeCacheStorage;
-        private readonly IPublisher<PortfolioTrade> _publisher;
+        private readonly IPublisher<AssetPortfolioTrade> _publisher;
 
         private readonly object _locker = new object();
 
@@ -29,7 +29,7 @@ namespace Service.Liquidity.Portfolio.Services
         public PortfolioHandler(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
             ILogger<PortfolioHandler> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
-            TradeCacheStorage tradeCacheStorage, IPublisher<PortfolioTrade> publisher)
+            TradeCacheStorage tradeCacheStorage, IPublisher<AssetPortfolioTrade> publisher)
         {
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
             _logger = logger;
@@ -38,7 +38,7 @@ namespace Service.Liquidity.Portfolio.Services
             _publisher = publisher;
         }
         
-        public async ValueTask HandleTradesAsync(List<PortfolioTrade> trades)
+        public async ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades)
         {
             using var activity = MyTelemetry.StartActivity("HandleTradesAsync");
             trades.Count.AddToActivityAsTag("Trades count");
@@ -70,34 +70,34 @@ namespace Service.Liquidity.Portfolio.Services
             _logger.LogInformation("Handled trades with errors: {countWithErrors}; with success: {countWithSuccess}", tradesWithErrors.Count, tradesWithSuccess.Count);
         }
 
-        private void HandleTradeAsync(PortfolioTrade portfolioTrade)
+        private void HandleTradeAsync(AssetPortfolioTrade assetPortfolioTrade)
         {
             using var activity = MyTelemetry.StartActivity("HandleTradeAsync");
             
-            var cache = _tradeCacheStorage.GetFromCache(portfolioTrade.TradeId);
+            var cache = _tradeCacheStorage.GetFromCache(assetPortfolioTrade.TradeId);
             if (cache != null)
             {
-                portfolioTrade.ErrorMessage = cache.ErrorMessage;
+                assetPortfolioTrade.ErrorMessage = cache.ErrorMessage;
                 return;
             }
 
             try
             {
-                UpdateBalanceByTrade(portfolioTrade);
+                UpdateBalanceByTrade(assetPortfolioTrade);
             }
             catch (Exception exception)
             {
-                portfolioTrade.ErrorMessage = exception.Message;
+                assetPortfolioTrade.ErrorMessage = exception.Message;
                 exception.FailActivity();
                 throw;
             }
             finally
             {
-                _tradeCacheStorage.SaveInCache(portfolioTrade);
+                _tradeCacheStorage.SaveInCache(assetPortfolioTrade);
             }
         }
 
-        private async ValueTask SetUsdProjection(List<PortfolioTrade> trades)
+        private async ValueTask SetUsdProjection(List<AssetPortfolioTrade> trades)
         {
             trades.ForEach(async trade =>
             {
@@ -121,7 +121,7 @@ namespace Service.Liquidity.Portfolio.Services
             });
         }
 
-        private async ValueTask SaveTrades(List<PortfolioTrade> trades)
+        private async ValueTask SaveTrades(List<AssetPortfolioTrade> trades)
         {
             //await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             //await ctx.SaveTradesAsync(trades);
@@ -132,28 +132,28 @@ namespace Service.Liquidity.Portfolio.Services
             });
         }
 
-        private void UpdateBalanceByTrade(PortfolioTrade portfolioTrade)
+        private void UpdateBalanceByTrade(AssetPortfolioTrade assetPortfolioTrade)
         {
-            var baseAsset = portfolioTrade.BaseAsset;
-            var quoteAsset = portfolioTrade.QuoteAsset;
+            var baseAsset = assetPortfolioTrade.BaseAsset;
+            var quoteAsset = assetPortfolioTrade.QuoteAsset;
 
             var balanceList = new List<AssetBalance>();
 
             var baseAssetBalance = new AssetBalance()
             {
-                BrokerId = portfolioTrade.AssociateBrokerId,
-                WalletName = portfolioTrade.WalletName,
+                BrokerId = assetPortfolioTrade.AssociateBrokerId,
+                WalletName = assetPortfolioTrade.WalletName,
                 Asset = baseAsset,
                 UpdateDate = DateTime.UtcNow,
-                Volume = portfolioTrade.BaseVolume
+                Volume = assetPortfolioTrade.BaseVolume
             };
             var quoteAssetBalance = new AssetBalance()
             {
-                BrokerId = portfolioTrade.AssociateBrokerId,
-                WalletName = portfolioTrade.WalletName,
+                BrokerId = assetPortfolioTrade.AssociateBrokerId,
+                WalletName = assetPortfolioTrade.WalletName,
                 Asset = quoteAsset,
                 UpdateDate = DateTime.UtcNow,
-                Volume = portfolioTrade.QuoteVolume
+                Volume = assetPortfolioTrade.QuoteVolume
             };
             balanceList.Add(baseAssetBalance);
             balanceList.Add(quoteAssetBalance);
@@ -205,7 +205,7 @@ namespace Service.Liquidity.Portfolio.Services
             return ctx.ChangeBalanceHistories.ToList();
         }
 
-        public async Task<List<PortfolioTrade>> GetTrades(long lastId, int batchSize, string assetFilter)
+        public async Task<List<AssetPortfolioTrade>> GetTrades(long lastId, int batchSize, string assetFilter)
         {
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             if (lastId != 0)

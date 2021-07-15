@@ -8,11 +8,11 @@ namespace Service.Liquidity.Portfolio.Postgres
 {
     public interface IPortfolioHandler
     {
-        ValueTask HandleTradesAsync(List<PortfolioTrade> trades);
+        ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades);
         void UpdateBalance(List<AssetBalance> differenceBalances);
         Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory);
         List<AssetBalance> GetBalancesSnapshot();
         Task<List<ChangeBalanceHistory>> GetHistories();
-        Task<List<PortfolioTrade>> GetTrades(long lastId, int batchSize, string assetFilter);
+        Task<List<AssetPortfolioTrade>> GetTrades(long lastId, int batchSize, string assetFilter);
     }
 }

@@ -9,7 +9,6 @@ using Service.AssetsDictionary.Client;
 using Service.Liquidity.Engine.Domain.Models.Portfolio;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Postgres;
-using PortfolioTrade = Service.Liquidity.Portfolio.Domain.Models.PortfolioTrade;
 
 namespace Service.Liquidity.Portfolio.Jobs
 {
@@ -28,7 +27,7 @@ namespace Service.Liquidity.Portfolio.Jobs
 
         private async ValueTask HandleTrades(IReadOnlyList<Engine.Domain.Models.Portfolio.PortfolioTrade> trades)
         {
-            var localTrades = new List<PortfolioTrade>();
+            var localTrades = new List<AssetPortfolioTrade>();
             foreach (var elem in trades.Where(elem => !elem.IsInternal))
             {
                 var instruments = _spotInstrumentDictionaryClient.GetSpotInstrumentByBroker(new JetBrandIdentity
@@ -37,7 +36,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                 });
                 var instrument = instruments.FirstOrDefault(e => e.Symbol == elem.AssociateSymbol);
                 
-                localTrades.Add(new PortfolioTrade(elem.TradeId,
+                localTrades.Add(new AssetPortfolioTrade(elem.TradeId,
                     elem.AssociateBrokerId,
                     elem.AssociateSymbol,
                     instrument?.BaseAsset,

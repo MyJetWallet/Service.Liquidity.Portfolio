@@ -50,14 +50,14 @@ namespace Service.Liquidity.Portfolio.Client
             {
                 builder
                     .RegisterInstance(new PortfolioTradeServiceBusSubscriber(client, queueName, queryType, true))
-                    .As<ISubscriber<IReadOnlyList<PortfolioTrade>>>()
+                    .As<ISubscriber<IReadOnlyList<AssetPortfolioTrade>>>()
                     .SingleInstance();
             }
             else
             {
                 builder
                     .RegisterInstance(new PortfolioTradeServiceBusSubscriber(client, queueName, queryType, false))
-                    .As<ISubscriber<PortfolioTrade>>()
+                    .As<ISubscriber<AssetPortfolioTrade>>()
                     .SingleInstance();
             }
         }
