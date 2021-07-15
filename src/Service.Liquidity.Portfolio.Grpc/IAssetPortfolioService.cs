@@ -18,8 +18,5 @@ namespace Service.Liquidity.Portfolio.Grpc
         
         [OperationContract]
         Task<GetTradesResponse> GetTradesAsync(GetTradesRequest request);
-        
-        [OperationContract]
-        Task<CreateTradeManualResponse> CreateManualTradeAsync(CreateTradeManualRequest request);
     }
 }
