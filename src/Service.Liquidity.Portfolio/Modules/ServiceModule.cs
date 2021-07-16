@@ -67,11 +67,11 @@ namespace Service.Liquidity.Portfolio.Modules
                 .AutoActivate()
                 .SingleInstance();
             
-            builder
-                .RegisterType<AssetBalanceWriterJob>()
-                .As<IStartable>()
-                .AutoActivate()
-                .SingleInstance();
+            //builder
+            //    .RegisterType<AssetBalanceWriterJob>()
+            //    .As<IStartable>()
+            //    .AutoActivate()
+            //    .SingleInstance();
             
             builder
                 .RegisterType<PortfolioHandler>()
