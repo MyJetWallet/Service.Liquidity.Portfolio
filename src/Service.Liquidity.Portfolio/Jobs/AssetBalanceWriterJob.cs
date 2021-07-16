@@ -5,8 +5,9 @@ using Autofac;
 using DotNetCoreDecorators;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service.Tools;
+using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc;
-using Service.Liquidity.Portfolio.Grpc.Models.GetBalances;
+using Service.Liquidity.Portfolio.Grpc.Models;
 
 namespace Service.Liquidity.Portfolio.Jobs
 {
@@ -23,7 +24,7 @@ namespace Service.Liquidity.Portfolio.Jobs
         {
             _logger = logger;
             _assetPortfolioService = assetPortfolioService;
-            _timer = new MyTaskTimer(nameof(BalancePersistJob), TimeSpan.FromSeconds(Program.Settings.AssetBalancePublisherTimeInSecond), _logger, DoTime);
+            _timer = new MyTaskTimer(nameof(AssetBalanceWriterJob), TimeSpan.FromSeconds(Program.Settings.AssetBalancePublisherTimeInSecond), _logger, DoTime);
             Console.WriteLine($"AssetBalanceWriterJob timer: {TimeSpan.FromSeconds(Program.Settings.AssetBalancePublisherTimeInSecond)}");
         }
 

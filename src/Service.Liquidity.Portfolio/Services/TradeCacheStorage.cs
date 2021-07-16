@@ -17,7 +17,6 @@ namespace Service.Liquidity.Portfolio.Services
         public TradeCacheStorage(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder)
         {
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
-            
             SetTradeCacheOnInit().GetAwaiter().GetResult();
         }
 

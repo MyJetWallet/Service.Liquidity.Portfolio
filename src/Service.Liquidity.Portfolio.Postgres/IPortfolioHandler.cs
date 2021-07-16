@@ -11,7 +11,6 @@ namespace Service.Liquidity.Portfolio.Postgres
         ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades);
         void UpdateBalance(List<AssetBalance> differenceBalances);
         Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory);
-        List<AssetBalance> GetBalancesSnapshot();
         Task<List<ChangeBalanceHistory>> GetHistories();
     }
 }

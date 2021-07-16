@@ -56,10 +56,6 @@ namespace Service.Liquidity.Portfolio
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcSchema<AssetPortfolioService, IAssetPortfolioService>();
-                endpoints.MapGrpcSchema<AnotherAssetProjectionService, IAnotherAssetProjectionService>();
-                endpoints.MapGrpcSchema<AssetPortfolioSettingsManager, IAssetPortfolioSettingsManager>();
-
                 endpoints.MapGrpcSchemaRegistry();
 
                 endpoints.MapGet("/", async context =>

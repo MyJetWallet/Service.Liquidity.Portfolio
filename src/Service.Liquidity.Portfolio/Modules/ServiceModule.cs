@@ -8,7 +8,6 @@ using Service.Liquidity.Engine.Domain.Models.Portfolio;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
-using Service.Liquidity.Portfolio.Grpc.Models.GetBalances;
 using Service.Liquidity.Portfolio.Jobs;
 using Service.Liquidity.Portfolio.Postgres;
 using Service.Liquidity.Portfolio.Services;
@@ -44,6 +43,13 @@ namespace Service.Liquidity.Portfolio.Modules
                 .SingleInstance();
             
             builder
+                .RegisterType<AssetPortfolioBalanceStorage>()
+                .As<IAssetPortfolioBalanceStorage>()
+                .As<IStartable>()
+                .AutoActivate()
+                .SingleInstance();
+            
+            builder
                 .RegisterType<BalanceHistoryTradeReaderJob>()
                 .As<IStartable>()
                 .AutoActivate()
@@ -70,11 +76,6 @@ namespace Service.Liquidity.Portfolio.Modules
             builder
                 .RegisterType<PortfolioHandler>()
                 .As<IPortfolioHandler>()
-                .SingleInstance();
-            
-            builder
-                .RegisterType<BalancePersistJob>()
-                .AsSelf()
                 .SingleInstance();
             
             builder

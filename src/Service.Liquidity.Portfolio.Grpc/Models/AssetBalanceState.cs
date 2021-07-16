@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Service.Liquidity.Portfolio.Grpc.Models.GetBalances
+namespace Service.Liquidity.Portfolio.Grpc.Models
 {
     [DataContract]
     public enum AssetBalanceState

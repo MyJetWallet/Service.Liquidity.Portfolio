@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Service.Liquidity.Portfolio.Domain.Models;
 
-namespace Service.Liquidity.Portfolio.Grpc.Models.GetBalances
+namespace Service.Liquidity.Portfolio.Grpc.Models
 {
     [DataContract]
     public class NetBalanceByAsset

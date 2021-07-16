@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Newtonsoft.Json;
 using Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
 using Service.Liquidity.Portfolio.Postgres;
@@ -21,6 +22,7 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly TradeCacheStorage _tradeCacheStorage;
         private readonly IPublisher<AssetPortfolioTrade> _publisher;
+        private readonly IAssetPortfolioBalanceStorage _assetPortfolioBalanceStorage;
 
         private readonly object _locker = new object();
 
@@ -29,13 +31,16 @@ namespace Service.Liquidity.Portfolio.Services
         public PortfolioHandler(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
             ILogger<PortfolioHandler> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
-            TradeCacheStorage tradeCacheStorage, IPublisher<AssetPortfolioTrade> publisher)
+            TradeCacheStorage tradeCacheStorage,
+            IPublisher<AssetPortfolioTrade> publisher,
+            IAssetPortfolioBalanceStorage assetPortfolioBalanceStorage)
         {
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
             _tradeCacheStorage = tradeCacheStorage;
             _publisher = publisher;
+            _assetPortfolioBalanceStorage = assetPortfolioBalanceStorage;
         }
         
         public async ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades)
@@ -123,9 +128,6 @@ namespace Service.Liquidity.Portfolio.Services
 
         private async ValueTask SaveTrades(List<AssetPortfolioTrade> trades)
         {
-            //await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            //await ctx.SaveTradesAsync(trades);
-            
             trades.ForEach(async elem =>
             {
                 await _publisher.PublishAsync(elem);
@@ -163,34 +165,11 @@ namespace Service.Liquidity.Portfolio.Services
 
         public void UpdateBalance(List<AssetBalance> differenceBalances)
         {
-            lock (_locker)
+            differenceBalances.ForEach(elem =>
             {
-                foreach (var difference in differenceBalances)
-                {
-                    var balance = _localBalances.FirstOrDefault(elem =>
-                        elem.WalletName == difference.WalletName && elem.Asset == difference.Asset);
-                    if (balance == null)
-                    {
-                        balance = difference;
-                        _localBalances.Add(balance);
-                    }
-                    else
-                    {
-                        balance.Volume += difference.Volume;
-                    }
-                }
-            }
-        }
-        
-        public List<AssetBalance> GetBalancesSnapshot()
-        {
-            using var a = MyTelemetry.StartActivity("GetBalancesSnapshot");
+                _assetPortfolioBalanceStorage.UpdateAssetPortfolioBalanceAsync(elem);
+            });
             
-            lock(_locker)
-            {
-                var newList = _localBalances.Select(elem => elem.Copy()).ToList();
-                return newList;
-            }
         }
         
         public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory)

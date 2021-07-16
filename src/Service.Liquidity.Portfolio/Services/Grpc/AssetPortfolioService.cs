@@ -13,7 +13,6 @@ using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
-using Service.Liquidity.Portfolio.Grpc.Models.GetBalances;
 using Service.Liquidity.Portfolio.Postgres;
 
 namespace Service.Liquidity.Portfolio.Services.Grpc
@@ -48,7 +47,7 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
             var response = new GetBalancesResponse();
             try
             {
-                var balancesSnapshot = _portfolioHandler.GetBalancesSnapshot();
+                var balancesSnapshot = new List<AssetBalance>();
                 // todo: calculate USD for all balances
                 
                 var internalWallets = _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();

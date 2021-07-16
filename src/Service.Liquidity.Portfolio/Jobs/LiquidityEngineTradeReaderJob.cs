@@ -16,7 +16,7 @@ namespace Service.Liquidity.Portfolio.Jobs
     {
         private readonly IPortfolioHandler _portfolioHandler;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
-        public LiquidityEngineTradeReaderJob(ISubscriber<IReadOnlyList<Engine.Domain.Models.Portfolio.PortfolioTrade>> subscriber,
+        public LiquidityEngineTradeReaderJob(ISubscriber<IReadOnlyList<PortfolioTrade>> subscriber,
             IPortfolioHandler portfolioHandler, 
             ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient)
         {
@@ -25,7 +25,7 @@ namespace Service.Liquidity.Portfolio.Jobs
             subscriber.Subscribe(HandleTrades);
         }
 
-        private async ValueTask HandleTrades(IReadOnlyList<Engine.Domain.Models.Portfolio.PortfolioTrade> trades)
+        private async ValueTask HandleTrades(IReadOnlyList<PortfolioTrade> trades)
         {
             var localTrades = new List<AssetPortfolioTrade>();
             foreach (var elem in trades.Where(elem => !elem.IsInternal))
@@ -47,7 +47,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                     elem.Side == OrderSide.Buy ? elem.BaseVolume : -elem.BaseVolume,
                     elem.Side == OrderSide.Buy ? -elem.QuoteVolume : elem.QuoteVolume,
                     elem.DateTime,
-                    Engine.Domain.Models.Portfolio.PortfolioTrade.TopicName));
+                    PortfolioTrade.TopicName));
             }
             await _portfolioHandler.HandleTradesAsync(localTrades);
         }
