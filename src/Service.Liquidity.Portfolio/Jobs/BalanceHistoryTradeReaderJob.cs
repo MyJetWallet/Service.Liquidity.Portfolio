@@ -10,7 +10,6 @@ using MyNoSqlServer.Abstractions;
 using Service.AssetsDictionary.Client;
 using Service.BalanceHistory.ServiceBus;
 using Service.Liquidity.Engine.Domain.Models.NoSql;
-using Service.Liquidity.Engine.Grpc;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Postgres;
 

@@ -32,6 +32,7 @@ namespace Service.Liquidity.Portfolio.Modules
                 true);
             
             builder.RegisterMyNoSqlWriter<AssetPortfolioSettingsNoSql>(Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), AssetPortfolioSettingsNoSql.TableName);
+            builder.RegisterMyNoSqlWriter<AssetPortfolioBalanceNoSql>(Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), AssetPortfolioBalanceNoSql.TableName);
 
             builder.RegisterMyServiceBusPublisher<AssetPortfolioTrade>(serviceBusClient, AssetPortfolioTrade.TopicName, true);
             
