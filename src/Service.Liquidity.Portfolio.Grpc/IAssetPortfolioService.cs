@@ -8,15 +8,8 @@ namespace Service.Liquidity.Portfolio.Grpc
 {
     public interface IAssetPortfolioService
     {
-        Task<AssetPortfolio> GetBalancesAsync();
         Task<GetChangeBalanceHistoryResponse> GetChangeBalanceHistoryAsync();
         
         Task<UpdateBalanceResponse> UpdateBalance(UpdateBalanceRequest request);
-
-        List<NetBalanceByAsset> GetBalanceByAsset(List<AssetBalance> balancesSnapshot,
-            ICollection<string> internalWallets);
-
-        List<NetBalanceByWallet> GetBalanceByWallet(List<AssetBalance> balancesSnapshot,
-            ICollection<string> internalWallets);
     }
 }
