@@ -34,8 +34,5 @@ namespace Service.Liquidity.Portfolio.Settings
 
         [YamlProperty("LiquidityPortfolio.MyNoSqlWriterUrl")]
         public string MyNoSqlWriterUrl { get; set; }
-
-        [YamlProperty("LiquidityPortfolio.AssetBalancePublisherTimeInSecond")]
-        public int AssetBalancePublisherTimeInSecond { get; set; }
     }
 }
