@@ -1,18 +1,22 @@
+using System.Collections.Generic;
 using System.ServiceModel;
 using System.Threading.Tasks;
+using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc.Models;
 
 namespace Service.Liquidity.Portfolio.Grpc
 {
-    [ServiceContract]
     public interface IAssetPortfolioService
     {
-        [OperationContract]
-        Task<GetBalancesResponse> GetBalancesAsync();
-        [OperationContract]
+        Task<AssetPortfolio> GetBalancesAsync();
         Task<GetChangeBalanceHistoryResponse> GetChangeBalanceHistoryAsync();
         
-        [OperationContract]
         Task<UpdateBalanceResponse> UpdateBalance(UpdateBalanceRequest request);
+
+        List<NetBalanceByAsset> GetBalanceByAsset(List<AssetBalance> balancesSnapshot,
+            ICollection<string> internalWallets);
+
+        List<NetBalanceByWallet> GetBalanceByWallet(List<AssetBalance> balancesSnapshot,
+            ICollection<string> internalWallets);
     }
 }

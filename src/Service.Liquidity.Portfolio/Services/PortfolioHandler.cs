@@ -22,25 +22,21 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly TradeCacheStorage _tradeCacheStorage;
         private readonly IPublisher<AssetPortfolioTrade> _publisher;
-        private readonly IAssetPortfolioBalanceStorage _assetPortfolioBalanceStorage;
-
-        private readonly object _locker = new object();
-
-        private readonly List<AssetBalance> _localBalances = new List<AssetBalance>();
+        private readonly IAssetPortfolioBalanceStorage _portfolioBalanceStorage;
 
         public PortfolioHandler(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
             ILogger<PortfolioHandler> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
             TradeCacheStorage tradeCacheStorage,
             IPublisher<AssetPortfolioTrade> publisher,
-            IAssetPortfolioBalanceStorage assetPortfolioBalanceStorage)
+            IAssetPortfolioBalanceStorage portfolioBalanceStorage)
         {
             _dbContextOptionsBuilder = dbContextOptionsBuilder;
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
             _tradeCacheStorage = tradeCacheStorage;
             _publisher = publisher;
-            _assetPortfolioBalanceStorage = assetPortfolioBalanceStorage;
+            _portfolioBalanceStorage = portfolioBalanceStorage;
         }
         
         public async ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades)
@@ -146,7 +142,6 @@ namespace Service.Liquidity.Portfolio.Services
                 BrokerId = assetPortfolioTrade.AssociateBrokerId,
                 WalletName = assetPortfolioTrade.WalletName,
                 Asset = baseAsset,
-                UpdateDate = DateTime.UtcNow,
                 Volume = assetPortfolioTrade.BaseVolume
             };
             var quoteAssetBalance = new AssetBalance()
@@ -154,22 +149,12 @@ namespace Service.Liquidity.Portfolio.Services
                 BrokerId = assetPortfolioTrade.AssociateBrokerId,
                 WalletName = assetPortfolioTrade.WalletName,
                 Asset = quoteAsset,
-                UpdateDate = DateTime.UtcNow,
                 Volume = assetPortfolioTrade.QuoteVolume
             };
             balanceList.Add(baseAssetBalance);
             balanceList.Add(quoteAssetBalance);
             
-            UpdateBalance(balanceList);
-        }
-
-        public void UpdateBalance(List<AssetBalance> differenceBalances)
-        {
-            differenceBalances.ForEach(elem =>
-            {
-                _assetPortfolioBalanceStorage.UpdateAssetPortfolioBalanceAsync(elem);
-            });
-            
+            _portfolioBalanceStorage.UpdateBalance(balanceList);
         }
         
         public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory)

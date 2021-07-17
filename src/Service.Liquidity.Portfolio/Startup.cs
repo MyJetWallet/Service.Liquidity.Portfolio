@@ -15,7 +15,6 @@ using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Modules;
 using Service.Liquidity.Portfolio.Postgres;
 using Service.Liquidity.Portfolio.Services;
-using Service.Liquidity.Portfolio.Services.Grpc;
 using SimpleTrading.BaseMetrics;
 using SimpleTrading.ServiceStatusReporterConnector;
 

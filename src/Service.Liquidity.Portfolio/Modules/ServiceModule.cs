@@ -11,7 +11,6 @@ using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Jobs;
 using Service.Liquidity.Portfolio.Postgres;
 using Service.Liquidity.Portfolio.Services;
-using Service.Liquidity.Portfolio.Services.Grpc;
 using Service.Liquidity.PortfolioHedger.Client;
 
 namespace Service.Liquidity.Portfolio.Modules
@@ -33,7 +32,6 @@ namespace Service.Liquidity.Portfolio.Modules
             
             builder.RegisterMyNoSqlWriter<AssetPortfolioSettingsNoSql>(Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), AssetPortfolioSettingsNoSql.TableName);
             builder.RegisterMyNoSqlWriter<AssetPortfolioBalanceNoSql>(Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), AssetPortfolioBalanceNoSql.TableName);
-
             builder.RegisterMyServiceBusPublisher<AssetPortfolioTrade>(serviceBusClient, AssetPortfolioTrade.TopicName, true);
             
             builder
@@ -42,7 +40,6 @@ namespace Service.Liquidity.Portfolio.Modules
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
-            
             builder
                 .RegisterType<AssetPortfolioBalanceStorage>()
                 .As<IAssetPortfolioBalanceStorage>()
@@ -55,46 +52,40 @@ namespace Service.Liquidity.Portfolio.Modules
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
-            
             builder
                 .RegisterType<LiquidityEngineTradeReaderJob>()
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
-            
             builder
                 .RegisterType<PortfolioHedgerTradeReaderJob>()
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
-            
-            //builder
-            //    .RegisterType<AssetBalanceWriterJob>()
-            //    .As<IStartable>()
-            //    .AutoActivate()
-            //    .SingleInstance();
+            builder
+                .RegisterType<BalancePersistJob>()
+                .AsSelf()
+                .SingleInstance();
             
             builder
                 .RegisterType<PortfolioHandler>()
                 .As<IPortfolioHandler>()
                 .SingleInstance();
-            
             builder
                 .RegisterType<TradeCacheStorage>()
                 .AsSelf()
                 .SingleInstance();
-            
             builder
                 .RegisterType<AnotherAssetProjectionService>()
                 .As<IAnotherAssetProjectionService>()
                 .SingleInstance();
-
             builder
                 .RegisterType<AssetPortfolioService>()
-                .As<IAssetPortfolioService>();
+                .As<IAssetPortfolioService>()
+                .SingleInstance();
 
-            builder.RegisterMyServiceBusSubscriberBatch<Engine.Domain.Models.Portfolio.PortfolioTrade>(serviceBusClient,
-                Engine.Domain.Models.Portfolio.PortfolioTrade.TopicName,
+            builder.RegisterMyServiceBusSubscriberBatch<PortfolioTrade>(serviceBusClient,
+                PortfolioTrade.TopicName,
                 $"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}",
                 TopicQueueType.PermanentWithSingleConnection);
         }

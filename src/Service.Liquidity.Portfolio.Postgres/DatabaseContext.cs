@@ -12,11 +12,8 @@ namespace Service.Liquidity.Portfolio.Postgres
     {
         private Activity _activity;
         public DbSet<AssetPortfolioTrade> Trades { get; set; }
-        public DbSet<AssetBalance> Balances { get; set; }
         public DbSet<ChangeBalanceHistory> ChangeBalanceHistories { get; set; }
 
-        private const string TradeTableName = "trade";
-        private const string BalanceTableName = "assetbalance";
         private const string ChangeBalanceHistoryTableName = "changebalancehistory";
         
         public const string Schema = "liquidityportfolio";
@@ -37,8 +34,6 @@ namespace Service.Liquidity.Portfolio.Postgres
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema(Schema);
-            
-            SetBalanceEntity(modelBuilder);
             SetChangeBalanceHistoryEntity(modelBuilder);
 
             base.OnModelCreating(modelBuilder);
@@ -58,30 +53,11 @@ namespace Service.Liquidity.Portfolio.Postgres
             modelBuilder.Entity<ChangeBalanceHistory>().Property(e => e.User).HasMaxLength(64);
         }
 
-        private void SetBalanceEntity(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<AssetBalance>().ToTable(BalanceTableName);
-            modelBuilder.Entity<AssetBalance>().HasKey(e => new {e.WalletName, e.Asset});
-            modelBuilder.Entity<AssetBalance>().Property(e => e.BrokerId).HasMaxLength(64);
-            modelBuilder.Entity<AssetBalance>().Property(e => e.WalletName).HasMaxLength(64);
-            modelBuilder.Entity<AssetBalance>().Property(e => e.Asset).HasMaxLength(64);
-            modelBuilder.Entity<AssetBalance>().Property(e => e.Volume);
-            modelBuilder.Entity<AssetBalance>().Property(e => e.UpdateDate);
-        }
-
         public static DatabaseContext Create(DbContextOptionsBuilder<DatabaseContext> options)
         {
             var activity = MyTelemetry.StartActivity($"Database context {Schema}")?.AddTag("db-schema", Schema);
             var ctx = new DatabaseContext(options.Options) {_activity = activity};
             return ctx;
-        }
-
-        public async Task UpdateBalancesAsync(List<AssetBalance> balances)
-        {
-            await Balances
-                .UpsertRange(balances)
-                .On(e => new {e.WalletName, e.Asset})
-                .RunAsync();
         }
         
         public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory history)

@@ -5,17 +5,17 @@ namespace Service.Liquidity.Portfolio.Domain.Models
     public class AssetPortfolioBalanceNoSql : MyNoSqlDbEntity
     {
         public const string TableName = "jetwallet-liquidity-portfolio";
-        private static string GeneratePartitionKey(string walletName) => $"walletName:{walletName}";
-        private static string GenerateRowKey(string asset) => $"asset:{asset}";
+        private static string GeneratePartitionKey() => $"balance";
+        private static string GenerateRowKey() => $"balance";
 
-        public AssetBalance Balance { get; set; }
+        public AssetPortfolio Balance { get; set; }
         
-        public static AssetPortfolioBalanceNoSql Create(AssetBalance balance)
+        public static AssetPortfolioBalanceNoSql Create(AssetPortfolio balance)
         {
             return new()
             {
-                PartitionKey = GeneratePartitionKey(balance.WalletName),
-                RowKey = GenerateRowKey(balance.Asset),
+                PartitionKey = GeneratePartitionKey(),
+                RowKey = GenerateRowKey(),
                 Balance = balance
             };
         }

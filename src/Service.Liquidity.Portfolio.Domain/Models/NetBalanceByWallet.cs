@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Service.Liquidity.Portfolio.Grpc.Models
+namespace Service.Liquidity.Portfolio.Domain.Models
 {
     [DataContract]
     public class NetBalanceByWallet

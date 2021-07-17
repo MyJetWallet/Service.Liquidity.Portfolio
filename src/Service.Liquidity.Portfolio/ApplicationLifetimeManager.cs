@@ -14,19 +14,21 @@ namespace Service.Liquidity.Portfolio
         private readonly MyServiceBusTcpClient _myServiceBusTcpClient;
         private readonly MyNoSqlTcpClient _myNoSqlTcpClient;
         private readonly MyNoSqlTcpClient[] _myNoSqlTcpClientManagers;
-
-
+        private readonly BalancePersistJob _balancePersistJob;
+        
         public ApplicationLifetimeManager(IHostApplicationLifetime appLifetime,
             ILogger<ApplicationLifetimeManager> logger,
             MyServiceBusTcpClient myServiceBusTcpClient,
             MyNoSqlTcpClient myNoSqlTcpClient,
-            MyNoSqlTcpClient[] myNoSqlTcpClientManagers)
+            MyNoSqlTcpClient[] myNoSqlTcpClientManagers,
+            BalancePersistJob balancePersistJob)
             : base(appLifetime)
         {
             _logger = logger;
             _myServiceBusTcpClient = myServiceBusTcpClient;
             _myNoSqlTcpClient = myNoSqlTcpClient;
             _myNoSqlTcpClientManagers = myNoSqlTcpClientManagers;
+            _balancePersistJob = balancePersistJob;
         }
 
         protected override void OnStarted()
@@ -34,6 +36,7 @@ namespace Service.Liquidity.Portfolio
             _logger.LogInformation("OnStarted has been called.");
             _myNoSqlTcpClient.Start();
             _myServiceBusTcpClient.Start();
+            _balancePersistJob.Start();
             
             foreach(var client in _myNoSqlTcpClientManagers)
             {
@@ -61,6 +64,7 @@ namespace Service.Liquidity.Portfolio
             try
             {
                 _myServiceBusTcpClient.Stop();
+                _balancePersistJob.Stop();
             }
             catch (Exception ex)
             {

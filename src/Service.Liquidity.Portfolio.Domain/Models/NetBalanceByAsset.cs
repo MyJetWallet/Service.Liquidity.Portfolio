@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Grpc.Models;
 
-namespace Service.Liquidity.Portfolio.Grpc.Models
+namespace Service.Liquidity.Portfolio.Domain.Models
 {
     [DataContract]
     public class NetBalanceByAsset
     {
-        public const string TopicName = "asset-balance";
-        
         [DataMember(Order = 1)] public string Asset { get; set; }
         [DataMember(Order = 2)] public List<NetBalanceByWallet> WalletBalances { get; set; }
         [DataMember(Order = 3)] public AssetBalanceState BalanceState { get; set; }

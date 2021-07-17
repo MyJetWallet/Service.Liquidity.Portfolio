@@ -9,7 +9,6 @@ namespace Service.Liquidity.Portfolio.Postgres
     public interface IPortfolioHandler
     {
         ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades);
-        void UpdateBalance(List<AssetBalance> differenceBalances);
         Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory);
         Task<List<ChangeBalanceHistory>> GetHistories();
     }

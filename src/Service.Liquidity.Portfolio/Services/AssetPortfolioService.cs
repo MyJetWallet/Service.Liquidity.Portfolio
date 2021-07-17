@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MyJetWallet.Domain;
 using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.Abstractions;
 using Newtonsoft.Json;
@@ -15,7 +14,7 @@ using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
 using Service.Liquidity.Portfolio.Postgres;
 
-namespace Service.Liquidity.Portfolio.Services.Grpc
+namespace Service.Liquidity.Portfolio.Services
 {
     public class AssetPortfolioService: IAssetPortfolioService
     {
@@ -25,13 +24,16 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
         private readonly IAssetPortfolioSettingsStorage _assetPortfolioSettingsStorage;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
         private readonly IMyNoSqlServerDataReader<LpWalletNoSql> _noSqlDataReader;
+        
+        private readonly IAssetPortfolioBalanceStorage _portfolioBalanceStorage;
 
         public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
             IPortfolioHandler portfolioHandler,
             IAssetPortfolioSettingsStorage assetPortfolioSettingsStorage,
             ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
-            IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader)
+            IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader,
+            IAssetPortfolioBalanceStorage portfolioBalanceStorage)
         {
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
@@ -39,12 +41,13 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
             _assetPortfolioSettingsStorage = assetPortfolioSettingsStorage;
             _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
             _noSqlDataReader = noSqlDataReader;
+            _portfolioBalanceStorage = portfolioBalanceStorage;
         }
 
-        public async Task<GetBalancesResponse> GetBalancesAsync()
+        public async Task<AssetPortfolio> GetBalancesAsync()
         {
             _logger.LogInformation("Call GetBalancesAsync");
-            var response = new GetBalancesResponse();
+            var response = new AssetPortfolio();
             try
             {
                 var balancesSnapshot = new List<AssetBalance>();
@@ -62,7 +65,7 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
             return response;
         }
 
-        private List<NetBalanceByAsset> GetBalanceByAsset(IReadOnlyCollection<AssetBalance> balancesSnapshot,
+        public List<NetBalanceByAsset> GetBalanceByAsset(List<AssetBalance> balancesSnapshot,
             ICollection<string> internalWallets)
         {
             using var a = MyTelemetry.StartActivity("GetBalanceByAsset");
@@ -134,7 +137,7 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
             return balanceByAssetCollection;
         }
 
-        private List<NetBalanceByWallet> GetBalanceByWallet(IReadOnlyCollection<AssetBalance> balancesSnapshot,
+        public List<NetBalanceByWallet> GetBalanceByWallet(List<AssetBalance> balancesSnapshot,
             ICollection<string> internalWallets)
         {
             using var a = MyTelemetry.StartActivity("GetBalanceByWallet");
@@ -223,11 +226,10 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
                 {
                     BrokerId = request.BrokerId,
                     Asset = request.Asset,
-                    UpdateDate = updateDate,
                     Volume = request.BalanceDifference,
                     WalletName = request.WalletName
                 };
-                _portfolioHandler.UpdateBalance(new List<AssetBalance>() {newBalance});
+                _portfolioBalanceStorage.UpdateBalance(new List<AssetBalance>() {newBalance});
                 await _portfolioHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
                 {
                     Asset = request.Asset,

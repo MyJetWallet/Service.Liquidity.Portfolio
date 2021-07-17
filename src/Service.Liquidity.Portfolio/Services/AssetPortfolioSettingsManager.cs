@@ -4,7 +4,7 @@ using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
 
-namespace Service.Liquidity.Portfolio.Services.Grpc
+namespace Service.Liquidity.Portfolio.Services
 {
     public class AssetPortfolioSettingsManager : IAssetPortfolioSettingsManager
     {

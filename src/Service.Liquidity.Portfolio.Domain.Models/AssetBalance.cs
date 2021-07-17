@@ -8,7 +8,6 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         public string WalletName { get; set; }
         public string Asset { get; set; }
         public double Volume { get; set; }
-        public DateTime UpdateDate { get; set; }
         
         public AssetBalance()
         {
@@ -21,8 +20,7 @@ namespace Service.Liquidity.Portfolio.Domain.Models
                 BrokerId = this.BrokerId,
                 WalletName = this.WalletName,
                 Asset = this.Asset,
-                Volume = this.Volume,
-                UpdateDate = this.UpdateDate
+                Volume = this.Volume
             };
         }
     }
