@@ -20,11 +20,7 @@ namespace Service.Liquidity.Portfolio.Client
         //    builder.RegisterInstance(factory.GetAssetPortfolioService()).As<IAssetPortfolioService>().SingleInstance();
         //}
         //
-        //public static void RegisterAssetPortfolioSettingsClient(this ContainerBuilder builder, string grpcServiceUrl)
-        //{
-        //    var factory = new PortfolioClientFactory(grpcServiceUrl);
-        //    builder.RegisterInstance(factory.GetAssetPortfolioSettingsService()).As<IAssetPortfolioSettingsManager>().SingleInstance();
-        //}
+
 
         public static void RegisterPortfolioTradeServiceBusClient(this ContainerBuilder builder, MyServiceBusTcpClient client, string queueName, TopicQueueType queryType, bool batchSubscriber)
         {

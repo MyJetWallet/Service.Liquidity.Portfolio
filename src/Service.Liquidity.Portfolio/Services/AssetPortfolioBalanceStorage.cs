@@ -22,8 +22,6 @@ namespace Service.Liquidity.Portfolio.Services
         
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         
-        private readonly IAssetPortfolioSettingsStorage _assetPortfolioSettingsStorage;
-        
         private AssetPortfolio _portfolio = new AssetPortfolio();
         private List<AssetBalance> _assetBalances = new List<AssetBalance>();
         private readonly object _locker = new object();
@@ -31,14 +29,12 @@ namespace Service.Liquidity.Portfolio.Services
         public AssetPortfolioBalanceStorage(ILogger<AssetPortfolioBalanceStorage> logger,
             IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> settingsDataWriter,
             IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader,
-            IAnotherAssetProjectionService anotherAssetProjectionService,
-            IAssetPortfolioSettingsStorage assetPortfolioSettingsStorage)
+            IAnotherAssetProjectionService anotherAssetProjectionService)
         {
             _logger = logger;
             _settingsDataWriter = settingsDataWriter;
             _noSqlDataReader = noSqlDataReader;
             _anotherAssetProjectionService = anotherAssetProjectionService;
-            _assetPortfolioSettingsStorage = assetPortfolioSettingsStorage;
         }
 
         public async Task SavePortfolioToNoSql()
@@ -188,13 +184,6 @@ namespace Service.Liquidity.Portfolio.Services
                     .Where(elem => !internalWallets.Contains(elem.WalletName))
                     .Sum(elem => elem.NetUsdVolume);
                 balanceByAsset.NetUsdVolume = netUsdVolumeByInternalWallets-netUsdVolumeByExternalWallets;
-
-                var assetBalanceSettings = _assetPortfolioSettingsStorage.GetAssetPortfolioSettingsByAsset(asset);
-                if (assetBalanceSettings != null)
-                {
-                    balanceByAsset.Settings = assetBalanceSettings;
-                    balanceByAsset.SetState(assetBalanceSettings);
-                }
                 
                 balanceByAssetCollection.Add(balanceByAsset);
             }

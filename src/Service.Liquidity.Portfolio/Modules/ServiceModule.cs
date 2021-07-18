@@ -30,16 +30,9 @@ namespace Service.Liquidity.Portfolio.Modules
                 TopicQueueType.PermanentWithSingleConnection,
                 true);
             
-            builder.RegisterMyNoSqlWriter<AssetPortfolioSettingsNoSql>(Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), AssetPortfolioSettingsNoSql.TableName);
             builder.RegisterMyNoSqlWriter<AssetPortfolioBalanceNoSql>(Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), AssetPortfolioBalanceNoSql.TableName);
             builder.RegisterMyServiceBusPublisher<AssetPortfolioTrade>(serviceBusClient, AssetPortfolioTrade.TopicName, true);
             
-            builder
-                .RegisterType<AssetPortfolioSettingsStorage>()
-                .As<IAssetPortfolioSettingsStorage>()
-                .As<IStartable>()
-                .AutoActivate()
-                .SingleInstance();
             builder
                 .RegisterType<AssetPortfolioBalanceStorage>()
                 .As<IAssetPortfolioBalanceStorage>()
