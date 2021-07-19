@@ -10,6 +10,7 @@
 
     <ItemGroup>
       <PackageReference Include="MyJetWallet.Domain.ServiceBus" Version="1.2.0" />
+      <PackageReference Include="MyJetWallet.Sdk.ServiceBus" Version="1.0.3" />
     </ItemGroup>
 
 </Project>
