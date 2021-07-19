@@ -7,7 +7,7 @@ namespace Service.Liquidity.Portfolio.Domain.Services
     public interface IAssetPortfolioBalanceStorage
     {
         Task SavePortfolioToNoSql();
-        void UpdateBalance(IEnumerable<AssetBalance> differenceBalances);
+        Dictionary<string, double> UpdateBalance(IEnumerable<AssetBalanceDifference> differenceBalances);
         List<AssetBalance> GetBalancesSnapshot();
     }
 }

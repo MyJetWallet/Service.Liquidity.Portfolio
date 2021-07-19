@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Service.Liquidity.Portfolio.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Services
@@ -20,8 +19,6 @@ namespace Service.Liquidity.Portfolio.Services
         {
             lock (_tradeCache)
             {
-
-
                 if (_tradeCache.Any())
                 {
                     _tradeCache.RemoveAt(0);

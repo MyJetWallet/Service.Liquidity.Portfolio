@@ -100,6 +100,7 @@ namespace Service.Liquidity.Portfolio.Services
         {
             trades.ForEach(async trade =>
             {
+                
                 var projectionOnBaseAsset = await _anotherAssetProjectionService.GetProjectionAsync(new GetProjectionRequest()
                 {
                     BrokerId = trade.AssociateBrokerId,
@@ -108,7 +109,8 @@ namespace Service.Liquidity.Portfolio.Services
                     ToAsset = "USD"
                 });
                 trade.BaseVolumeInUsd = projectionOnBaseAsset.ProjectionVolume;
-                
+                trade.BaseAssetPriceInUsd = 0; //todo: get prices from https://monfex.atlassian.net/browse/SPOTLIQ-119
+
                 var projectionOnQuoteAsset = await _anotherAssetProjectionService.GetProjectionAsync(new GetProjectionRequest()
                 {
                     BrokerId = trade.AssociateBrokerId,
@@ -117,6 +119,7 @@ namespace Service.Liquidity.Portfolio.Services
                     ToAsset = "USD"
                 });
                 trade.QuoteVolumeInUsd = projectionOnQuoteAsset.ProjectionVolume;
+                trade.QuoteVolumeInUsd = 0; //todo: get prices from https://monfex.atlassian.net/browse/SPOTLIQ-119
             });
         }
 
@@ -133,26 +136,27 @@ namespace Service.Liquidity.Portfolio.Services
             var baseAsset = assetPortfolioTrade.BaseAsset;
             var quoteAsset = assetPortfolioTrade.QuoteAsset;
 
-            var balanceList = new List<AssetBalance>();
-
-            var baseAssetBalance = new AssetBalance()
-            {
-                BrokerId = assetPortfolioTrade.AssociateBrokerId,
-                WalletName = assetPortfolioTrade.WalletName,
-                Asset = baseAsset,
-                Volume = assetPortfolioTrade.BaseVolume
-            };
-            var quoteAssetBalance = new AssetBalance()
-            {
-                BrokerId = assetPortfolioTrade.AssociateBrokerId,
-                WalletName = assetPortfolioTrade.WalletName,
-                Asset = quoteAsset,
-                Volume = assetPortfolioTrade.QuoteVolume
-            };
+            var balanceList = new List<AssetBalanceDifference>();
+            
+            var baseAssetBalance = new AssetBalanceDifference(assetPortfolioTrade.AssociateBrokerId,
+                assetPortfolioTrade.WalletName,
+                baseAsset, 
+                assetPortfolioTrade.BaseVolume, 
+                assetPortfolioTrade.BaseVolumeInUsd,
+                assetPortfolioTrade.BaseAssetPriceInUsd);
+            
+            var quoteAssetBalance = new AssetBalanceDifference(assetPortfolioTrade.AssociateBrokerId,
+                assetPortfolioTrade.WalletName,
+                quoteAsset, 
+                assetPortfolioTrade.QuoteVolume, 
+                assetPortfolioTrade.QuoteVolumeInUsd,
+                assetPortfolioTrade.QuoteAssetPriceInUsd);
+            
             balanceList.Add(baseAssetBalance);
             balanceList.Add(quoteAssetBalance);
             
-            _portfolioBalanceStorage.UpdateBalance(balanceList);
+            var pnlByAsset = _portfolioBalanceStorage.UpdateBalance(balanceList);
+            assetPortfolioTrade.ReleasePnl = pnlByAsset.Select(elem => PnlByAsset.Create(elem.Key, elem.Value)).ToList();
         }
         
         public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory)

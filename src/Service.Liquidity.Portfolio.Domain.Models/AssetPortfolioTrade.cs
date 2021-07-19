@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using MyJetWallet.Domain.Orders;
 
@@ -21,11 +22,14 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 11)] public double QuoteVolume { get; set; }
         [DataMember(Order = 12)] public double BaseVolumeInUsd { get; set; }
         [DataMember(Order = 13)] public double QuoteVolumeInUsd { get; set; }
-        [DataMember(Order = 14)] public DateTime DateTime { get; set; }
-        [DataMember(Order = 15)] public string ErrorMessage { get; set; }
-        [DataMember(Order = 16)] public string Source { get; set; }
-        [DataMember(Order = 17)] public string Comment { get; set; }
-        [DataMember(Order = 18)] public string User { get; set; }
+        [DataMember(Order = 14)] public double BaseAssetPriceInUsd { get; set; }
+        [DataMember(Order = 15)] public double QuoteAssetPriceInUsd { get; set; }
+        [DataMember(Order = 16)] public DateTime DateTime { get; set; }
+        [DataMember(Order = 17)] public string ErrorMessage { get; set; }
+        [DataMember(Order = 18)] public string Source { get; set; }
+        [DataMember(Order = 19)] public string Comment { get; set; }
+        [DataMember(Order = 20)] public string User { get; set; }
+        [DataMember(Order = 21)] public List<PnlByAsset> ReleasePnl { get; set; }
 
         public AssetPortfolioTrade(string tradeId, 
             string associateBrokerId,
@@ -77,6 +81,18 @@ namespace Service.Liquidity.Portfolio.Domain.Models
 
         public AssetPortfolioTrade()
         {
+        }
+    }
+
+    [DataContract]
+    public class PnlByAsset
+    {
+        [DataMember(Order = 1)] public string Asset { get; set; }
+        [DataMember(Order = 2)] public double Pnl { get; set; }
+
+        public static PnlByAsset Create(string asset, double pnl)
+        {
+            return new PnlByAsset() {Asset = asset, Pnl = pnl};
         }
     }
 }

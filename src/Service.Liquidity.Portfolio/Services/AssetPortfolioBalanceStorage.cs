@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Microsoft.Extensions.Logging;
@@ -25,6 +26,7 @@ namespace Service.Liquidity.Portfolio.Services
         private AssetPortfolio _portfolio = new AssetPortfolio();
         private List<AssetBalance> _assetBalances = new List<AssetBalance>();
         private readonly object _locker = new object();
+        public const string UsdAsset = "USD";
 
         public AssetPortfolioBalanceStorage(ILogger<AssetPortfolioBalanceStorage> logger,
             IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> settingsDataWriter,
@@ -94,27 +96,77 @@ namespace Service.Liquidity.Portfolio.Services
             ReloadBalance().GetAwaiter().GetResult();
         }
         
-        public void UpdateBalance(IEnumerable<AssetBalance> differenceBalances)
+        public Dictionary<string, double> UpdateBalance(IEnumerable<AssetBalanceDifference> differenceBalances)
         {
             lock (_locker)
             {
+                var pnlByAsset = new Dictionary<string, double>();
                 foreach (var difference in differenceBalances)
                 {
-                    var balance = _assetBalances.FirstOrDefault(elem =>
-                        elem.WalletName == difference.WalletName && elem.Asset == difference.Asset);
-                    if (balance == null)
-                    {
-                        balance = difference;
-                        _assetBalances.Add(balance);
-                    }
-                    else
+                    var balance = GetBalanceEntity(difference.BrokerId, difference.WalletName, difference.Asset);
+                    var usdBalance = GetBalanceEntity(difference.BrokerId, difference.WalletName, UsdAsset);
+                    
+                    if ((balance.Volume > 0 && difference.Volume > 0) || (balance.Volume < 0 && difference.Volume < 0))
                     {
                         balance.Volume += difference.Volume;
+                        balance.OpenPrice =
+                            (balance.Volume * balance.OpenPrice + difference.Volume * difference.CurrentPriceInUsd) /
+                            (difference.Volume + balance.Volume);
+                        continue;
                     }
+
+                    var originalVolume = balance.Volume;
+                    var decreaseVolumeAbs = Math.Min(Math.Abs(balance.Volume), Math.Abs(difference.Volume));
+                    var decreaseVolume = balance.Volume > 0 ? decreaseVolumeAbs : -decreaseVolumeAbs;
+
+                    if (decreaseVolume > 0)
+                    {
+                        var releasePnl = (difference.CurrentPriceInUsd - balance.OpenPrice) / decreaseVolume;
+                        usdBalance.Volume += releasePnl;
+                        balance.Volume = 0;
+
+                        if (!pnlByAsset.TryGetValue(balance.Asset, out var pnl))
+                        {
+                            pnl = 0;
+                        }
+                        pnl += releasePnl;
+                        pnlByAsset[balance.Asset] = pnl;
+                        continue;
+                    }
+
+                    if (decreaseVolumeAbs < Math.Abs(difference.Volume))
+                    {
+                        balance.Volume = difference.Volume + originalVolume;
+                        balance.OpenPrice = difference.CurrentPriceInUsd; 
+                        continue;
+                    }
+
+                    balance.Volume += difference.Volume;
                 }
+
+                return pnlByAsset;
             }
         }
-        
+
+        private AssetBalance GetBalanceEntity(string brokerId, string walletName, string asset)
+        {
+            var balance = _assetBalances.FirstOrDefault(elem =>
+                elem.WalletName == walletName && elem.Asset == asset);
+            if (balance == null)
+            {
+                balance = new AssetBalance()
+                {
+                    Asset = asset,
+                    BrokerId = brokerId,
+                    Volume = 0,
+                    WalletName = walletName
+                };
+                _assetBalances.Add(balance);
+            }
+
+            return balance;
+        }
+
         public List<AssetBalance> GetBalancesSnapshot()
         {
             using var a = MyTelemetry.StartActivity("GetBalancesSnapshot");

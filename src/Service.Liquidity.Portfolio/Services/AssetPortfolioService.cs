@@ -49,14 +49,15 @@ namespace Service.Liquidity.Portfolio.Services
             try
             {
                 var updateDate = DateTime.UtcNow;
-                var newBalance = new AssetBalance()
-                {
-                    BrokerId = request.BrokerId,
-                    Asset = request.Asset,
-                    Volume = request.BalanceDifference,
-                    WalletName = request.WalletName
-                };
-                _portfolioBalanceStorage.UpdateBalance(new List<AssetBalance>() {newBalance});
+                var newBalance = new AssetBalanceDifference(request.BrokerId, 
+                    request.WalletName,
+                    request.Asset, 
+                    request.BalanceDifference, 
+                    0, // todo: get price from https://monfex.atlassian.net/browse/SPOTLIQ-119
+                    0); // todo: get price from https://monfex.atlassian.net/browse/SPOTLIQ-119
+                var pnlByAsset = _portfolioBalanceStorage.UpdateBalance(new List<AssetBalanceDifference>() {newBalance});
+                
+                
                 await _portfolioHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
                 {
                     Asset = request.Asset,
