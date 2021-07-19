@@ -11,28 +11,24 @@ using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
-using Service.Liquidity.Portfolio.Postgres;
 using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
 
 namespace Service.Liquidity.Portfolio.Services
 {
     public class PortfolioHandler : IPortfolioHandler
     {
-        private readonly DbContextOptionsBuilder<DatabaseContext> _dbContextOptionsBuilder;
         private readonly ILogger<PortfolioHandler> _logger;
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly TradeCacheStorage _tradeCacheStorage;
         private readonly IPublisher<AssetPortfolioTrade> _publisher;
         private readonly IAssetPortfolioBalanceStorage _portfolioBalanceStorage;
 
-        public PortfolioHandler(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder,
-            ILogger<PortfolioHandler> logger,
+        public PortfolioHandler(ILogger<PortfolioHandler> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
             TradeCacheStorage tradeCacheStorage,
             IPublisher<AssetPortfolioTrade> publisher,
             IAssetPortfolioBalanceStorage portfolioBalanceStorage)
         {
-            _dbContextOptionsBuilder = dbContextOptionsBuilder;
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
             _tradeCacheStorage = tradeCacheStorage;
@@ -160,8 +156,6 @@ namespace Service.Liquidity.Portfolio.Services
         
         public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory)
         {
-            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            await ctx.SaveChangeBalanceHistoryAsync(balanceHistory);
         }
     }
 }
