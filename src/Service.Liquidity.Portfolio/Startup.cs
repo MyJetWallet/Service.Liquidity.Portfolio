@@ -7,14 +7,10 @@ using Microsoft.Extensions.Hosting;
 using Autofac;
 using MyJetWallet.Sdk.GrpcMetrics;
 using MyJetWallet.Sdk.GrpcSchema;
-using MyJetWallet.Sdk.Postgres;
 using MyJetWallet.Sdk.Service;
 using Prometheus;
 using ProtoBuf.Grpc.Server;
-using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Modules;
-using Service.Liquidity.Portfolio.Postgres;
-using Service.Liquidity.Portfolio.Services;
 using SimpleTrading.BaseMetrics;
 using SimpleTrading.ServiceStatusReporterConnector;
 
@@ -31,9 +27,6 @@ namespace Service.Liquidity.Portfolio
             });
 
             services.AddHostedService<ApplicationLifetimeManager>();
-            
-            DatabaseContext.LoggerFactory = Program.LogFactory;
-            services.AddDatabase(DatabaseContext.Schema, Program.Settings.PostgresConnectionString, o => new DatabaseContext(o));
 
             services.AddMyTelemetry("SP-", Program.Settings.ZipkinUrl);
         }

@@ -1,23 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Service.Liquidity.Portfolio.Domain.Models;
-using Service.Liquidity.Portfolio.Postgres;
 
 namespace Service.Liquidity.Portfolio.Services
 {
     public class TradeCacheStorage
     {
-        private readonly DbContextOptionsBuilder<DatabaseContext> _dbContextOptionsBuilder;
         private readonly List<TradeCache> _tradeCache = new List<TradeCache>();
 
         private int _cacheLimit = 100;
 
-        public TradeCacheStorage(DbContextOptionsBuilder<DatabaseContext> dbContextOptionsBuilder)
+        public TradeCacheStorage()
         {
-            _dbContextOptionsBuilder = dbContextOptionsBuilder;
-            SetTradeCacheOnInit().GetAwaiter().GetResult();
+            //SetTradeCacheOnInit().GetAwaiter().GetResult();
         }
 
         public void SaveInCache(AssetPortfolioTrade assetPortfolioTrade)
@@ -44,23 +40,23 @@ namespace Service.Liquidity.Portfolio.Services
             }
         }
 
-        private async Task SetTradeCacheOnInit()
-        {
-            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            var trades = ctx.Trades
-                .OrderByDescending(trade => trade.Id)
-                .Take(100)
-                .ToList();
-
-            lock (_tradeCache)
-            {
-                foreach (var trade in trades.OrderByDescending(trade => trade.Id))
-                {
-                    var cacheEntity = new TradeCache(trade.TradeId, trade.ErrorMessage);
-                    _tradeCache.Add(cacheEntity);
-                }
-            }
-        }
+        //private async Task SetTradeCacheOnInit()
+        //{
+        //    await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
+        //    var trades = ctx.Trades
+        //        .OrderByDescending(trade => trade.Id)
+        //        .Take(100)
+        //        .ToList();
+//
+        //    lock (_tradeCache)
+        //    {
+        //        foreach (var trade in trades.OrderByDescending(trade => trade.Id))
+        //        {
+        //            var cacheEntity = new TradeCache(trade.TradeId, trade.ErrorMessage);
+        //            _tradeCache.Add(cacheEntity);
+        //        }
+        //    }
+        //}
     }
 
     public class TradeCache

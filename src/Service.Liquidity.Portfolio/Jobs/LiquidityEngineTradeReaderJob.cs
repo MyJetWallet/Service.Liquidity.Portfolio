@@ -9,8 +9,6 @@ using Service.AssetsDictionary.Client;
 using Service.Liquidity.Engine.Domain.Models.Portfolio;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
-using Service.Liquidity.Portfolio.Postgres;
-using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
 
 namespace Service.Liquidity.Portfolio.Jobs
 {

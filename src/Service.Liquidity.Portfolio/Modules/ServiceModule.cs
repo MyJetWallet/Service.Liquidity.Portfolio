@@ -9,7 +9,6 @@ using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Jobs;
-using Service.Liquidity.Portfolio.Postgres;
 using Service.Liquidity.Portfolio.Services;
 using Service.Liquidity.PortfolioHedger.Client;
 using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
