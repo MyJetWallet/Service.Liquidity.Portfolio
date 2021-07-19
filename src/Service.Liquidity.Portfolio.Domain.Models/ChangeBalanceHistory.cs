@@ -6,6 +6,8 @@ namespace Service.Liquidity.Portfolio.Domain.Models
     [DataContract]
     public class ChangeBalanceHistory
     {
+        public const string TopicName = "jetwallet-liquidity-portfolio-changebalancehistory";
+        
         [DataMember(Order = 1)] public long Id { get; set; }
         [DataMember(Order = 2)] public string BrokerId { get; set; }
         [DataMember(Order = 3)] public string WalletName { get; set; }

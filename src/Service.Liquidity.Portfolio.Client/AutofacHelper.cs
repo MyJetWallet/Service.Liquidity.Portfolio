@@ -20,9 +20,8 @@ namespace Service.Liquidity.Portfolio.Client
             builder.RegisterInstance(factory.GetAssetPortfolioService()).As<IAssetPortfolioService>().SingleInstance();
         }
         
-
-
-        public static void RegisterPortfolioTradeServiceBusClient(this ContainerBuilder builder, MyServiceBusTcpClient client, string queueName, TopicQueueType queryType, bool batchSubscriber)
+        public static void RegisterPortfolioTradeServiceBusClient(this ContainerBuilder builder,
+            MyServiceBusTcpClient client, string queueName, TopicQueueType queryType, bool batchSubscriber)
         {
             if (batchSubscriber)
             {
@@ -36,6 +35,25 @@ namespace Service.Liquidity.Portfolio.Client
                 builder
                     .RegisterInstance(new PortfolioTradeServiceBusSubscriber(client, queueName, queryType, false))
                     .As<ISubscriber<AssetPortfolioTrade>>()
+                    .SingleInstance();
+            }
+        }
+        
+        public static void RegisterPortfolioChangeBalanceHistoryServiceBusClient(this ContainerBuilder builder,
+            MyServiceBusTcpClient client, string queueName, TopicQueueType queryType, bool batchSubscriber)
+        {
+            if (batchSubscriber)
+            {
+                builder
+                    .RegisterInstance(new PortfolioChangeBalanceHistoryServiceBusSubscriber(client, queueName, queryType, true))
+                    .As<ISubscriber<IReadOnlyList<ChangeBalanceHistory>>>()
+                    .SingleInstance();
+            }
+            else
+            {
+                builder
+                    .RegisterInstance(new PortfolioChangeBalanceHistoryServiceBusSubscriber(client, queueName, queryType, false))
+                    .As<ISubscriber<ChangeBalanceHistory>>()
                     .SingleInstance();
             }
         }

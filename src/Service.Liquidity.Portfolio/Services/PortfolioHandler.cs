@@ -10,7 +10,6 @@ using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
-using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
 
 namespace Service.Liquidity.Portfolio.Services
 {
@@ -19,20 +18,23 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly ILogger<PortfolioHandler> _logger;
         private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly TradeCacheStorage _tradeCacheStorage;
-        private readonly IPublisher<AssetPortfolioTrade> _publisher;
+        private readonly IPublisher<AssetPortfolioTrade> _tradePublisher;
+        private readonly IPublisher<ChangeBalanceHistory> _changeBalanceHistoryPublisher;
         private readonly IAssetPortfolioBalanceStorage _portfolioBalanceStorage;
 
         public PortfolioHandler(ILogger<PortfolioHandler> logger,
             IAnotherAssetProjectionService anotherAssetProjectionService,
             TradeCacheStorage tradeCacheStorage,
-            IPublisher<AssetPortfolioTrade> publisher,
-            IAssetPortfolioBalanceStorage portfolioBalanceStorage)
+            IPublisher<AssetPortfolioTrade> tradePublisher,
+            IAssetPortfolioBalanceStorage portfolioBalanceStorage,
+            IPublisher<ChangeBalanceHistory> changeBalanceHistoryPublisher)
         {
             _logger = logger;
             _anotherAssetProjectionService = anotherAssetProjectionService;
             _tradeCacheStorage = tradeCacheStorage;
-            _publisher = publisher;
+            _tradePublisher = tradePublisher;
             _portfolioBalanceStorage = portfolioBalanceStorage;
+            _changeBalanceHistoryPublisher = changeBalanceHistoryPublisher;
         }
         
         public async ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades)
@@ -122,7 +124,7 @@ namespace Service.Liquidity.Portfolio.Services
         {
             trades.ForEach(async elem =>
             {
-                await _publisher.PublishAsync(elem);
+                await _tradePublisher.PublishAsync(elem);
             });
         }
 
@@ -155,6 +157,7 @@ namespace Service.Liquidity.Portfolio.Services
         
         public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory)
         {
+            await _changeBalanceHistoryPublisher.PublishAsync(balanceHistory);
         }
     }
 }
