@@ -175,7 +175,7 @@ namespace Service.Liquidity.Portfolio.Services
                 var netVolumeByExternalWallets = balanceByAsset.WalletBalances
                     .Where(elem => !internalWallets.Contains(elem.WalletName))
                     .Sum(elem => elem.NetVolume);
-                balanceByAsset.NetVolume = netVolumeByInternalWallets-netVolumeByExternalWallets;
+                balanceByAsset.NetVolume = netVolumeByInternalWallets+netVolumeByExternalWallets;
 
                 var netUsdVolumeByInternalWallets = balanceByAsset.WalletBalances
                     .Where(elem => internalWallets.Contains(elem.WalletName))
@@ -183,7 +183,7 @@ namespace Service.Liquidity.Portfolio.Services
                 var netUsdVolumeByExternalWallets = balanceByAsset.WalletBalances
                     .Where(elem => !internalWallets.Contains(elem.WalletName))
                     .Sum(elem => elem.NetUsdVolume);
-                balanceByAsset.NetUsdVolume = netUsdVolumeByInternalWallets-netUsdVolumeByExternalWallets;
+                balanceByAsset.NetUsdVolume = netUsdVolumeByInternalWallets+netUsdVolumeByExternalWallets;
                 
                 balanceByAssetCollection.Add(balanceByAsset);
             }
