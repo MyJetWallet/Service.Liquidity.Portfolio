@@ -12,6 +12,7 @@ using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
 using Service.Liquidity.Portfolio.Postgres;
+using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
 
 namespace Service.Liquidity.Portfolio.Services
 {
@@ -161,12 +162,6 @@ namespace Service.Liquidity.Portfolio.Services
         {
             await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
             await ctx.SaveChangeBalanceHistoryAsync(balanceHistory);
-        }
-
-        public async Task<List<ChangeBalanceHistory>> GetHistories()
-        {
-            await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-            return ctx.ChangeBalanceHistories.ToList();
         }
     }
 }

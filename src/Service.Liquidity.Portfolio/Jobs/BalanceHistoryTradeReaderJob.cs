@@ -11,7 +11,9 @@ using Service.AssetsDictionary.Client;
 using Service.BalanceHistory.ServiceBus;
 using Service.Liquidity.Engine.Domain.Models.NoSql;
 using Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Postgres;
+using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
 
 namespace Service.Liquidity.Portfolio.Jobs
 {

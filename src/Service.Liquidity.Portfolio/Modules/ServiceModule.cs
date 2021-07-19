@@ -12,6 +12,7 @@ using Service.Liquidity.Portfolio.Jobs;
 using Service.Liquidity.Portfolio.Postgres;
 using Service.Liquidity.Portfolio.Services;
 using Service.Liquidity.PortfolioHedger.Client;
+using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
 
 namespace Service.Liquidity.Portfolio.Modules
 {

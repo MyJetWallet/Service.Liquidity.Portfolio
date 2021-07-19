@@ -7,15 +7,15 @@ using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
-using Service.Liquidity.Portfolio.Postgres;
+using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
 
 namespace Service.Liquidity.Portfolio.Services
 {
-    public class AssetPortfolioService: IAssetPortfolioService
+    public class AssetPortfolioService : IAssetPortfolioService
     {
         private readonly ILogger<AssetPortfolioService> _logger;
         private readonly IPortfolioHandler _portfolioHandler;
-        
+
         private readonly IAssetPortfolioBalanceStorage _portfolioBalanceStorage;
 
         public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
@@ -25,23 +25,6 @@ namespace Service.Liquidity.Portfolio.Services
             _logger = logger;
             _portfolioHandler = portfolioHandler;
             _portfolioBalanceStorage = portfolioBalanceStorage;
-        }
-
-        public async Task<GetChangeBalanceHistoryResponse> GetChangeBalanceHistoryAsync()
-        {
-            var response = new GetChangeBalanceHistoryResponse();
-            try
-            {
-                response.Histories = await _portfolioHandler.GetHistories();
-                response.Success = true;
-            }
-            catch (Exception exception)
-            {
-                response.Success = false;
-                response.ErrorText = exception.Message;
-            }
-
-            return response;
         }
 
         public async Task<UpdateBalanceResponse> UpdateBalance(UpdateBalanceRequest request)
@@ -55,7 +38,7 @@ namespace Service.Liquidity.Portfolio.Services
                 _logger.LogError($"Bad request entity: {JsonConvert.SerializeObject(request)}");
                 return new UpdateBalanceResponse() {Success = false, ErrorMessage = "Incorrect entity"};
             }
-            
+
             if (request.BalanceDifference == 0)
             {
                 const string message = "Balance difference is zero.";
@@ -93,5 +76,5 @@ namespace Service.Liquidity.Portfolio.Services
 
             return new UpdateBalanceResponse() {Success = true};
         }
-        }
+    }
 }

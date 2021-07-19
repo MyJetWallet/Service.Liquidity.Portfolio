@@ -8,8 +8,10 @@ using MyJetWallet.Domain.ExternalMarketApi.Models;
 using MyJetWallet.Domain.Orders;
 using Service.AssetsDictionary.Client;
 using Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Postgres;
 using Service.Liquidity.PortfolioHedger.ServiceBus;
+using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
 
 namespace Service.Liquidity.Portfolio.Jobs
 {
