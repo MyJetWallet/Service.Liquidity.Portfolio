@@ -96,11 +96,11 @@ namespace Service.Liquidity.Portfolio.Services
             ReloadBalance().GetAwaiter().GetResult();
         }
         
-        public Dictionary<string, double> UpdateBalance(IEnumerable<AssetBalanceDifference> differenceBalances)
+        public Dictionary<string, decimal> UpdateBalance(IEnumerable<AssetBalanceDifference> differenceBalances)
         {
             lock (_locker)
             {
-                var pnlByAsset = new Dictionary<string, double>();
+                var pnlByAsset = new Dictionary<string, decimal>();
                 foreach (var difference in differenceBalances)
                 {
                     var balance = GetBalanceEntity(difference.BrokerId, difference.WalletName, difference.Asset);
@@ -273,7 +273,7 @@ namespace Service.Liquidity.Portfolio.Services
             return balanceByWallet;
         }
         
-        private double GetUsdProjectionByBalance(AssetBalance balance)
+        private decimal GetUsdProjectionByBalance(AssetBalance balance)
         {
             const string projectionAsset = "USD";
             

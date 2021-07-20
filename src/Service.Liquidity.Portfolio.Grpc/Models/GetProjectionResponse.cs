@@ -8,7 +8,7 @@ namespace Service.Liquidity.Portfolio.Grpc.Models
     {
         [DataMember(Order = 1)] public bool Success { get; set; }
         [DataMember(Order = 2)] public GetProjectionRequest Request { get; set; }
-        [DataMember(Order = 3)] public double ProjectionVolume { get; set; }
+        [DataMember(Order = 3)] public decimal ProjectionVolume { get; set; }
         [DataMember(Order = 4)] public string ErrorText { get; set; }
     }
 }

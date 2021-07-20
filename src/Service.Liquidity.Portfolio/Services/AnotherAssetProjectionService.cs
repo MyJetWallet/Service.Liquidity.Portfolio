@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -72,11 +73,11 @@ namespace Service.Liquidity.Portfolio.Services
                 }
                 if (operation.IsMultiply)
                 {
-                    projectionVolume *= (operation.UseBid ? price.Bid : price.Ask);
+                    projectionVolume *= Convert.ToDecimal((operation.UseBid ? price.Bid : price.Ask));
                 }
                 else
                 {
-                    projectionVolume /= (operation.UseBid ? price.Bid : price.Ask);
+                    projectionVolume /= Convert.ToDecimal((operation.UseBid ? price.Bid : price.Ask));
                 }
                 _logger.LogInformation($"Receive GetPrice response: {JsonConvert.SerializeObject(price)} for operation {operation}");
             }

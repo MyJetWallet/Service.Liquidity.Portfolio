@@ -17,13 +17,13 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 6)] public string BaseAsset { get; set; }
         [DataMember(Order = 7)] public string QuoteAsset { get; set; }
         [DataMember(Order = 8)] public OrderSide Side { get; set; }
-        [DataMember(Order = 9)] public double Price { get; set; }
-        [DataMember(Order = 10)] public double BaseVolume { get; set; }
-        [DataMember(Order = 11)] public double QuoteVolume { get; set; }
-        [DataMember(Order = 12)] public double BaseVolumeInUsd { get; set; }
-        [DataMember(Order = 13)] public double QuoteVolumeInUsd { get; set; }
-        [DataMember(Order = 14)] public double BaseAssetPriceInUsd { get; set; }
-        [DataMember(Order = 15)] public double QuoteAssetPriceInUsd { get; set; }
+        [DataMember(Order = 9)] public decimal Price { get; set; }
+        [DataMember(Order = 10)] public decimal BaseVolume { get; set; }
+        [DataMember(Order = 11)] public decimal QuoteVolume { get; set; }
+        [DataMember(Order = 12)] public decimal BaseVolumeInUsd { get; set; }
+        [DataMember(Order = 13)] public decimal QuoteVolumeInUsd { get; set; }
+        [DataMember(Order = 14)] public decimal BaseAssetPriceInUsd { get; set; }
+        [DataMember(Order = 15)] public decimal QuoteAssetPriceInUsd { get; set; }
         [DataMember(Order = 16)] public DateTime DateTime { get; set; }
         [DataMember(Order = 17)] public string ErrorMessage { get; set; }
         [DataMember(Order = 18)] public string Source { get; set; }
@@ -37,8 +37,8 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             string baseAsset,
             string quoteAsset,
             string walletName,
-            OrderSide side, double price, double baseVolume,
-            double quoteVolume, DateTime dateTime, string source)
+            OrderSide side, decimal price, decimal baseVolume,
+            decimal quoteVolume, DateTime dateTime, string source)
         {
             TradeId = tradeId;
             AssociateBrokerId = associateBrokerId;
@@ -59,8 +59,8 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             string baseAsset,
             string quoteAsset,
             string walletName,
-            double price, double baseVolume,
-            double quoteVolume, string comment, string user, string source)
+            decimal price, decimal baseVolume,
+            decimal quoteVolume, string comment, string user, string source)
         {
             AssociateBrokerId = associateBrokerId;
             WalletName = walletName;
@@ -88,9 +88,9 @@ namespace Service.Liquidity.Portfolio.Domain.Models
     public class PnlByAsset
     {
         [DataMember(Order = 1)] public string Asset { get; set; }
-        [DataMember(Order = 2)] public double Pnl { get; set; }
+        [DataMember(Order = 2)] public decimal Pnl { get; set; }
 
-        public static PnlByAsset Create(string asset, double pnl)
+        public static PnlByAsset Create(string asset, decimal pnl)
         {
             return new PnlByAsset() {Asset = asset, Pnl = pnl};
         }

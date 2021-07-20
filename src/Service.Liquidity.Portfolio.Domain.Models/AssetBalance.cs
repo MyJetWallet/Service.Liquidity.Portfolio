@@ -7,8 +7,8 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         public string BrokerId { get; set; }
         public string WalletName { get; set; }
         public string Asset { get; set; }
-        public double Volume { get; set; }
-        public double OpenPrice { get; set; }
+        public decimal Volume { get; set; }
+        public decimal OpenPrice { get; set; }
         
         public AssetBalance()
         {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
@@ -43,9 +44,9 @@ namespace Service.Liquidity.Portfolio.Jobs
                     instrument?.QuoteAsset,
                     elem.Source,
                     elem.Side,
-                    elem.Price,
-                    elem.Side == OrderSide.Buy ? elem.BaseVolume : -elem.BaseVolume,
-                    elem.Side == OrderSide.Buy ? -elem.QuoteVolume : elem.QuoteVolume,
+                    Convert.ToDecimal(elem.Price),
+                    Convert.ToDecimal(elem.Side == OrderSide.Buy ? elem.BaseVolume : -elem.BaseVolume),
+                    Convert.ToDecimal(elem.Side == OrderSide.Buy ? -elem.QuoteVolume : elem.QuoteVolume),
                     elem.DateTime,
                     PortfolioTrade.TopicName));
             }

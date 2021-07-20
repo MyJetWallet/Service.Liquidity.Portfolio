@@ -62,9 +62,9 @@ namespace Service.Liquidity.Portfolio.Jobs
                             instrument?.QuoteAsset,
                             wallet.Wallet.Name,
                             elem.Trade.Side, 
-                            elem.Trade.Price,
-                            elem.Trade.BaseVolume, 
-                            elem.Trade.QuoteVolume, 
+                            Convert.ToDecimal(elem.Trade.Price),
+                            Convert.ToDecimal(elem.Trade.BaseVolume), 
+                            Convert.ToDecimal(elem.Trade.QuoteVolume), 
                             elem.Trade.DateTime,
                             "spot-trades"));
                     }

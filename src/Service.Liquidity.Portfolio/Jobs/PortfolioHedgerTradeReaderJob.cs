@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Autofac;
 using DotNetCoreDecorators;
@@ -15,7 +16,7 @@ namespace Service.Liquidity.Portfolio.Jobs
         private readonly IPortfolioHandler _portfolioHandler;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
 
-        public PortfolioHedgerTradeReaderJob(ISubscriber<IReadOnlyList<ExchangeTradeMessage>> subscriber, 
+        public PortfolioHedgerTradeReaderJob(ISubscriber<IReadOnlyList<TradeMessage>> subscriber, 
             IPortfolioHandler portfolioHandler, 
             ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient)
         {
@@ -24,7 +25,7 @@ namespace Service.Liquidity.Portfolio.Jobs
             subscriber.Subscribe(HandleTrades);
         }
 
-        private async ValueTask HandleTrades(IReadOnlyList<ExchangeTradeMessage> trades)
+        private async ValueTask HandleTrades(IReadOnlyList<TradeMessage> trades)
         {
 
             var localTrades = new List<AssetPortfolioTrade>();
@@ -38,11 +39,11 @@ namespace Service.Liquidity.Portfolio.Jobs
                     elem.QuoteAsset,
                     elem.Source,
                     elem.Side,
-                    elem.Price,
-                    elem.Side == OrderSide.Buy ? elem.Volume : -elem.Volume,
-                    elem.Side == OrderSide.Buy ? -elem.OppositeVolume : elem.OppositeVolume,
+                    Convert.ToDecimal(elem.Price),
+                    Convert.ToDecimal(elem.Side == OrderSide.Buy ? elem.Volume : -elem.Volume),
+                    Convert.ToDecimal(elem.Side == OrderSide.Buy ? -elem.OppositeVolume : elem.OppositeVolume),
                     elem.Timestamp,
-                    ExchangeTradeMessage.TopicName)
+                    TradeMessage.TopicName)
                 {
                     Comment = elem.Comment,
                     User = elem.User
