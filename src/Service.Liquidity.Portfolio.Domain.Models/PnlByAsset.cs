@@ -5,13 +5,13 @@ namespace Service.Liquidity.Portfolio.Domain.Models
     [DataContract]
     public class PnlByAsset
     {
-        [DataMember(Order = 1)] public long TradeId { get; set; }
-        [DataMember(Order = 2)] public string Asset { get; set; }
-        [DataMember(Order = 3)] public decimal Pnl { get; set; }
+        [DataMember(Order = 1)] public string Asset { get; set; }
+        [DataMember(Order = 2)] public decimal Pnl { get; set; }
+        public AssetPortfolioTrade Trade { get; set; }
 
-        public static PnlByAsset Create(string asset, decimal pnl)
+        public static PnlByAsset Create(string asset, decimal pnl, AssetPortfolioTrade trade)
         {
-            return new PnlByAsset() {Asset = asset, Pnl = pnl};
+            return new PnlByAsset() {Asset = asset, Pnl = pnl, Trade = trade};
         }
     }
 }

@@ -146,7 +146,7 @@ namespace Service.Liquidity.Portfolio.Services
             balanceList.Add(quoteAssetBalance);
             
             var pnlByAsset = _portfolioManager.UpdateBalance(balanceList);
-            assetPortfolioTrade.ReleasePnl = pnlByAsset.Select(elem => PnlByAsset.Create(elem.Key, elem.Value)).ToList();
+            assetPortfolioTrade.ReleasePnl = pnlByAsset.Select(elem => PnlByAsset.Create(elem.Key, elem.Value, assetPortfolioTrade)).ToList();
         }
         
         public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory)
