@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Microsoft.Extensions.Logging;
@@ -10,43 +9,30 @@ using MyNoSqlServer.Abstractions;
 using Service.IndexPrices.Client;
 using Service.Liquidity.Engine.Domain.Models.NoSql;
 using Service.Liquidity.Portfolio.Domain.Models;
-using Service.Liquidity.Portfolio.Domain.Services;
-using Service.Liquidity.Portfolio.Grpc;
-using Service.Liquidity.Portfolio.Grpc.Models;
 
 namespace Service.Liquidity.Portfolio.Services
 {
-    public class AssetPortfolioBalanceStorage : IAssetPortfolioBalanceStorage, IStartable
+    public class AssetPortfolioManager
     {
-        private readonly ILogger<AssetPortfolioBalanceStorage> _logger;
+        private readonly ILogger<AssetPortfolioManager> _logger;
         private readonly IMyNoSqlServerDataReader<LpWalletNoSql> _noSqlDataReader;
-        private readonly IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> _settingsDataWriter;
         private readonly IIndexPricesClient _indexPricesClient;
-        
-        private AssetPortfolio _portfolio = new AssetPortfolio();
+
+        public AssetPortfolio _portfolio = new AssetPortfolio();
         private List<AssetBalance> _assetBalances = new List<AssetBalance>();
         private readonly object _locker = new object();
         public const string UsdAsset = "USD";
 
-        public AssetPortfolioBalanceStorage(ILogger<AssetPortfolioBalanceStorage> logger,
-            IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> settingsDataWriter,
+        public AssetPortfolioManager(ILogger<AssetPortfolioManager> logger,
             IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader,
             IIndexPricesClient indexPricesClient)
         {
             _logger = logger;
-            _settingsDataWriter = settingsDataWriter;
             _noSqlDataReader = noSqlDataReader;
             _indexPricesClient = indexPricesClient;
         }
 
-        public async Task SavePortfolioToNoSql()
-        {
-            await UpdatePortfolio();
-            await _settingsDataWriter.InsertOrReplaceAsync(AssetPortfolioBalanceNoSql.Create(_portfolio));
-            await ReloadBalance();
-        }
-
-        private async Task UpdatePortfolio()
+        public async Task UpdatePortfolio()
         {
             var assetBalanceCopy = new List<AssetBalance>();
             lock (_locker)
@@ -62,9 +48,9 @@ namespace Service.Liquidity.Portfolio.Services
             _portfolio.BalanceByAsset = GetBalanceByAsset(assetBalanceCopy, internalWallets);
         }
 
-        private async Task ReloadBalance()
+        public async Task ReloadBalance(IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> myNoSqlServerDataWriter)
         {
-            var nosqlBalance = (await _settingsDataWriter.GetAsync()).FirstOrDefault();
+            var nosqlBalance = (await myNoSqlServerDataWriter.GetAsync()).FirstOrDefault();
             _portfolio = nosqlBalance?.Balance ?? new AssetPortfolio();
             
             ReloadAssetBalances(_portfolio);
@@ -89,11 +75,6 @@ namespace Service.Liquidity.Portfolio.Services
                     });
                 });
             }
-        }
-
-        public void Start()
-        {
-            ReloadBalance().GetAwaiter().GetResult();
         }
         
         public Dictionary<string, decimal> UpdateBalance(IEnumerable<AssetBalanceDifference> differenceBalances)

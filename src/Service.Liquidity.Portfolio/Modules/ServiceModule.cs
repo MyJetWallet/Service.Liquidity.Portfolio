@@ -35,10 +35,8 @@ namespace Service.Liquidity.Portfolio.Modules
             builder.RegisterMyServiceBusPublisher<ChangeBalanceHistory>(serviceBusClient, ChangeBalanceHistory.TopicName, true);
             
             builder
-                .RegisterType<AssetPortfolioBalanceStorage>()
-                .As<IAssetPortfolioBalanceStorage>()
-                .As<IStartable>()
-                .AutoActivate()
+                .RegisterType<AssetPortfolioManager>()
+                .AsSelf()
                 .SingleInstance();
             
             builder

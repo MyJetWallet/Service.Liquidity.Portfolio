@@ -18,16 +18,16 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly IPortfolioHandler _portfolioHandler;
         private readonly IIndexPricesClient _indexPricesClient;
 
-        private readonly IAssetPortfolioBalanceStorage _portfolioBalanceStorage;
+        private readonly AssetPortfolioManager _portfolioManager;
 
         public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
             IPortfolioHandler portfolioHandler,
-            IAssetPortfolioBalanceStorage portfolioBalanceStorage,
+            AssetPortfolioManager portfolioManager,
             IIndexPricesClient indexPricesClient)
         {
             _logger = logger;
             _portfolioHandler = portfolioHandler;
-            _portfolioBalanceStorage = portfolioBalanceStorage;
+            _portfolioManager = portfolioManager;
             _indexPricesClient = indexPricesClient;
         }
 
@@ -62,7 +62,7 @@ namespace Service.Liquidity.Portfolio.Services
                     request.BalanceDifference, 
                     usdVolume,
                     indexPrice.UsdPrice);
-                var pnlByAsset = _portfolioBalanceStorage.UpdateBalance(new List<AssetBalanceDifference>() {newBalance});
+                var pnlByAsset = _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {newBalance});
                 
                 await _portfolioHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
                 {

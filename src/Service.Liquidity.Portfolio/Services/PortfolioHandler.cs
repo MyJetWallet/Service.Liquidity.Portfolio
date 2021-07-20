@@ -20,20 +20,20 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly TradeCacheStorage _tradeCacheStorage;
         private readonly IPublisher<AssetPortfolioTrade> _tradePublisher;
         private readonly IPublisher<ChangeBalanceHistory> _changeBalanceHistoryPublisher;
-        private readonly IAssetPortfolioBalanceStorage _portfolioBalanceStorage;
+        private readonly AssetPortfolioManager _portfolioManager;
         private readonly IIndexPricesClient _indexPricesClient;
 
         public PortfolioHandler(ILogger<PortfolioHandler> logger,
             TradeCacheStorage tradeCacheStorage,
             IPublisher<AssetPortfolioTrade> tradePublisher,
-            IAssetPortfolioBalanceStorage portfolioBalanceStorage,
+            AssetPortfolioManager portfolioManager,
             IPublisher<ChangeBalanceHistory> changeBalanceHistoryPublisher,
             IIndexPricesClient indexPricesClient)
         {
             _logger = logger;
             _tradeCacheStorage = tradeCacheStorage;
             _tradePublisher = tradePublisher;
-            _portfolioBalanceStorage = portfolioBalanceStorage;
+            _portfolioManager = portfolioManager;
             _changeBalanceHistoryPublisher = changeBalanceHistoryPublisher;
             _indexPricesClient = indexPricesClient;
         }
@@ -145,7 +145,7 @@ namespace Service.Liquidity.Portfolio.Services
             balanceList.Add(baseAssetBalance);
             balanceList.Add(quoteAssetBalance);
             
-            var pnlByAsset = _portfolioBalanceStorage.UpdateBalance(balanceList);
+            var pnlByAsset = _portfolioManager.UpdateBalance(balanceList);
             assetPortfolioTrade.ReleasePnl = pnlByAsset.Select(elem => PnlByAsset.Create(elem.Key, elem.Value)).ToList();
         }
         
