@@ -22,7 +22,7 @@ namespace Service.Liquidity.Portfolio.Services
         private List<AssetBalance> _assetBalances = new List<AssetBalance>();
         private readonly object _locker = new object();
         public const string UsdAsset = "USD";
-        private bool IsInit = false;
+        private bool _isInit = false;
 
         public AssetPortfolioManager(ILogger<AssetPortfolioManager> logger,
             IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader,
@@ -55,7 +55,7 @@ namespace Service.Liquidity.Portfolio.Services
             _portfolio = nosqlBalance?.Balance ?? new AssetPortfolio();
             ReloadAssetBalances(_portfolio);
 
-            IsInit = true;
+            _isInit = true;
         }
 
         private void ReloadAssetBalances(AssetPortfolio assetPortfolio)
@@ -81,7 +81,7 @@ namespace Service.Liquidity.Portfolio.Services
         
         public Dictionary<string, decimal> UpdateBalance(IEnumerable<AssetBalanceDifference> differenceBalances)
         {
-            if (!IsInit)
+            if (!_isInit)
             {
                 throw new Exception($"{nameof(AssetPortfolioManager)} is not init!!!");
             }
@@ -157,7 +157,7 @@ namespace Service.Liquidity.Portfolio.Services
 
         public List<AssetBalance> GetBalancesSnapshot()
         {
-            if (!IsInit)
+            if (!_isInit)
             {
                 throw new Exception($"{nameof(AssetPortfolioManager)} is not init!!!");
             }
