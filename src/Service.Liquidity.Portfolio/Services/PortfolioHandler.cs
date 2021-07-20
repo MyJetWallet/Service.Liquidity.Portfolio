@@ -6,6 +6,7 @@ using DotNetCoreDecorators;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Newtonsoft.Json;
+using Service.IndexPrices.Client;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
@@ -16,25 +17,25 @@ namespace Service.Liquidity.Portfolio.Services
     public class PortfolioHandler : IPortfolioHandler
     {
         private readonly ILogger<PortfolioHandler> _logger;
-        private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
         private readonly TradeCacheStorage _tradeCacheStorage;
         private readonly IPublisher<AssetPortfolioTrade> _tradePublisher;
         private readonly IPublisher<ChangeBalanceHistory> _changeBalanceHistoryPublisher;
         private readonly IAssetPortfolioBalanceStorage _portfolioBalanceStorage;
+        private readonly IIndexPricesClient _indexPricesClient;
 
         public PortfolioHandler(ILogger<PortfolioHandler> logger,
-            IAnotherAssetProjectionService anotherAssetProjectionService,
             TradeCacheStorage tradeCacheStorage,
             IPublisher<AssetPortfolioTrade> tradePublisher,
             IAssetPortfolioBalanceStorage portfolioBalanceStorage,
-            IPublisher<ChangeBalanceHistory> changeBalanceHistoryPublisher)
+            IPublisher<ChangeBalanceHistory> changeBalanceHistoryPublisher,
+            IIndexPricesClient indexPricesClient)
         {
             _logger = logger;
-            _anotherAssetProjectionService = anotherAssetProjectionService;
             _tradeCacheStorage = tradeCacheStorage;
             _tradePublisher = tradePublisher;
             _portfolioBalanceStorage = portfolioBalanceStorage;
             _changeBalanceHistoryPublisher = changeBalanceHistoryPublisher;
+            _indexPricesClient = indexPricesClient;
         }
         
         public async ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades)
@@ -98,28 +99,17 @@ namespace Service.Liquidity.Portfolio.Services
 
         private async ValueTask SetUsdProjection(List<AssetPortfolioTrade> trades)
         {
-            trades.ForEach(async trade =>
+            trades.ForEach(trade =>
             {
+                var (baseIndexPrice, baseUsdVolume) =
+                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(trade.BaseAsset, trade.BaseVolume);
+                trade.BaseVolumeInUsd = baseUsdVolume;
+                trade.BaseAssetPriceInUsd = baseIndexPrice.UsdPrice;
                 
-                var projectionOnBaseAsset = await _anotherAssetProjectionService.GetProjectionAsync(new GetProjectionRequest()
-                {
-                    BrokerId = trade.AssociateBrokerId,
-                    FromAsset = trade.BaseAsset,
-                    FromVolume = trade.BaseVolume,
-                    ToAsset = "USD"
-                });
-                trade.BaseVolumeInUsd = projectionOnBaseAsset.ProjectionVolume;
-                trade.BaseAssetPriceInUsd = 0; //todo: get prices from https://monfex.atlassian.net/browse/SPOTLIQ-119
-
-                var projectionOnQuoteAsset = await _anotherAssetProjectionService.GetProjectionAsync(new GetProjectionRequest()
-                {
-                    BrokerId = trade.AssociateBrokerId,
-                    FromAsset = trade.QuoteAsset,
-                    FromVolume = trade.QuoteVolume,
-                    ToAsset = "USD"
-                });
-                trade.QuoteVolumeInUsd = projectionOnQuoteAsset.ProjectionVolume;
-                trade.QuoteVolumeInUsd = 0; //todo: get prices from https://monfex.atlassian.net/browse/SPOTLIQ-119
+                var (quoteIndexPrice, quoteUsdVolume) =
+                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(trade.QuoteAsset, trade.QuoteVolume);
+                trade.QuoteVolumeInUsd = quoteUsdVolume;
+                trade.QuoteAssetPriceInUsd = quoteIndexPrice.UsdPrice; 
             });
         }
 

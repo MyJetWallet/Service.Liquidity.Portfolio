@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MyJetWallet.Sdk.NoSql;
 using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.DataReader;
 using MyServiceBus.TcpClient;
@@ -13,54 +14,38 @@ namespace Service.Liquidity.Portfolio
         private readonly ILogger<ApplicationLifetimeManager> _logger;
         private readonly MyServiceBusTcpClient _myServiceBusTcpClient;
         private readonly MyNoSqlTcpClient _myNoSqlTcpClient;
-        private readonly MyNoSqlTcpClient[] _myNoSqlTcpClientManagers;
         private readonly BalancePersistJob _balancePersistJob;
+        private readonly MyNoSqlClientLifeTime _myNoSqlClientLifeTime;
         
         public ApplicationLifetimeManager(IHostApplicationLifetime appLifetime,
             ILogger<ApplicationLifetimeManager> logger,
             MyServiceBusTcpClient myServiceBusTcpClient,
             MyNoSqlTcpClient myNoSqlTcpClient,
-            MyNoSqlTcpClient[] myNoSqlTcpClientManagers,
-            BalancePersistJob balancePersistJob)
+            BalancePersistJob balancePersistJob,
+            MyNoSqlClientLifeTime myNoSqlClientLifeTime)
             : base(appLifetime)
         {
             _logger = logger;
             _myServiceBusTcpClient = myServiceBusTcpClient;
             _myNoSqlTcpClient = myNoSqlTcpClient;
-            _myNoSqlTcpClientManagers = myNoSqlTcpClientManagers;
             _balancePersistJob = balancePersistJob;
+            _myNoSqlClientLifeTime = myNoSqlClientLifeTime;
         }
 
         protected override void OnStarted()
         {
             _logger.LogInformation("OnStarted has been called.");
+            _balancePersistJob.Start();
             _myNoSqlTcpClient.Start();
             _myServiceBusTcpClient.Start();
-            _balancePersistJob.Start();
-            
-            foreach(var client in _myNoSqlTcpClientManagers)
-            {
-                client.Start();
-            }
+            _myNoSqlClientLifeTime.Start();
         }
 
         protected override void OnStopping()
         {
             _logger.LogInformation("OnStopping has been called.");
             _myNoSqlTcpClient.Stop();
-            
-            foreach(var client in _myNoSqlTcpClientManagers)
-            {
-                try
-                {
-                    client.Start();
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-            }
-            
+            _myNoSqlClientLifeTime.Stop();
             try
             {
                 _myServiceBusTcpClient.Stop();

@@ -7,6 +7,7 @@ using Autofac;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.Abstractions;
+using Service.IndexPrices.Client;
 using Service.Liquidity.Engine.Domain.Models.NoSql;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
@@ -20,8 +21,7 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly ILogger<AssetPortfolioBalanceStorage> _logger;
         private readonly IMyNoSqlServerDataReader<LpWalletNoSql> _noSqlDataReader;
         private readonly IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> _settingsDataWriter;
-        
-        private readonly IAnotherAssetProjectionService _anotherAssetProjectionService;
+        private readonly IIndexPricesClient _indexPricesClient;
         
         private AssetPortfolio _portfolio = new AssetPortfolio();
         private List<AssetBalance> _assetBalances = new List<AssetBalance>();
@@ -31,12 +31,12 @@ namespace Service.Liquidity.Portfolio.Services
         public AssetPortfolioBalanceStorage(ILogger<AssetPortfolioBalanceStorage> logger,
             IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> settingsDataWriter,
             IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader,
-            IAnotherAssetProjectionService anotherAssetProjectionService)
+            IIndexPricesClient indexPricesClient)
         {
             _logger = logger;
             _settingsDataWriter = settingsDataWriter;
             _noSqlDataReader = noSqlDataReader;
-            _anotherAssetProjectionService = anotherAssetProjectionService;
+            _indexPricesClient = indexPricesClient;
         }
 
         public async Task SavePortfolioToNoSql()
@@ -275,18 +275,10 @@ namespace Service.Liquidity.Portfolio.Services
         
         private decimal GetUsdProjectionByBalance(AssetBalance balance)
         {
-            const string projectionAsset = "USD";
+            var (indexPrice, usdVolume) =
+                _indexPricesClient.GetIndexPriceByAssetVolumeAsync(balance.Asset, balance.Volume);
             
-            var usdProjectionEntity = _anotherAssetProjectionService.GetProjectionAsync(
-                new GetProjectionRequest()
-                {
-                    BrokerId = balance.BrokerId,
-                    FromAsset = balance.Asset,
-                    FromVolume = balance.Volume,
-                    ToAsset = projectionAsset
-                }).Result;
-
-            return Math.Round(usdProjectionEntity.ProjectionVolume, 2);
+            return usdVolume;
         }
     }
 }

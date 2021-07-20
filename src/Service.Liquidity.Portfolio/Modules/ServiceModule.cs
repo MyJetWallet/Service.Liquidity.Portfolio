@@ -70,10 +70,6 @@ namespace Service.Liquidity.Portfolio.Modules
                 .AsSelf()
                 .SingleInstance();
             builder
-                .RegisterType<AnotherAssetProjectionService>()
-                .As<IAnotherAssetProjectionService>()
-                .SingleInstance();
-            builder
                 .RegisterType<AssetPortfolioService>()
                 .As<IAssetPortfolioService>()
                 .SingleInstance();

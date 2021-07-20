@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Service.IndexPrices.Client;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
@@ -15,16 +16,19 @@ namespace Service.Liquidity.Portfolio.Services
     {
         private readonly ILogger<AssetPortfolioService> _logger;
         private readonly IPortfolioHandler _portfolioHandler;
+        private readonly IIndexPricesClient _indexPricesClient;
 
         private readonly IAssetPortfolioBalanceStorage _portfolioBalanceStorage;
 
         public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
             IPortfolioHandler portfolioHandler,
-            IAssetPortfolioBalanceStorage portfolioBalanceStorage)
+            IAssetPortfolioBalanceStorage portfolioBalanceStorage,
+            IIndexPricesClient indexPricesClient)
         {
             _logger = logger;
             _portfolioHandler = portfolioHandler;
             _portfolioBalanceStorage = portfolioBalanceStorage;
+            _indexPricesClient = indexPricesClient;
         }
 
         public async Task<UpdateBalanceResponse> UpdateBalance(UpdateBalanceRequest request)
@@ -48,15 +52,17 @@ namespace Service.Liquidity.Portfolio.Services
 
             try
             {
+                var (indexPrice, usdVolume) =
+                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(request.Asset, request.BalanceDifference);
+                
                 var updateDate = DateTime.UtcNow;
                 var newBalance = new AssetBalanceDifference(request.BrokerId, 
                     request.WalletName,
                     request.Asset, 
                     request.BalanceDifference, 
-                    0, // todo: get price from https://monfex.atlassian.net/browse/SPOTLIQ-119
-                    0); // todo: get price from https://monfex.atlassian.net/browse/SPOTLIQ-119
+                    usdVolume,
+                    indexPrice.UsdPrice);
                 var pnlByAsset = _portfolioBalanceStorage.UpdateBalance(new List<AssetBalanceDifference>() {newBalance});
-                
                 
                 await _portfolioHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
                 {
