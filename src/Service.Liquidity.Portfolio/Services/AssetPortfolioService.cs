@@ -63,7 +63,7 @@ namespace Service.Liquidity.Portfolio.Services
                     usdVolume,
                     indexPrice.UsdPrice);
                 
-                var pnlByAsset = _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {newBalance});
+                var pnlByAsset = _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {newBalance}, true);
                 
                 await _portfolioHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
                 {
