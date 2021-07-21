@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 namespace Service.Liquidity.Portfolio.Grpc.Models
 {
     [DataContract]
-    public class UpdateBalanceRequest
+    public class SetBalanceRequest
     {
         [DataMember(Order = 1)] public string BrokerId { get; set; }
         [DataMember(Order = 2)] public string WalletName { get; set; }

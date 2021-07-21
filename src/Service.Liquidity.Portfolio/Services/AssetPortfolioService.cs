@@ -31,7 +31,7 @@ namespace Service.Liquidity.Portfolio.Services
             _indexPricesClient = indexPricesClient;
         }
 
-        public async Task<UpdateBalanceResponse> UpdateBalance(UpdateBalanceRequest request)
+        public async Task<SetBalanceResponse> SetBalance(SetBalanceRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.BrokerId) ||
                 string.IsNullOrWhiteSpace(request.WalletName) ||
@@ -40,15 +40,15 @@ namespace Service.Liquidity.Portfolio.Services
                 string.IsNullOrWhiteSpace(request.User))
             {
                 _logger.LogError($"Bad request entity: {JsonConvert.SerializeObject(request)}");
-                return new UpdateBalanceResponse() {Success = false, ErrorMessage = "Incorrect entity"};
+                return new SetBalanceResponse() {Success = false, ErrorMessage = "Incorrect entity"};
             }
 
-            if (request.BalanceDifference == 0)
-            {
-                const string message = "Balance difference is zero.";
-                _logger.LogError(message);
-                return new UpdateBalanceResponse() {Success = false, ErrorMessage = message};
-            }
+            //if (request.BalanceDifference == 0)
+            //{
+            //    const string message = "Balance difference is zero.";
+            //    _logger.LogError(message);
+            //    return new SetBalanceResponse() {Success = false, ErrorMessage = message};
+            //}
 
             try
             {
@@ -62,6 +62,7 @@ namespace Service.Liquidity.Portfolio.Services
                     request.BalanceDifference, 
                     usdVolume,
                     indexPrice.UsdPrice);
+                
                 var pnlByAsset = _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {newBalance});
                 
                 await _portfolioHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
@@ -78,10 +79,10 @@ namespace Service.Liquidity.Portfolio.Services
             catch (Exception exception)
             {
                 _logger.LogError($"Update failed: {JsonConvert.SerializeObject(exception)}");
-                return new UpdateBalanceResponse() {Success = false, ErrorMessage = exception.Message};
+                return new SetBalanceResponse() {Success = false, ErrorMessage = exception.Message};
             }
 
-            return new UpdateBalanceResponse() {Success = true};
+            return new SetBalanceResponse() {Success = true};
         }
     }
 }

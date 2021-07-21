@@ -151,6 +151,14 @@ namespace Service.Liquidity.Portfolio.Services
         
         public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory)
         {
+            var balanceBeforeUpdate = _portfolioManager
+                ._portfolio?
+                .BalanceByAsset?
+                    .FirstOrDefault(elem => elem.Asset == balanceHistory.Asset)?
+                .WalletBalances?
+                    .FirstOrDefault(elem => elem.WalletName == balanceHistory.WalletName)?
+                    .NetVolume;
+            balanceHistory.BalanceBeforeUpdate = balanceBeforeUpdate ?? 0m;
             await _changeBalanceHistoryPublisher.PublishAsync(balanceHistory);
         }
     }

@@ -79,13 +79,13 @@ namespace Service.Liquidity.Portfolio.Services
             }
         }
         
-        public Dictionary<string, decimal> UpdateBalance(IEnumerable<AssetBalanceDifference> differenceBalances)
+        public Dictionary<string, decimal> UpdateBalance(IEnumerable<AssetBalanceDifference> differenceBalances, bool forceSet = false)
         {
             if (!_isInit)
             {
                 throw new Exception($"{nameof(AssetPortfolioManager)} is not init!!!");
             }
-            
+
             lock (_locker)
             {
                 var pnlByAsset = new Dictionary<string, decimal>();
@@ -94,6 +94,12 @@ namespace Service.Liquidity.Portfolio.Services
                     var balance = GetBalanceEntity(difference.BrokerId, difference.WalletName, difference.Asset);
                     var usdBalance = GetBalanceEntity(difference.BrokerId, difference.WalletName, UsdAsset);
                     
+                    // for SetBalance
+                    if (forceSet)
+                    {
+                        balance.Volume = 0m;
+                    }
+
                     if ((balance.Volume > 0 && difference.Volume > 0) || (balance.Volume < 0 && difference.Volume < 0))
                     {
                         balance.Volume += difference.Volume;
