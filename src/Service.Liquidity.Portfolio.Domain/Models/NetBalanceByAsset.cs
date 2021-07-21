@@ -10,6 +10,8 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 2)] public List<NetBalanceByWallet> WalletBalances { get; set; }
         [DataMember(Order = 4)] public decimal NetVolume { get; set; }
         [DataMember(Order = 5)] public decimal NetUsdVolume { get; set; }
+        [DataMember(Order = 6)] public decimal OpenPriceAvg { get; set; }
+        [DataMember(Order = 7)] public decimal UnrealisedPnl { get; set; }
         
         public NetBalanceByAsset()
         {

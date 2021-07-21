@@ -45,8 +45,8 @@ namespace Service.Liquidity.Portfolio.Services
             }
             var internalWallets = _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
 
-            _portfolio.BalanceByWallet = GetBalanceByWallet(assetBalanceCopy, internalWallets);
             _portfolio.BalanceByAsset = GetBalanceByAsset(assetBalanceCopy, internalWallets);
+            _portfolio.BalanceByWallet = GetBalanceByWallet(_portfolio.BalanceByAsset);
         }
 
         public async Task ReloadBalance(IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> myNoSqlServerDataWriter)
@@ -204,70 +204,57 @@ namespace Service.Liquidity.Portfolio.Services
                         BrokerId = balancesSnapshot.First(elem => elem.WalletName == wallet).BrokerId,
                         WalletName = wallet
                     };
-                    var sumByWallet = balancesSnapshot
-                        .Where(elem => elem.WalletName == wallet && elem.Asset == asset)
-                        .Sum(elem => elem.Volume);
-                    
-                    if (sumByWallet != 0)
-                    {
-                        balanceByWallet.NetVolume = sumByWallet;
-                        balanceByWallet.NetUsdVolume = balancesSnapshot
-                            .Where(elem => elem.WalletName == wallet && elem.Asset == asset)
-                            .Sum(GetUsdProjectionByBalance);
-                    }
 
+                    var entity =
+                        balancesSnapshot.FirstOrDefault(elem => elem.Asset == asset && elem.WalletName == wallet);
+
+                    if (entity != null)
+                    {
+                        balanceByWallet.NetVolume = entity.Volume;
+                        balanceByWallet.OpenPrice = entity.OpenPrice;
+                        balanceByWallet.NetUsdVolume = GetUsdProjectionByBalance(entity);
+                        balanceByWallet.UnreleasedPnlUsd = balanceByWallet.NetUsdVolume -
+                                                           balanceByWallet.NetVolume * balanceByWallet.OpenPrice;
+                    }
                     balanceByWallet.IsInternal = internalWallets.Contains(wallet);
+                    
                     balanceByAsset.WalletBalances.Add(balanceByWallet);
                 }
-
-                var netVolumeByInternalWallets = balanceByAsset.WalletBalances
-                    .Where(elem => internalWallets.Contains(elem.WalletName))
-                    .Sum(elem => elem.NetVolume);
-                var netVolumeByExternalWallets = balanceByAsset.WalletBalances
-                    .Where(elem => !internalWallets.Contains(elem.WalletName))
-                    .Sum(elem => elem.NetVolume);
-                balanceByAsset.NetVolume = netVolumeByInternalWallets+netVolumeByExternalWallets;
-
-                var netUsdVolumeByInternalWallets = balanceByAsset.WalletBalances
-                    .Where(elem => internalWallets.Contains(elem.WalletName))
-                    .Sum(elem => elem.NetUsdVolume);
-                var netUsdVolumeByExternalWallets = balanceByAsset.WalletBalances
-                    .Where(elem => !internalWallets.Contains(elem.WalletName))
-                    .Sum(elem => elem.NetUsdVolume);
-                balanceByAsset.NetUsdVolume = netUsdVolumeByInternalWallets+netUsdVolumeByExternalWallets;
                 
+                balanceByAsset.NetVolume = balanceByAsset.WalletBalances
+                    .Sum(elem => elem.NetVolume);
+                
+                balanceByAsset.NetUsdVolume = balanceByAsset.WalletBalances
+                    .Sum(elem => elem.NetUsdVolume);
+                
+                balanceByAsset.UnrealisedPnl = balanceByAsset.WalletBalances
+                    .Sum(elem => elem.UnreleasedPnlUsd);
+                
+                balanceByAsset.OpenPriceAvg = balanceByAsset.WalletBalances
+                    .Sum(elem => elem.OpenPrice * elem.NetVolume) / balanceByAsset.NetVolume;
+
                 balanceByAssetCollection.Add(balanceByAsset);
             }
 
             return balanceByAssetCollection;
         }
-
-        private List<NetBalanceByWallet> GetBalanceByWallet(List<AssetBalance> balancesSnapshot,
-            ICollection<string> internalWallets)
+        
+        private List<NetBalanceByWallet> GetBalanceByWallet(List<NetBalanceByAsset> balancesByAssets)
         {
             using var a = MyTelemetry.StartActivity("GetBalanceByWallet");
-            
-            var balanceByWallet = balancesSnapshot
-                .Select(elem => elem.WalletName)
-                .Distinct()
-                .Select(walletName => new NetBalanceByWallet() {WalletName = walletName})
-                .ToList();
 
-            foreach (var balanceByWalletElem in balanceByWallet)
-            {
-                var balanceByWalletCollection = balancesSnapshot
-                    .Where(assetBalance => balanceByWalletElem.WalletName == assetBalance.WalletName)
-                    .ToList();
-
-                balanceByWalletElem.BrokerId = balanceByWalletCollection.First().BrokerId;
-                balanceByWalletElem.NetUsdVolume = balanceByWalletCollection
-                    .Sum(GetUsdProjectionByBalance);
-            }
-
-            balanceByWallet.ForEach(elem =>
-            {
-                elem.IsInternal = internalWallets.Contains(elem.WalletName);
-            });
+            var balanceByWallet = balancesByAssets
+                .SelectMany(elem => elem.WalletBalances)
+                .GroupBy(x => new {x.WalletName, x.BrokerId, x.IsInternal})
+                .Select(group => new NetBalanceByWallet()
+                {
+                    BrokerId = group.Key.BrokerId,
+                    IsInternal = group.Key.IsInternal,
+                    WalletName = group.Key.WalletName,
+                    NetVolume = group.Sum(e => e.NetVolume),
+                    NetUsdVolume = group.Sum(e => e.NetUsdVolume),
+                    UnreleasedPnlUsd = group.Sum(e => e.UnreleasedPnlUsd)
+                }).ToList();
             
             return balanceByWallet;
         }
