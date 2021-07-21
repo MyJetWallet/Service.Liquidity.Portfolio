@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -63,6 +64,14 @@ namespace Service.Liquidity.Portfolio.Services
                     usdVolume,
                     indexPrice.UsdPrice);
                 
+                var balanceBeforeUpdate = _portfolioManager
+                    ._portfolio?
+                    .BalanceByAsset?
+                    .FirstOrDefault(elem => elem.Asset == request.Asset)?
+                    .WalletBalances?
+                    .FirstOrDefault(elem => elem.WalletName == request.WalletName)?
+                    .NetVolume;
+                
                 var pnlByAsset = _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {newBalance}, true);
                 
                 await _portfolioHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
@@ -73,7 +82,8 @@ namespace Service.Liquidity.Portfolio.Services
                     UpdateDate = updateDate,
                     User = request.User,
                     VolumeDifference = request.BalanceDifference,
-                    WalletName = request.WalletName
+                    WalletName = request.WalletName,
+                    BalanceBeforeUpdate = balanceBeforeUpdate ?? 0m
                 });
             }
             catch (Exception exception)
