@@ -10,16 +10,11 @@ namespace Service.Liquidity.Portfolio.Services
 
         private int _cacheLimit = 100;
 
-        public TradeCacheStorage()
-        {
-            //SetTradeCacheOnInit().GetAwaiter().GetResult();
-        }
-
         public void SaveInCache(AssetPortfolioTrade assetPortfolioTrade)
         {
             lock (_tradeCache)
             {
-                if (_tradeCache.Any())
+                if (_tradeCache != null && _tradeCache.Count >= _cacheLimit)
                 {
                     _tradeCache.RemoveAt(0);
                 }
@@ -33,27 +28,9 @@ namespace Service.Liquidity.Portfolio.Services
         {
             lock (_tradeCache)
             {
-                return _tradeCache.FirstOrDefault(elem => elem.TradeId == id);
+                return _tradeCache?.FirstOrDefault(elem => elem.TradeId == id);
             }
         }
-
-        //private async Task SetTradeCacheOnInit()
-        //{
-        //    await using var ctx = DatabaseContext.Create(_dbContextOptionsBuilder);
-        //    var trades = ctx.Trades
-        //        .OrderByDescending(trade => trade.Id)
-        //        .Take(100)
-        //        .ToList();
-//
-        //    lock (_tradeCache)
-        //    {
-        //        foreach (var trade in trades.OrderByDescending(trade => trade.Id))
-        //        {
-        //            var cacheEntity = new TradeCache(trade.TradeId, trade.ErrorMessage);
-        //            _tradeCache.Add(cacheEntity);
-        //        }
-        //    }
-        //}
     }
 
     public class TradeCache
