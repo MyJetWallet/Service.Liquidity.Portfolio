@@ -114,9 +114,9 @@ namespace Service.Liquidity.Portfolio.Services
                     var decreaseVolumeAbs = Math.Min(Math.Abs(balance.Volume), Math.Abs(difference.Volume));
                     var decreaseVolume = balance.Volume > 0 ? decreaseVolumeAbs : -decreaseVolumeAbs;
 
-                    if (decreaseVolume > 0)
+                    if (decreaseVolumeAbs > 0)
                     {
-                        var releasePnl = (difference.CurrentPriceInUsd - balance.OpenPrice) / decreaseVolume;
+                        var releasePnl = (difference.CurrentPriceInUsd - balance.OpenPrice) * decreaseVolume;
                         usdBalance.Volume += releasePnl;
                         balance.Volume = 0;
 

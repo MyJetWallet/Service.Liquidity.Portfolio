@@ -115,10 +115,17 @@ namespace Service.Liquidity.Portfolio.Services
 
         private async ValueTask SaveTrades(List<AssetPortfolioTrade> trades)
         {
-            trades.ForEach(async elem =>
+            foreach (var trade in trades)
             {
-                await _tradePublisher.PublishAsync(elem);
-            });
+                try
+                {
+                    await _tradePublisher.PublishAsync(trade);
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception.Message);
+                }
+            }
         }
 
         private void UpdateBalanceByTrade(AssetPortfolioTrade assetPortfolioTrade)

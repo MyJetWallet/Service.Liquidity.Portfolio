@@ -56,6 +56,7 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             QuoteVolume = quoteVolume;
             DateTime = dateTime;
             Source = source;
+            ReleasePnl = new List<PnlByAsset>();
         }
 
         public AssetPortfolioTrade(string associateBrokerId,
@@ -81,6 +82,7 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             TradeId = Guid.NewGuid().ToString("N");
             DateTime = DateTime.UtcNow;
             Side = baseVolume < 0 ? OrderSide.Sell : OrderSide.Buy;
+            ReleasePnl = new List<PnlByAsset>();
         }
 
         public AssetPortfolioTrade()
