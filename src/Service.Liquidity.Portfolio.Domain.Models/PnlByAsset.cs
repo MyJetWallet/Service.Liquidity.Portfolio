@@ -8,11 +8,10 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         public long Id { get; set; }
         [DataMember(Order = 1)] public string Asset { get; set; }
         [DataMember(Order = 2)] public decimal Pnl { get; set; }
-        public AssetPortfolioTrade Trade { get; set; }
 
-        public static PnlByAsset Create(string asset, decimal pnl, AssetPortfolioTrade trade)
+        public static PnlByAsset Create(string asset, decimal pnl)
         {
-            return new PnlByAsset() {Asset = asset, Pnl = pnl, Trade = trade};
+            return new PnlByAsset() {Asset = asset, Pnl = pnl};
         }
     }
 }
