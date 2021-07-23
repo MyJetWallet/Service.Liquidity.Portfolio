@@ -37,8 +37,12 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             string baseAsset,
             string quoteAsset,
             string walletName,
-            OrderSide side, decimal price, decimal baseVolume,
-            decimal quoteVolume, DateTime dateTime, string source)
+            OrderSide side,
+            decimal price,
+            decimal baseVolume,
+            decimal quoteVolume, 
+            DateTime dateTime, 
+            string source)
         {
             TradeId = tradeId;
             AssociateBrokerId = associateBrokerId;

@@ -37,7 +37,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                     elem.AssociateSymbol,
                     elem.BaseAsset,
                     elem.QuoteAsset,
-                    elem.Source,
+                    elem.AssociateWalletId,
                     elem.Side,
                     Convert.ToDecimal(elem.Price),
                     Convert.ToDecimal(elem.Side == OrderSide.Buy ? elem.Volume : -elem.Volume),
