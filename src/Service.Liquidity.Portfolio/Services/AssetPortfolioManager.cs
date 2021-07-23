@@ -72,7 +72,8 @@ namespace Service.Liquidity.Portfolio.Services
                             Asset = balanceByAsset.Asset,
                             BrokerId = balanceByAssetAndWallet.BrokerId,
                             Volume = balanceByAssetAndWallet.NetVolume,
-                            WalletName = balanceByAssetAndWallet.WalletName
+                            WalletName = balanceByAssetAndWallet.WalletName,
+                            OpenPrice = balanceByAssetAndWallet.OpenPrice
                         });
                     });
                 });
