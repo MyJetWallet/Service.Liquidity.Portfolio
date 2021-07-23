@@ -40,8 +40,8 @@ namespace Service.Liquidity.Portfolio.Jobs
                     elem.AssociateWalletId,
                     elem.Side,
                     Convert.ToDecimal(elem.Price),
-                    Convert.ToDecimal(elem.Side == OrderSide.Buy ? elem.Volume : -elem.Volume),
-                    Convert.ToDecimal(elem.Side == OrderSide.Buy ? -elem.OppositeVolume : elem.OppositeVolume),
+                    Convert.ToDecimal(elem.Volume),
+                    Convert.ToDecimal(elem.OppositeVolume),
                     elem.Timestamp,
                     TradeMessage.TopicName)
                 {
