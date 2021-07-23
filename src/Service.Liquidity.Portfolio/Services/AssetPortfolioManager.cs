@@ -162,22 +162,6 @@ namespace Service.Liquidity.Portfolio.Services
             return balance;
         }
 
-        public List<AssetBalance> GetBalancesSnapshot()
-        {
-            if (!_isInit)
-            {
-                throw new Exception($"{nameof(AssetPortfolioManager)} is not init!!!");
-            }
-            
-            using var a = MyTelemetry.StartActivity("GetBalancesSnapshot");
-            
-            lock(_locker)
-            {
-                var newList = _assetBalances.Select(elem => elem.Copy()).ToList();
-                return newList;
-            }
-        }
-
         private List<NetBalanceByAsset> GetBalanceByAsset(List<AssetBalance> balancesSnapshot,
             ICollection<string> internalWallets)
         {
@@ -230,9 +214,16 @@ namespace Service.Liquidity.Portfolio.Services
                 
                 balanceByAsset.UnrealisedPnl = balanceByAsset.WalletBalances
                     .Sum(elem => elem.UnreleasedPnlUsd);
-                
-                balanceByAsset.OpenPriceAvg = balanceByAsset.WalletBalances
-                    .Sum(elem => elem.OpenPrice * elem.NetVolume) / balanceByAsset.NetVolume;
+
+                if (balanceByAsset.NetVolume != 0)
+                {
+                    balanceByAsset.OpenPriceAvg = balanceByAsset.WalletBalances
+                        .Sum(elem => elem.OpenPrice * elem.NetVolume) / balanceByAsset.NetVolume;
+                }
+                else
+                {
+                    balanceByAsset.OpenPriceAvg = 0;
+                }
 
                 balanceByAssetCollection.Add(balanceByAsset);
             }
