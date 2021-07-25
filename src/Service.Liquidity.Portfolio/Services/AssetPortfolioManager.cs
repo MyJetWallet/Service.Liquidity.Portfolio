@@ -32,6 +32,26 @@ namespace Service.Liquidity.Portfolio.Services
             _noSqlDataReader = noSqlDataReader;
             _indexPricesClient = indexPricesClient;
         }
+        
+        public AssetPortfolio GetPortfolioSnapshot()
+        {
+            if (!_isInit)
+            {
+                throw new Exception($"{nameof(AssetPortfolioManager)} is not init!!!");
+            }
+            
+            using var a = MyTelemetry.StartActivity("GetPortfolioSnapshot");
+            
+            lock(_locker)
+            {
+                var portfolioCopy = new AssetPortfolio
+                {
+                    BalanceByAsset = _portfolio.BalanceByAsset.Select(e => e.GetCopy()).ToList(),
+                    BalanceByWallet = _portfolio.BalanceByWallet.Select(e => e.GetCopy()).ToList()
+                };
+                return portfolioCopy;
+            }
+        }
 
         public async Task UpdatePortfolio()
         {

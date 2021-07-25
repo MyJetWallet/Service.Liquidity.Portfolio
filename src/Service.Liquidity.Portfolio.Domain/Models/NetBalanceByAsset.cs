@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Service.Liquidity.Portfolio.Domain.Models
@@ -15,6 +16,19 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         
         public NetBalanceByAsset()
         {
+        }
+
+        public NetBalanceByAsset GetCopy()
+        {
+            return new NetBalanceByAsset()
+            {
+                Asset = Asset,
+                NetVolume = NetVolume,
+                NetUsdVolume = NetUsdVolume,
+                OpenPriceAvg = OpenPriceAvg,
+                UnrealisedPnl = UnrealisedPnl,
+                WalletBalances = WalletBalances.Select(e => e.GetCopy()).ToList()
+            };
         }
     }
 }

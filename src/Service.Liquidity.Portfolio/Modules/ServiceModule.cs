@@ -71,6 +71,11 @@ namespace Service.Liquidity.Portfolio.Modules
                 .RegisterType<AssetPortfolioService>()
                 .As<IAssetPortfolioService>()
                 .SingleInstance();
+            
+            builder
+                .RegisterType<PrometheusMetricsInterceptor>()
+                .AsSelf()
+                .SingleInstance();
 
             builder.RegisterMyServiceBusSubscriberBatch<PortfolioTrade>(serviceBusClient,
                 PortfolioTrade.TopicName,

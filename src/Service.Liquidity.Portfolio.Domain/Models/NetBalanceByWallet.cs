@@ -12,5 +12,19 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 5)] public bool IsInternal { get; set; }
         [DataMember(Order = 6)] public decimal OpenPrice { get; set; }
         [DataMember(Order = 7)] public decimal UnreleasedPnlUsd { get; set; }
+
+        public NetBalanceByWallet GetCopy()
+        {
+            return new NetBalanceByWallet
+            {
+                BrokerId = BrokerId,
+                WalletName = WalletName,
+                NetVolume = NetVolume,
+                NetUsdVolume = NetUsdVolume,
+                IsInternal = IsInternal,
+                OpenPrice = OpenPrice,
+                UnreleasedPnlUsd = UnreleasedPnlUsd
+            };
+        }
     }
 }
