@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Prometheus;
 using Service.Liquidity.Portfolio.Domain.Models;
 
@@ -22,7 +23,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                 new GaugeConfiguration { LabelNames = new[] { "asset", "wallet"} });
         
         private static readonly Gauge UnreleasedPnlByAssetAndWallet = Metrics
-            .CreateGauge("jet_portfolio_asset_wallet_unrealised_pl",
+            .CreateGauge("jet_portfolio_asset_wallet_unrealised_pnl",
                 "Unreleased pnl by asset and wallet.",
                 new GaugeConfiguration { LabelNames = new[] { "asset", "wallet"} });
         
@@ -44,7 +45,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                 new GaugeConfiguration { LabelNames = new[] { "asset"} });
         
         private static readonly Gauge UnreleasedPnlByAsset = Metrics
-            .CreateGauge("jet_portfolio_asset_unrealised_pl",
+            .CreateGauge("jet_portfolio_asset_unrealised_pnl",
                 "Unreleased pnl by asset.",
                 new GaugeConfiguration { LabelNames = new[] { "asset"} });
         
@@ -65,9 +66,20 @@ namespace Service.Liquidity.Portfolio.Jobs
                 new GaugeConfiguration { LabelNames = new[] { "wallet"} });
         
         private static readonly Gauge UnreleasedPnlByWallet = Metrics
-            .CreateGauge("jet_portfolio_wallet_unrealised_pl",
+            .CreateGauge("jet_portfolio_wallet_unrealised_pnl",
                 "Unreleased pnl by wallet.",
                 new GaugeConfiguration { LabelNames = new[] { "wallet"} });
+        
+        
+        private static readonly Gauge VolumeUsdTotal = Metrics
+            .CreateGauge("jet_portfolio_total_net",
+                "Total volume in USD.",
+                new GaugeConfiguration ());
+        
+        private static readonly Gauge UnreleasedPnlTotal = Metrics
+            .CreateGauge("jet_portfolio_total_unrealised_pnl",
+                "Total unreleased pnl.",
+                new GaugeConfiguration());
 
 
         public void SetMetrics(AssetPortfolio portfolio)
@@ -86,6 +98,17 @@ namespace Service.Liquidity.Portfolio.Jobs
             {
                 SetMetricsByWallet(balanceByWallet);
             }
+            
+            SetMetricsByTotal(portfolio);
+        }
+
+        private void SetMetricsByTotal(AssetPortfolio portfolio)
+        {
+            var totalNetUsd = portfolio.BalanceByWallet.Sum(e => e.NetUsdVolume);
+            var totalPnl = portfolio.BalanceByWallet.Sum(e => e.UnreleasedPnlUsd);
+            
+            VolumeUsdTotal.Set(Convert.ToDouble(totalNetUsd));
+            UnreleasedPnlTotal.Set(Convert.ToDouble(totalPnl));
         }
 
         private void SetMetricsByWallet(NetBalanceByWallet balanceByWallet)
