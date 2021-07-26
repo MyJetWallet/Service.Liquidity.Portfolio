@@ -84,7 +84,7 @@ namespace Service.Liquidity.Portfolio.Services
                 new GaugeConfiguration());
         
         
-        private static readonly Counter TradeCount = Metrics
+        private static readonly Counter TradeCounter = Metrics
             .CreateCounter("jet_portfolio_trade_count",
                 "Trade count of portfolio processed.",
                 new CounterConfiguration() { LabelNames = new[] { "market", "wallet", "source"} });
@@ -95,7 +95,13 @@ namespace Service.Liquidity.Portfolio.Services
                 new GaugeConfiguration { LabelNames = new[] { "market", "wallet", "source"} });
 
 
-        public void SetMetrics(AssetPortfolio portfolio)
+        private static readonly Counter ChangeBalanceCounter = Metrics
+            .CreateCounter("jet_portfolio_manual change_balance",
+                "Change balance operation count.",
+                new CounterConfiguration());
+
+
+        public void SetPortfolioMetrics(AssetPortfolio portfolio)
         {
             foreach (var balanceByAsset in portfolio.BalanceByAsset)
             {
@@ -115,9 +121,9 @@ namespace Service.Liquidity.Portfolio.Services
             SetMetricsByTotal(portfolio);
         }
 
-        public void SetMetrics(AssetPortfolioTrade trade)
+        public void SetTradeMetrics(AssetPortfolioTrade trade)
         {
-            TradeCount
+            TradeCounter
                 .WithLabels(trade.AssociateSymbol, trade.WalletName, trade.Source)
                 .Inc();
 
@@ -128,6 +134,11 @@ namespace Service.Liquidity.Portfolio.Services
             TradeVolume
                 .WithLabels(trade.AssociateSymbol, trade.WalletName, trade.Source)
                 .Set(lastVolume + Math.Abs(Convert.ToDouble(trade.BaseVolume)));
+        }
+
+        public void SetChangeBalanceMetrics(ChangeBalanceHistory changeBalanceHistory)
+        {
+            ChangeBalanceCounter.Inc();
         }
 
         private void SetMetricsByTotal(AssetPortfolio portfolio)

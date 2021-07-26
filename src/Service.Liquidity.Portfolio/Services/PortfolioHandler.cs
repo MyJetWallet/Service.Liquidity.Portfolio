@@ -120,7 +120,7 @@ namespace Service.Liquidity.Portfolio.Services
             {
                 try
                 {
-                    _portfolioMetricsInterceptor.SetMetrics(trade);
+                    _portfolioMetricsInterceptor.SetTradeMetrics(trade);
                     await _tradePublisher.PublishAsync(trade);
                 }
                 catch (Exception exception)
@@ -160,6 +160,7 @@ namespace Service.Liquidity.Portfolio.Services
         
         public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory)
         {
+            _portfolioMetricsInterceptor.SetChangeBalanceMetrics(balanceHistory);
             await _changeBalanceHistoryPublisher.PublishAsync(balanceHistory);
         }
     }

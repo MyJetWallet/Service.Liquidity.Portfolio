@@ -47,7 +47,7 @@ namespace Service.Liquidity.Portfolio.Jobs
 
             var portfolioSnapshot = _assetPortfolioManager.GetPortfolioSnapshot();
             
-            _portfolioMetricsInterceptor.SetMetrics(portfolioSnapshot);
+            _portfolioMetricsInterceptor.SetPortfolioMetrics(portfolioSnapshot);
             
             await _settingsDataWriter.InsertOrReplaceAsync(AssetPortfolioBalanceNoSql.Create(portfolioSnapshot));
             
