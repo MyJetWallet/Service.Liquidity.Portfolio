@@ -9,8 +9,6 @@ using Newtonsoft.Json;
 using Service.IndexPrices.Client;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
-using Service.Liquidity.Portfolio.Grpc;
-using Service.Liquidity.Portfolio.Grpc.Models;
 
 namespace Service.Liquidity.Portfolio.Services
 {
@@ -22,13 +20,15 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly IPublisher<ChangeBalanceHistory> _changeBalanceHistoryPublisher;
         private readonly AssetPortfolioManager _portfolioManager;
         private readonly IIndexPricesClient _indexPricesClient;
+        private readonly PortfolioMetricsInterceptor _portfolioMetricsInterceptor;
 
         public PortfolioHandler(ILogger<PortfolioHandler> logger,
             TradeCacheStorage tradeCacheStorage,
             IPublisher<AssetPortfolioTrade> tradePublisher,
             AssetPortfolioManager portfolioManager,
             IPublisher<ChangeBalanceHistory> changeBalanceHistoryPublisher,
-            IIndexPricesClient indexPricesClient)
+            IIndexPricesClient indexPricesClient,
+            PortfolioMetricsInterceptor portfolioMetricsInterceptor)
         {
             _logger = logger;
             _tradeCacheStorage = tradeCacheStorage;
@@ -36,6 +36,7 @@ namespace Service.Liquidity.Portfolio.Services
             _portfolioManager = portfolioManager;
             _changeBalanceHistoryPublisher = changeBalanceHistoryPublisher;
             _indexPricesClient = indexPricesClient;
+            _portfolioMetricsInterceptor = portfolioMetricsInterceptor;
         }
         
         public async ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades)
@@ -119,6 +120,7 @@ namespace Service.Liquidity.Portfolio.Services
             {
                 try
                 {
+                    _portfolioMetricsInterceptor.SetMetrics(trade);
                     await _tradePublisher.PublishAsync(trade);
                 }
                 catch (Exception exception)

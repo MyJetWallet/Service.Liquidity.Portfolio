@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Grpc.Core.Interceptors;
 using Prometheus;
 using Service.Liquidity.Portfolio.Domain.Models;
 
-namespace Service.Liquidity.Portfolio.Jobs
+namespace Service.Liquidity.Portfolio.Services
 {
-    public class PrometheusMetricsInterceptor
+    public class PortfolioMetricsInterceptor : Interceptor
     {
         private static readonly Gauge VolumeByAssetAndWallet = Metrics
             .CreateGauge("jet_portfolio_asset_wallet_amount",
@@ -80,6 +82,17 @@ namespace Service.Liquidity.Portfolio.Jobs
             .CreateGauge("jet_portfolio_total_unrealised_pnl",
                 "Total unreleased pnl.",
                 new GaugeConfiguration());
+        
+        
+        private static readonly Counter TradeCount = Metrics
+            .CreateCounter("jet_portfolio_trade_count",
+                "Trade count of portfolio processed.",
+                new CounterConfiguration() { LabelNames = new[] { "market", "wallet", "source"} });
+        
+        private static readonly Gauge TradeVolume = Metrics
+            .CreateGauge("jet_portfolio_trade_volume",
+                "Trade volume of portfolio processed.",
+                new GaugeConfiguration { LabelNames = new[] { "market", "wallet", "source"} });
 
 
         public void SetMetrics(AssetPortfolio portfolio)
@@ -100,6 +113,21 @@ namespace Service.Liquidity.Portfolio.Jobs
             }
             
             SetMetricsByTotal(portfolio);
+        }
+
+        public void SetMetrics(AssetPortfolioTrade trade)
+        {
+            TradeCount
+                .WithLabels(trade.AssociateSymbol, trade.WalletName, trade.Source)
+                .Inc();
+
+            var lastVolume = TradeVolume
+                .WithLabels(trade.AssociateSymbol, trade.WalletName, trade.Source)
+                .Value;
+            
+            TradeVolume
+                .WithLabels(trade.AssociateSymbol, trade.WalletName, trade.Source)
+                .Set(lastVolume + Math.Abs(Convert.ToDouble(trade.BaseVolume)));
         }
 
         private void SetMetricsByTotal(AssetPortfolio portfolio)

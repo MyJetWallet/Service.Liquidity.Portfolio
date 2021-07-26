@@ -15,17 +15,17 @@ namespace Service.Liquidity.Portfolio.Jobs
         private readonly MyTaskTimer _timer;
         private readonly AssetPortfolioManager _assetPortfolioManager;
         private readonly IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> _settingsDataWriter;
-        private readonly PrometheusMetricsInterceptor _prometheusMetricsInterceptor;
+        private readonly PortfolioMetricsInterceptor _portfolioMetricsInterceptor;
 
         public BalancePersistJob(ILogger<BalancePersistJob> logger,
             AssetPortfolioManager assetPortfolioManager,
             IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> settingsDataWriter,
-            PrometheusMetricsInterceptor prometheusMetricsInterceptor)
+            PortfolioMetricsInterceptor portfolioMetricsInterceptor)
         {
             _logger = logger;
             _assetPortfolioManager = assetPortfolioManager;
             _settingsDataWriter = settingsDataWriter;
-            _prometheusMetricsInterceptor = prometheusMetricsInterceptor;
+            _portfolioMetricsInterceptor = portfolioMetricsInterceptor;
             _timer = new MyTaskTimer(nameof(BalancePersistJob), TimeSpan.FromSeconds(Program.Settings.UpdateNoSqlBalancesTimerInSeconds), _logger, DoTime);
             Console.WriteLine($"BalancePersistJob timer: {TimeSpan.FromSeconds(Program.Settings.UpdateNoSqlBalancesTimerInSeconds)}");
         }
@@ -47,7 +47,7 @@ namespace Service.Liquidity.Portfolio.Jobs
 
             var portfolioSnapshot = _assetPortfolioManager.GetPortfolioSnapshot();
             
-            _prometheusMetricsInterceptor.SetMetrics(portfolioSnapshot);
+            _portfolioMetricsInterceptor.SetMetrics(portfolioSnapshot);
             
             await _settingsDataWriter.InsertOrReplaceAsync(AssetPortfolioBalanceNoSql.Create(portfolioSnapshot));
             

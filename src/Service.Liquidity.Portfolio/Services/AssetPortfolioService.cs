@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Service.IndexPrices.Client;
 using Service.Liquidity.Portfolio.Domain.Models;
-using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
 using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
