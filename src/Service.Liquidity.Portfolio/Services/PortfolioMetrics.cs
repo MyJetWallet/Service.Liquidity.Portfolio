@@ -93,7 +93,7 @@ namespace Service.Liquidity.Portfolio.Services
                 new GaugeConfiguration { LabelNames = new[] { "market", "wallet", "source"} });
         
         private static readonly Gauge TradeReleasedPnl = Metrics
-            .CreateGauge("jet_portfolio_trade_releasedPnl",
+            .CreateGauge("jet_portfolio_total_releasedPnl",
                 "Trade released pnl of portfolio processed.",
                 new GaugeConfiguration { LabelNames = new[] { "market", "wallet", "source"} });
 
