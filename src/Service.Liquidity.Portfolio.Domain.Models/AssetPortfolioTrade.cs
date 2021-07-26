@@ -29,7 +29,8 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 18)] public string Source { get; set; }
         [DataMember(Order = 19)] public string Comment { get; set; }
         [DataMember(Order = 20)] public string User { get; set; }
-        [DataMember(Order = 21)] public List<PnlByAsset> ReleasePnl { get; set; }
+        [DataMember(Order = 21)] public decimal TotalReleasePnl { get; set; }
+        [DataMember(Order = 22)] public List<PnlByAsset> ReleasePnl { get; set; }
 
         public AssetPortfolioTrade(string tradeId, 
             string associateBrokerId,
