@@ -106,7 +106,6 @@ namespace Service.Liquidity.Portfolio.Services
             {
                 throw new Exception($"{nameof(AssetPortfolioManager)} is not init!!!");
             }
-
             lock (_locker)
             {
                 var pnlByAsset = new Dictionary<string, decimal>();
@@ -120,7 +119,6 @@ namespace Service.Liquidity.Portfolio.Services
                     {
                         balance.Volume = 0m;
                     }
-
                     if ((balance.Volume > 0 && difference.Volume > 0) || (balance.Volume < 0 && difference.Volume < 0))
                     {
                         balance.Volume += difference.Volume;
@@ -129,7 +127,6 @@ namespace Service.Liquidity.Portfolio.Services
                             (difference.Volume + balance.Volume);
                         continue;
                     }
-
                     var originalVolume = balance.Volume;
                     var decreaseVolumeAbs = Math.Min(Math.Abs(balance.Volume), Math.Abs(difference.Volume));
                     var decreaseVolume = balance.Volume > 0 ? decreaseVolumeAbs : -decreaseVolumeAbs;
@@ -137,7 +134,7 @@ namespace Service.Liquidity.Portfolio.Services
                     if (decreaseVolumeAbs > 0)
                     {
                         var releasePnl = (difference.CurrentPriceInUsd - balance.OpenPrice) * decreaseVolume;
-                        usdBalance.Volume += releasePnl;
+                        usdBalance.Volume -= releasePnl;
                         balance.Volume = 0;
 
                         if (!pnlByAsset.TryGetValue(balance.Asset, out var pnl))
@@ -148,17 +145,14 @@ namespace Service.Liquidity.Portfolio.Services
                         pnlByAsset[balance.Asset] = pnl;
                         continue;
                     }
-
                     if (decreaseVolumeAbs < Math.Abs(difference.Volume))
                     {
                         balance.Volume = difference.Volume + originalVolume;
                         balance.OpenPrice = difference.CurrentPriceInUsd; 
                         continue;
                     }
-
                     balance.Volume += difference.Volume;
                 }
-
                 return pnlByAsset;
             }
         }
