@@ -20,7 +20,7 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly IPublisher<ChangeBalanceHistory> _changeBalanceHistoryPublisher;
         private readonly AssetPortfolioManager _portfolioManager;
         private readonly IIndexPricesClient _indexPricesClient;
-        private readonly PortfolioMetricsInterceptor _portfolioMetricsInterceptor;
+        private readonly PortfolioMetrics _portfolioMetrics;
 
         public PortfolioHandler(ILogger<PortfolioHandler> logger,
             TradeCacheStorage tradeCacheStorage,
@@ -28,7 +28,7 @@ namespace Service.Liquidity.Portfolio.Services
             AssetPortfolioManager portfolioManager,
             IPublisher<ChangeBalanceHistory> changeBalanceHistoryPublisher,
             IIndexPricesClient indexPricesClient,
-            PortfolioMetricsInterceptor portfolioMetricsInterceptor)
+            PortfolioMetrics portfolioMetrics)
         {
             _logger = logger;
             _tradeCacheStorage = tradeCacheStorage;
@@ -36,7 +36,7 @@ namespace Service.Liquidity.Portfolio.Services
             _portfolioManager = portfolioManager;
             _changeBalanceHistoryPublisher = changeBalanceHistoryPublisher;
             _indexPricesClient = indexPricesClient;
-            _portfolioMetricsInterceptor = portfolioMetricsInterceptor;
+            _portfolioMetrics = portfolioMetrics;
         }
         
         public async ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades)
@@ -120,7 +120,7 @@ namespace Service.Liquidity.Portfolio.Services
             {
                 try
                 {
-                    _portfolioMetricsInterceptor.SetTradeMetrics(trade);
+                    _portfolioMetrics.SetTradeMetrics(trade);
                     await _tradePublisher.PublishAsync(trade);
                 }
                 catch (Exception exception)
@@ -160,7 +160,7 @@ namespace Service.Liquidity.Portfolio.Services
         
         public async Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory)
         {
-            _portfolioMetricsInterceptor.SetChangeBalanceMetrics(balanceHistory);
+            _portfolioMetrics.SetChangeBalanceMetrics(balanceHistory);
             await _changeBalanceHistoryPublisher.PublishAsync(balanceHistory);
         }
     }

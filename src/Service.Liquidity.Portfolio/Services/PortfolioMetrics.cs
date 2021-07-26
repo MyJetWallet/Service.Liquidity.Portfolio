@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using Grpc.Core.Interceptors;
 using Prometheus;
 using Service.Liquidity.Portfolio.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Services
 {
-    public class PortfolioMetricsInterceptor : Interceptor
+    public class PortfolioMetrics
     {
         private static readonly Gauge VolumeByAssetAndWallet = Metrics
             .CreateGauge("jet_portfolio_asset_wallet_amount",
@@ -93,6 +91,11 @@ namespace Service.Liquidity.Portfolio.Services
             .CreateGauge("jet_portfolio_trade_volume",
                 "Trade volume of portfolio processed.",
                 new GaugeConfiguration { LabelNames = new[] { "market", "wallet", "source"} });
+        
+        private static readonly Gauge TradeReleasedPnl = Metrics
+            .CreateGauge("jet_portfolio_trade_releasedPnl",
+                "Trade released pnl of portfolio processed.",
+                new GaugeConfiguration { LabelNames = new[] { "market", "wallet", "source"} });
 
 
         private static readonly Counter ChangeBalanceCounter = Metrics
@@ -126,14 +129,14 @@ namespace Service.Liquidity.Portfolio.Services
             TradeCounter
                 .WithLabels(trade.AssociateSymbol, trade.WalletName, trade.Source)
                 .Inc();
-
-            var lastVolume = TradeVolume
-                .WithLabels(trade.AssociateSymbol, trade.WalletName, trade.Source)
-                .Value;
             
             TradeVolume
                 .WithLabels(trade.AssociateSymbol, trade.WalletName, trade.Source)
-                .Set(lastVolume + Math.Abs(Convert.ToDouble(trade.BaseVolume)));
+                .Inc(Math.Abs(Convert.ToDouble(trade.BaseVolume)));
+
+            TradeReleasedPnl
+                .WithLabels(trade.AssociateSymbol, trade.WalletName, trade.Source)
+                .Inc(Convert.ToDouble(trade.ReleasePnl.Sum(e => e.Pnl)));
         }
 
         public void SetChangeBalanceMetrics(ChangeBalanceHistory changeBalanceHistory)

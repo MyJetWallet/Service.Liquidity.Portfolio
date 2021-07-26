@@ -73,7 +73,7 @@ namespace Service.Liquidity.Portfolio.Modules
                 .SingleInstance();
             
             builder
-                .RegisterType<PortfolioMetricsInterceptor>()
+                .RegisterType<PortfolioMetrics>()
                 .AsSelf()
                 .SingleInstance();
 
