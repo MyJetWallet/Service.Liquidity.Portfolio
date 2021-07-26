@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -32,7 +33,8 @@ namespace Service.Liquidity.Portfolio.Jobs
 
         public async Task Start()
         {
-            await _assetPortfolioManager.ReloadBalance(_settingsDataWriter);
+            var nosqlBalance = (await _settingsDataWriter.GetAsync()).FirstOrDefault();
+            await _assetPortfolioManager.ReloadBalance(nosqlBalance?.Balance);
             _timer.Start();
         }
 
@@ -43,15 +45,11 @@ namespace Service.Liquidity.Portfolio.Jobs
 
         private async Task SavePortfolio()
         {
-            await _assetPortfolioManager.UpdatePortfolio();
-
             var portfolioSnapshot = _assetPortfolioManager.GetPortfolioSnapshot();
             
             _portfolioMetrics.SetPortfolioMetrics(portfolioSnapshot);
             
             await _settingsDataWriter.InsertOrReplaceAsync(AssetPortfolioBalanceNoSql.Create(portfolioSnapshot));
-            
-            await _assetPortfolioManager.ReloadBalance(_settingsDataWriter);
         }
 
         public async Task Stop()

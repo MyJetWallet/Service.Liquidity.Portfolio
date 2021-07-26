@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Autofac;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.Abstractions;
@@ -39,11 +38,12 @@ namespace Service.Liquidity.Portfolio.Services
             {
                 throw new Exception($"{nameof(AssetPortfolioManager)} is not init!!!");
             }
-            
             using var a = MyTelemetry.StartActivity("GetPortfolioSnapshot");
-            
+
             lock(_locker)
             {
+                UpdatePortfolio();
+                
                 var portfolioCopy = new AssetPortfolio
                 {
                     BalanceByAsset = _portfolio.BalanceByAsset.Select(e => e.GetCopy()).ToList(),
@@ -53,26 +53,23 @@ namespace Service.Liquidity.Portfolio.Services
             }
         }
 
-        public async Task UpdatePortfolio()
+        private void UpdatePortfolio()
         {
             var assetBalanceCopy = new List<AssetBalance>();
-            lock (_locker)
+            _assetBalances.ForEach(elem =>
             {
-                _assetBalances.ForEach(elem =>
-                {
-                    assetBalanceCopy.Add(elem.Copy());
-                });
-            }
+                assetBalanceCopy.Add(elem.Copy());
+            });
+            
             var internalWallets = _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
 
             _portfolio.BalanceByAsset = GetBalanceByAsset(assetBalanceCopy, internalWallets);
             _portfolio.BalanceByWallet = GetBalanceByWallet(_portfolio.BalanceByAsset);
         }
 
-        public async Task ReloadBalance(IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> myNoSqlServerDataWriter)
+        public async Task ReloadBalance(AssetPortfolio balances)
         {
-            var nosqlBalance = (await myNoSqlServerDataWriter.GetAsync()).FirstOrDefault();
-            _portfolio = nosqlBalance?.Balance ?? new AssetPortfolio();
+            _portfolio = balances ?? new AssetPortfolio();
             ReloadAssetBalances(_portfolio);
 
             _isInit = true;
@@ -119,12 +116,12 @@ namespace Service.Liquidity.Portfolio.Services
                     {
                         balance.Volume = 0m;
                     }
-                    if ((balance.Volume > 0 && difference.Volume > 0) || (balance.Volume < 0 && difference.Volume < 0))
+                    if ((balance.Volume >= 0 && difference.Volume > 0) || (balance.Volume <= 0 && difference.Volume < 0))
                     {
-                        balance.Volume += difference.Volume;
                         balance.OpenPrice =
                             (balance.Volume * balance.OpenPrice + difference.Volume * difference.CurrentPriceInUsd) /
                             (difference.Volume + balance.Volume);
+                        balance.Volume += difference.Volume;
                         continue;
                     }
                     var originalVolume = balance.Volume;
@@ -143,15 +140,12 @@ namespace Service.Liquidity.Portfolio.Services
                         }
                         pnl += releasePnl;
                         pnlByAsset[balance.Asset] = pnl;
-                        continue;
                     }
                     if (decreaseVolumeAbs < Math.Abs(difference.Volume))
                     {
                         balance.Volume = difference.Volume + originalVolume;
                         balance.OpenPrice = difference.CurrentPriceInUsd; 
-                        continue;
                     }
-                    balance.Volume += difference.Volume;
                 }
                 return pnlByAsset;
             }
