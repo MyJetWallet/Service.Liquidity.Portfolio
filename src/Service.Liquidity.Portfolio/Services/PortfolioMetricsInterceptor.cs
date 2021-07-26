@@ -98,7 +98,7 @@ namespace Service.Liquidity.Portfolio.Services
         private static readonly Counter ChangeBalanceCounter = Metrics
             .CreateCounter("jet_portfolio_manual change_balance",
                 "Change balance operation count.",
-                new CounterConfiguration());
+                new CounterConfiguration{ LabelNames = new []{"broker", "wallet", "asset"}});
 
 
         public void SetPortfolioMetrics(AssetPortfolio portfolio)
@@ -138,7 +138,9 @@ namespace Service.Liquidity.Portfolio.Services
 
         public void SetChangeBalanceMetrics(ChangeBalanceHistory changeBalanceHistory)
         {
-            ChangeBalanceCounter.Inc();
+            ChangeBalanceCounter
+                .WithLabels(changeBalanceHistory.BrokerId, changeBalanceHistory.WalletName, changeBalanceHistory.Asset)
+                .Inc();
         }
 
         private void SetMetricsByTotal(AssetPortfolio portfolio)
