@@ -128,7 +128,14 @@ namespace Service.Liquidity.Portfolio.Services
                     var decreaseVolumeAbs = Math.Min(Math.Abs(balance.Volume), Math.Abs(difference.Volume));
                     if (decreaseVolumeAbs > 0)
                     {
-                        balance.Volume = 0;
+                        if (balance.Volume > 0)
+                            balance.Volume -= decreaseVolumeAbs;
+                        else
+                            balance.Volume += decreaseVolumeAbs;
+                        
+                        
+                        if (balance.Volume == 0)
+                            balance.OpenPrice = 0;
                     }
                     if (decreaseVolumeAbs < Math.Abs(difference.Volume))
                     {
