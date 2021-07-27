@@ -136,7 +136,7 @@ namespace Service.Liquidity.Portfolio.Services
 
             TradeReleasedPnl
                 .WithLabels(trade.AssociateSymbol, trade.WalletName, trade.Source)
-                .Inc(Convert.ToDouble(trade.ReleasePnl.Sum(e => e.Pnl)));
+                .Inc(Convert.ToDouble(trade.TotalReleasePnl));
         }
 
         public void SetChangeBalanceMetrics(ChangeBalanceHistory changeBalanceHistory)

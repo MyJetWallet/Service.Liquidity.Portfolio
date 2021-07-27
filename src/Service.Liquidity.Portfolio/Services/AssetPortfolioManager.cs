@@ -20,7 +20,9 @@ namespace Service.Liquidity.Portfolio.Services
         public AssetPortfolio _portfolio = new AssetPortfolio();
         private List<AssetBalance> _assetBalances = new List<AssetBalance>();
         private readonly object _locker = new object();
-        public const string UsdAsset = "USD";
+        public const string UsdAsset = "USD"; // todo: get from config ASSET AND BROKER
+        private const string Broker = "jetwallet"; // todo: get from config ASSET AND BROKER
+        public const string PlWalletName = "PL Balance";// todo: get from config
         private bool _isInit = false;
 
         public AssetPortfolioManager(ILogger<AssetPortfolioManager> logger,
@@ -97,7 +99,7 @@ namespace Service.Liquidity.Portfolio.Services
             }
         }
         
-        public Dictionary<string, decimal> UpdateBalance(IEnumerable<AssetBalanceDifference> differenceBalances, bool forceSet = false)
+        public void UpdateBalance(IEnumerable<AssetBalanceDifference> differenceBalances, bool forceSet = false)
         {
             if (!_isInit)
             {
@@ -105,11 +107,9 @@ namespace Service.Liquidity.Portfolio.Services
             }
             lock (_locker)
             {
-                var pnlByAsset = new Dictionary<string, decimal>();
                 foreach (var difference in differenceBalances)
                 {
                     var balance = GetBalanceEntity(difference.BrokerId, difference.WalletName, difference.Asset);
-                    var usdBalance = GetBalanceEntity(difference.BrokerId, difference.WalletName, UsdAsset);
                     
                     // for SetBalance
                     if (forceSet)
@@ -126,20 +126,9 @@ namespace Service.Liquidity.Portfolio.Services
                     }
                     var originalVolume = balance.Volume;
                     var decreaseVolumeAbs = Math.Min(Math.Abs(balance.Volume), Math.Abs(difference.Volume));
-                    var decreaseVolume = balance.Volume > 0 ? decreaseVolumeAbs : -decreaseVolumeAbs;
-
                     if (decreaseVolumeAbs > 0)
                     {
-                        var releasePnl = (difference.CurrentPriceInUsd - balance.OpenPrice) * decreaseVolume;
-                        usdBalance.Volume -= releasePnl;
                         balance.Volume = 0;
-
-                        if (!pnlByAsset.TryGetValue(balance.Asset, out var pnl))
-                        {
-                            pnl = 0;
-                        }
-                        pnl += releasePnl;
-                        pnlByAsset[balance.Asset] = pnl;
                     }
                     if (decreaseVolumeAbs < Math.Abs(difference.Volume))
                     {
@@ -147,8 +136,42 @@ namespace Service.Liquidity.Portfolio.Services
                         balance.OpenPrice = difference.CurrentPriceInUsd; 
                     }
                 }
-                return pnlByAsset;
             }
+        }
+
+        public decimal FixReleasedPnl()
+        {
+            lock (_locker)
+            {
+                var snapshot = GetPortfolioSnapshot();
+
+                var netUsd = snapshot.BalanceByWallet.Sum(e => e.NetUsdVolume);
+                var unrPnl = snapshot.BalanceByWallet.Sum(e => e.UnreleasedPnlUsd);
+
+                var releasedPnl = netUsd - unrPnl;
+                var usdBalance = GetReleasedPnlEntity();
+                usdBalance.Volume -= releasedPnl;
+                return releasedPnl;
+            }
+        }
+
+        private AssetBalance GetReleasedPnlEntity()
+        {
+            var balance = _assetBalances.FirstOrDefault(elem =>
+                elem.WalletName == PlWalletName && elem.Asset == UsdAsset);
+            if (balance == null)
+            {
+                balance = new AssetBalance()
+                {
+                    Asset = UsdAsset,
+                    BrokerId = Broker,
+                    Volume = 0,
+                    WalletName = PlWalletName,
+                    OpenPrice = 1
+                };
+                _assetBalances.Add(balance);
+            }
+            return balance;
         }
 
         private AssetBalance GetBalanceEntity(string brokerId, string walletName, string asset)
@@ -162,7 +185,8 @@ namespace Service.Liquidity.Portfolio.Services
                     Asset = asset,
                     BrokerId = brokerId,
                     Volume = 0,
-                    WalletName = walletName
+                    WalletName = walletName,
+                    OpenPrice = 0
                 };
                 _assetBalances.Add(balance);
             }

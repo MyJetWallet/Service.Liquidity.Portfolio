@@ -42,14 +42,6 @@ namespace Service.Liquidity.Portfolio.Services
                 _logger.LogError($"Bad request entity: {JsonConvert.SerializeObject(request)}");
                 return new SetBalanceResponse() {Success = false, ErrorMessage = "Incorrect entity"};
             }
-
-            //if (request.BalanceDifference == 0)
-            //{
-            //    const string message = "Balance difference is zero.";
-            //    _logger.LogError(message);
-            //    return new SetBalanceResponse() {Success = false, ErrorMessage = message};
-            //}
-
             try
             {
                 var (indexPrice, usdVolume) =
@@ -71,7 +63,7 @@ namespace Service.Liquidity.Portfolio.Services
                     .FirstOrDefault(elem => elem.WalletName == request.WalletName)?
                     .NetVolume;
                 
-                var pnlByAsset = _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {newBalance}, true);
+                _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {newBalance}, true);
                 
                 await _portfolioHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
                 {

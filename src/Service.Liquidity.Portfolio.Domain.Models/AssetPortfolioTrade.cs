@@ -30,7 +30,6 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 19)] public string Comment { get; set; }
         [DataMember(Order = 20)] public string User { get; set; }
         [DataMember(Order = 21)] public decimal TotalReleasePnl { get; set; }
-        [DataMember(Order = 22)] public List<PnlByAsset> ReleasePnl { get; set; }
 
         public AssetPortfolioTrade(string tradeId, 
             string associateBrokerId,
@@ -57,7 +56,6 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             QuoteVolume = quoteVolume;
             DateTime = dateTime;
             Source = source;
-            ReleasePnl = new List<PnlByAsset>();
         }
 
         public AssetPortfolioTrade(string associateBrokerId,
@@ -83,7 +81,6 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             TradeId = Guid.NewGuid().ToString("N");
             DateTime = DateTime.UtcNow;
             Side = baseVolume < 0 ? OrderSide.Sell : OrderSide.Buy;
-            ReleasePnl = new List<PnlByAsset>();
         }
 
         public AssetPortfolioTrade()
