@@ -6,7 +6,8 @@ namespace Service.Liquidity.Portfolio.Grpc.Simulation.Models
     [DataContract]
     public class GetSimulationListResponse
     {
-        [DataMember]
-        public List<PortfolioSimulation> SimulationList { get; set; }
+        [DataMember(Order = 1)] public bool Success { get; set; }
+        [DataMember(Order = 2)] public string ErrorText { get; set; }
+        [DataMember(Order = 3)] public List<PortfolioSimulation> SimulationList { get; set; }
     }
 }

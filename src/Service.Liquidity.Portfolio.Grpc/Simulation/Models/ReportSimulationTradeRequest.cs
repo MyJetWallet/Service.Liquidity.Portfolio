@@ -5,25 +5,25 @@ namespace Service.Liquidity.Portfolio.Grpc.Simulation.Models
     [DataContract]
     public class ReportSimulationTradeRequest
     {
-        [DataMember]
+        [DataMember(Order = 1)]
         public long SimulationId { get; set; }
         
-        [DataMember]
+        [DataMember(Order = 2)]
         public string BaseAsset { get; set; }
         
-        [DataMember]
+        [DataMember(Order = 3)]
         public string QuoteAsset { get; set; }
         
-        [DataMember]
+        [DataMember(Order = 4)]
         public decimal BaseVolume { get; set; }
         
-        [DataMember]
+        [DataMember(Order = 5)]
         public decimal QuoteVolume { get; set; }
         
-        [DataMember]
+        [DataMember(Order = 6)]
         public decimal BaseAssetIndexPrice { get; set; }
         
-        [DataMember]
+        [DataMember(Order = 7)]
         public decimal QuoteAssetIndexPrice { get; set; }
     }
 }

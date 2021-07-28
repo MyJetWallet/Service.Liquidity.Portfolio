@@ -65,7 +65,9 @@ namespace Service.Liquidity.Portfolio
         {
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<ServiceModule>();
-            builder.RegisterModule(new ClientsModule());
+            builder.RegisterModule<ClientsModule>();
+
+            builder.RegisterModule<SimulationModule>();
         }
     }
 }

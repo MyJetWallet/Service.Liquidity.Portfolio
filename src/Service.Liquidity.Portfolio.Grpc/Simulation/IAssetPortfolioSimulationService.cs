@@ -8,7 +8,7 @@ namespace Service.Liquidity.Portfolio.Grpc.Simulation
     public interface IAssetPortfolioSimulationService
     {
         [OperationContract]
-        public Task<PortfolioSimulation> CreateNewSimulation();
+        public Task<CreateNewSimulationResponse> CreateNewSimulation();
 
         public Task<GetSimulationListResponse> GetSimulationList();
         
