@@ -1,7 +1,8 @@
 ﻿using Autofac;
 using Service.Liquidity.Portfolio.Grpc.Simulation;
+using Service.Liquidity.Portfolio.Simulation.Services;
 
-namespace Service.Liquidity.Portfolio.Simulation
+namespace Service.Liquidity.Portfolio.Simulation.Modules
 {
     public class SimulationModule : Module
     {

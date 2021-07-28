@@ -11,6 +11,8 @@ using MyJetWallet.Sdk.Service;
 using Prometheus;
 using ProtoBuf.Grpc.Server;
 using Service.Liquidity.Portfolio.Grpc.Simulation;
+using Service.Liquidity.Portfolio.Simulation.Modules;
+using Service.Liquidity.Portfolio.Simulation.Services;
 using SimpleTrading.BaseMetrics;
 using SimpleTrading.ServiceStatusReporterConnector;
 

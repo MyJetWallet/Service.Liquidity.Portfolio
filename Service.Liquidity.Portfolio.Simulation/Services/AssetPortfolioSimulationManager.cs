@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Service.Liquidity.Portfolio.Grpc.Simulation.Models;
 
-namespace Service.Liquidity.Portfolio.Simulation
+namespace Service.Liquidity.Portfolio.Simulation.Services
 {
     public class AssetPortfolioSimulationManager
     {
