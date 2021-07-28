@@ -1,22 +1,20 @@
 ﻿using System.Reflection;
+using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Autofac;
 using MyJetWallet.Sdk.GrpcMetrics;
 using MyJetWallet.Sdk.GrpcSchema;
 using MyJetWallet.Sdk.Service;
 using Prometheus;
 using ProtoBuf.Grpc.Server;
-using Service.Liquidity.Portfolio.Grpc;
-using Service.Liquidity.Portfolio.Modules;
-using Service.Liquidity.Portfolio.Services;
+using Service.Liquidity.Portfolio.Grpc.Simulation;
 using SimpleTrading.BaseMetrics;
 using SimpleTrading.ServiceStatusReporterConnector;
 
-namespace Service.Liquidity.Portfolio
+namespace Service.Liquidity.Portfolio.Simulation
 {
     public class Startup
     {
@@ -50,7 +48,7 @@ namespace Service.Liquidity.Portfolio
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcSchema<AssetPortfolioService, IAssetPortfolioService>();
+                endpoints.MapGrpcSchema<AssetPortfolioSimulationService, IAssetPortfolioSimulationService>();
                 
                 endpoints.MapGrpcSchemaRegistry();
 
@@ -63,9 +61,7 @@ namespace Service.Liquidity.Portfolio
 
         public void ConfigureContainer(ContainerBuilder builder)
         {
-            builder.RegisterModule<SettingsModule>();
-            builder.RegisterModule<ServiceModule>();
-            builder.RegisterModule<ClientsModule>();
+            builder.RegisterModule<SimulationModule>();
         }
     }
 }

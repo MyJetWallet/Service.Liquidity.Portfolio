@@ -35,7 +35,7 @@ namespace Service.Liquidity.Portfolio
         protected override void OnStarted()
         {
             _logger.LogInformation("OnStarted has been called.");
-            _balancePersistJob.Start();
+            _balancePersistJob.Start().GetAwaiter().GetResult();
             _myNoSqlTcpClient.Start();
             _myServiceBusTcpClient.Start();
             _myNoSqlClientLifeTime.Start();
@@ -49,11 +49,20 @@ namespace Service.Liquidity.Portfolio
             try
             {
                 _myServiceBusTcpClient.Stop();
-                _balancePersistJob.Stop();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception on MyServiceBusTcpClient.Stop: {ex}");
+            }
+            
+            try
+            {
+                _balancePersistJob.Stop().GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception on BalancePersistJob.Stop");
+                Console.WriteLine($"Exception on BalancePersistJob.Stop: {ex}");
             }
         }
 

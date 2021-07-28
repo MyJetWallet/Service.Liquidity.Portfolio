@@ -34,6 +34,10 @@ jobs:
     - name: Publish Service
       run: dotnet publish --no-build ./src/Service.Liquidity.Portfolio/Service.Liquidity.Portfolio.csproj --configuration Release --output ./publish-api
 
+
+    - name: Publish Simulation
+      run: dotnet publish --no-build ./src/Service.Liquidity.Portfolio.Simulation/Service.Liquidity.Portfolio.Simulation.csproj --configuration Release --output ./publish-simulation
+
     - name: Check Service dir
       run: ls ./publish-api
       
@@ -47,7 +51,7 @@ jobs:
         repository: ${{ secrets.ORG_NAME }}/service.liquidity.portfolio/myjetwallet.service.liquidity.portfolio-test
         tags: latest
         build_args: app_version=myjetwallet.service.liquidity.portfolio-test:latest,app_compilation_date=${{ steps.current-time.outputs.formattedTime }}
-        
+
     - name: Publish image ST
       uses: docker/build-push-action@v1
       with:
@@ -59,6 +63,29 @@ jobs:
         tags: latest
         add_git_labels: true
         build_args: app_version=myjetwallet.service.liquidity.portfolio-test:latest,app_compilation_date=${{ steps.current-time.outputs.formattedTime }}
+        
+    - name: Publish image Simulation
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        path: ./publish-simulation
+        registry: docker.pkg.github.com
+        repository: ${{ secrets.ORG_NAME }}/service.liquidity.portfolio/myjetwallet.service.liquidity.portfolio.simulation-test
+        tags: latest
+        build_args: app_version=myjetwallet.service.liquidity.portfolio.simulation-test:latest,app_compilation_date=${{ steps.current-time.outputs.formattedTime }}
+
+    - name: Publish image Simulation ST
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.ST_DOCKER_USER }}
+        password: ${{ secrets.ST_DOCKER_PASSWORD }}
+        path: ./publish-simulation
+        registry: simpletrading.azurecr.io
+        repository: spot/myjetwallet.service.liquidity.portfolio.simulation-test
+        tags: latest
+        add_git_labels: true
+        build_args: app_version=myjetwallet.service.liquidity.portfolio.simulation-test:latest,app_compilation_date=${{ steps.current-time.outputs.formattedTime }}
 
   restart:
     runs-on: ubuntu-latest    
@@ -70,3 +97,9 @@ jobs:
         KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA__ST_TEST }}
         NAMESPACE: ${{ secrets.KUBE_TEST_NAMESPACE }}
         POD: liquidity-portfolio
+    - name: Restart Simulation
+      uses: Myjetwallet/kube-restart-pods@master
+      env:
+        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA__ST_TEST }}
+        NAMESPACE: ${{ secrets.KUBE_TEST_NAMESPACE }}
+        POD: liquidity-portfolio-simulation

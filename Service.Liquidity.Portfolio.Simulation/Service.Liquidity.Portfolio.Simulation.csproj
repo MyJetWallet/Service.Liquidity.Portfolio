@@ -2,10 +2,41 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\src\Service.Liquidity.Portfolio.Grpc\Service.Liquidity.Portfolio.Grpc.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MyJetWallet.Sdk.GrpcMetrics" Version="2.0.0" />
+      <PackageReference Include="MyJetWallet.Sdk.GrpcSchema" Version="1.0.6" />
+      <PackageReference Include="MyJetWallet.Sdk.Service" Version="1.5.5" />
+      <PackageReference Include="MyJetYamlParser" Version="1.1.1" />
+      <PackageReference Include="MySettingsReader" Version="1.2.1" />
+      <PackageReference Include="SimpleTrading.BaseMetrics" Version="1.0.3" />
+      <PackageReference Include="SimpleTrading.ServiceStatusReporterConnector" Version="1.0.9" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+        <HintPath>..\..\..\..\..\..\usr\local\share\dotnet\shared\Microsoft.AspNetCore.App\5.0.6\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Dockerfile">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="appsettings.json">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

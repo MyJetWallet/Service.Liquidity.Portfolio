@@ -8,11 +8,11 @@ namespace Service.Liquidity.Portfolio.Simulation
 {
     public class AssetPortfolioSimulationService : IAssetPortfolioSimulationService
     {
-        private readonly AssetPortfolioSimulationStorage _assetPortfolioSimulationStorage;
+        private readonly AssetPortfolioSimulationManager _assetPortfolioSimulationManager;
 
-        public AssetPortfolioSimulationService(AssetPortfolioSimulationStorage assetPortfolioSimulationStorage)
+        public AssetPortfolioSimulationService(AssetPortfolioSimulationManager assetPortfolioSimulationManager)
         {
-            _assetPortfolioSimulationStorage = assetPortfolioSimulationStorage;
+            _assetPortfolioSimulationManager = assetPortfolioSimulationManager;
         }
 
         public async Task<CreateNewSimulationResponse> CreateNewSimulation()
@@ -20,7 +20,7 @@ namespace Service.Liquidity.Portfolio.Simulation
             PortfolioSimulation newSimulation;
             try
             {
-                newSimulation = await _assetPortfolioSimulationStorage.CreateNewSimulation();
+                newSimulation = await _assetPortfolioSimulationManager.CreateNewSimulation();
             }
             catch (Exception ex)
             {
@@ -34,7 +34,7 @@ namespace Service.Liquidity.Portfolio.Simulation
             List<PortfolioSimulation> simulationList;
             try
             {
-                simulationList = await _assetPortfolioSimulationStorage.GetSimulationList();
+                simulationList = await _assetPortfolioSimulationManager.GetSimulationList();
             }
             catch (Exception ex)
             {
@@ -48,7 +48,7 @@ namespace Service.Liquidity.Portfolio.Simulation
             PortfolioSimulation simulation;
             try
             {
-                simulation = await _assetPortfolioSimulationStorage.GetSimulation(request.SimulationId);
+                simulation = await _assetPortfolioSimulationManager.GetSimulation(request.SimulationId);
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace Service.Liquidity.Portfolio.Simulation
             }
             try
             {
-                await _assetPortfolioSimulationStorage.ReportSimulationTrade(request);
+                await _assetPortfolioSimulationManager.ReportSimulationTrade(request);
             }
             catch (Exception ex)
             {

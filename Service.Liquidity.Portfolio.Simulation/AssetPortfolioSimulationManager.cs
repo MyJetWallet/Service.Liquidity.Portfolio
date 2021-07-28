@@ -5,7 +5,7 @@ using Service.Liquidity.Portfolio.Grpc.Simulation.Models;
 
 namespace Service.Liquidity.Portfolio.Simulation
 {
-    public class AssetPortfolioSimulationStorage
+    public class AssetPortfolioSimulationManager
     {
         private readonly List<PortfolioSimulation> _simulationList = new List<PortfolioSimulation>();
         

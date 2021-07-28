@@ -1,8 +1,7 @@
 ﻿using Autofac;
 using Service.Liquidity.Portfolio.Grpc.Simulation;
-using Service.Liquidity.Portfolio.Simulation;
 
-namespace Service.Liquidity.Portfolio.Modules
+namespace Service.Liquidity.Portfolio.Simulation
 {
     public class SimulationModule : Module
     {
@@ -13,7 +12,7 @@ namespace Service.Liquidity.Portfolio.Modules
                 .As<IAssetPortfolioSimulationService>();
             
             builder
-                .RegisterType<AssetPortfolioSimulationStorage>()
+                .RegisterType<AssetPortfolioSimulationManager>()
                 .AsSelf()
                 .SingleInstance();
         }

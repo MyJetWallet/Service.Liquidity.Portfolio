@@ -36,7 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Service.Liquidity.Portfolio.Simulation\Service.Liquidity.Portfolio.Simulation.csproj" />
     <ProjectReference Include="..\Service.Liquidity.Portfolio.Domain\Service.Liquidity.Portfolio.Domain.csproj" />
     <ProjectReference Include="..\Service.Liquidity.Portfolio.Grpc\Service.Liquidity.Portfolio.Grpc.csproj" />
   </ItemGroup>
