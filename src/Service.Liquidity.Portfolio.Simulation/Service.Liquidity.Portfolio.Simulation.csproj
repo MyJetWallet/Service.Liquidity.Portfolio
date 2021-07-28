@@ -6,7 +6,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\src\Service.Liquidity.Portfolio.Grpc\Service.Liquidity.Portfolio.Grpc.csproj" />
+      <ProjectReference Include="..\Service.Liquidity.Portfolio\Service.Liquidity.Portfolio.csproj" />
+      <ProjectReference Include="..\Service.Liquidity.Portfolio.Grpc\Service.Liquidity.Portfolio.Grpc.csproj" />
+      <ProjectReference Include="..\Service.Liquidity.Portfolio\Service.Liquidity.Portfolio.csproj" />
     </ItemGroup>
 
     <ItemGroup>

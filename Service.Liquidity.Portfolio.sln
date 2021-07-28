@@ -31,7 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Liquidity.Portfolio.Domain", "src\Service.Liquidity.Portfolio.Domain\Service.Liquidity.Portfolio.Domain.csproj", "{5CFE74A4-CDBB-4E2D-9C0A-9CEF20DCB38B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Liquidity.Portfolio.Simulation", "Service.Liquidity.Portfolio.Simulation\Service.Liquidity.Portfolio.Simulation.csproj", "{D8B09E14-A88B-4E27-A099-32BF6553117C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Liquidity.Portfolio.Simulation", "src\Service.Liquidity.Portfolio.Simulation\Service.Liquidity.Portfolio.Simulation.csproj", "{F2065C6B-0B50-47DD-A26E-E3F2A3F7B32D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,10 +67,10 @@ Global
 		{5CFE74A4-CDBB-4E2D-9C0A-9CEF20DCB38B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CFE74A4-CDBB-4E2D-9C0A-9CEF20DCB38B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CFE74A4-CDBB-4E2D-9C0A-9CEF20DCB38B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D8B09E14-A88B-4E27-A099-32BF6553117C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D8B09E14-A88B-4E27-A099-32BF6553117C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D8B09E14-A88B-4E27-A099-32BF6553117C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D8B09E14-A88B-4E27-A099-32BF6553117C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2065C6B-0B50-47DD-A26E-E3F2A3F7B32D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2065C6B-0B50-47DD-A26E-E3F2A3F7B32D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2065C6B-0B50-47DD-A26E-E3F2A3F7B32D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2065C6B-0B50-47DD-A26E-E3F2A3F7B32D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

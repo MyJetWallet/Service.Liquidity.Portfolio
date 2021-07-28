@@ -2,13 +2,20 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Service.Liquidity.Portfolio.Grpc.Simulation.Models;
+using Service.Liquidity.Portfolio.Services;
 
 namespace Service.Liquidity.Portfolio.Simulation.Services
 {
     public class AssetPortfolioSimulationManager
     {
+        private readonly AssetPortfolioManager _assetPortfolioManager;
         private readonly List<PortfolioSimulation> _simulationList = new List<PortfolioSimulation>();
-        
+
+        public AssetPortfolioSimulationManager(AssetPortfolioManager assetPortfolioManager)
+        {
+            _assetPortfolioManager = assetPortfolioManager;
+        }
+
         public async Task<PortfolioSimulation> CreateNewSimulation()
         {
             var newSimulation = new PortfolioSimulation(GenerateNewSimulationId());
