@@ -77,7 +77,9 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
                 QuoteAsset = request.QuoteAsset,
                 BaseVolume = request.BaseVolume,
                 QuoteVolume = request.QuoteVolume,
-                WalletName = request.WalletName
+                WalletName = request.WalletName,
+                BaseAssetPriceInUsd = _indexPricesClientMock.PriceMap[request.BaseAsset],
+                QuoteAssetPriceInUsd = _indexPricesClientMock.PriceMap[request.QuoteAsset]
             };
             
             simulation.Trades.Add(trade);
