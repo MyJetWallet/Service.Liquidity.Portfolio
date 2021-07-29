@@ -61,6 +61,19 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             return new GetSimulationResponse() {Success = true, Portfolio = simulation};
         }
 
+        public async Task<DeleteSimulationResponse> DeleteSimulation(DeleteSimulationRequest request)
+        {
+            try
+            {
+                await _assetPortfolioSimulationManager.DeleteSimulation(request.SimulationId);
+            }
+            catch (Exception ex)
+            {
+                return new DeleteSimulationResponse() {Success = false, ErrorText = ex.Message};
+            }
+            return new DeleteSimulationResponse() {Success = true};
+        }
+
         public async Task<ReportSimulationTradeResponse> ReportSimulationTrade(ReportSimulationTradeRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.BaseAsset) ||

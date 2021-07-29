@@ -99,5 +99,10 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
                 : _simulationList.Max(e => e.SimulationId);
             return ++lastId;
         }
+
+        public async Task DeleteSimulation(long simulationId)
+        {
+            _simulationList.RemoveAll(e => e.SimulationId == simulationId);
+        }
     }
 }
