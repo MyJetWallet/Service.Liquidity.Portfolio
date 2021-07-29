@@ -24,7 +24,7 @@ namespace Service.Liquidity.Portfolio.Services
         public const string UsdAsset = "USD"; // todo: get from config ASSET AND BROKER
         public const string Broker = "jetwallet"; // todo: get from config ASSET AND BROKER
         public const string PlWalletName = "PL Balance";// todo: get from config
-        public bool _isInit = false;
+        private bool _isInit = false;
 
         public AssetPortfolioManager(ILogger<AssetPortfolioManager> logger,
             IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader,
