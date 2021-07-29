@@ -76,6 +76,7 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             _assetPortfolioManager.UpdatePortfolio(simulation.Portfolio, simulation.AssetBalances);
             var trade = new AssetPortfolioTrade()
             {
+                DateTime = DateTime.UtcNow,
                 BaseAsset = request.BaseAsset,
                 QuoteAsset = request.QuoteAsset,
                 BaseVolume = request.BaseVolume,
