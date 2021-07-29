@@ -15,6 +15,7 @@ namespace Service.Liquidity.Portfolio.Tests
         private MyNoSqlServerDataReaderMock _noSqlDataReader;
         private IndexPricesClientMock _indexPricesClient;
         private AssetPortfolioManager _assetPortfolioManager;
+        private AssetPortfolioMath _assetPortfolioMath;
 
         [SetUp]
         public void SetUpTests()
@@ -29,10 +30,12 @@ namespace Service.Liquidity.Portfolio.Tests
                     }));
             _indexPricesClient = new IndexPricesClientMock();
             _noSqlDataReader = new MyNoSqlServerDataReaderMock();
+            _assetPortfolioMath = new AssetPortfolioMath();
 
             _assetPortfolioManager = new AssetPortfolioManager(_loggerFactory.CreateLogger<AssetPortfolioManager>(),
                 _noSqlDataReader,
-                _indexPricesClient);
+                _indexPricesClient,
+                _assetPortfolioMath);
         }
 
         [Test]

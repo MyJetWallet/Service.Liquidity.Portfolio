@@ -77,6 +77,10 @@ namespace Service.Liquidity.Portfolio.Modules
                 .AsSelf()
                 .SingleInstance();
 
+            builder
+                .RegisterType<AssetPortfolioMath>()
+                .AsSelf();
+
             builder.RegisterMyServiceBusSubscriberBatch<PortfolioTrade>(serviceBusClient,
                 PortfolioTrade.TopicName,
                 $"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}",

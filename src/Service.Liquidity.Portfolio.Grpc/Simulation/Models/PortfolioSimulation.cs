@@ -15,6 +15,9 @@ namespace Service.Liquidity.Portfolio.Grpc.Simulation.Models
         
         [DataMember(Order = 3)]
         public List<AssetPortfolioTrade> Trades { get; set; }
+        
+        [DataMember(Order = 4)]
+        public List<AssetBalance> AssetBalances { get; set; }
 
         public PortfolioSimulation()
         {
@@ -25,6 +28,7 @@ namespace Service.Liquidity.Portfolio.Grpc.Simulation.Models
             SimulationId = simulationId;
             Portfolio = new AssetPortfolio();
             Trades = new List<AssetPortfolioTrade>();
+            AssetBalances = new List<AssetBalance>();
         }
     }
 }
