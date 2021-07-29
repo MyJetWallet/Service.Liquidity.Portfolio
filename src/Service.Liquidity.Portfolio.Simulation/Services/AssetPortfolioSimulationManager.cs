@@ -73,7 +73,7 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             _assetPortfolioMath.UpdateBalance(quoteAssetBalance, quoteAssetDiff);
 
             _assetPortfolioManager.FixReleasedPnl(simulation.Portfolio, simulation.AssetBalances);
-
+            _assetPortfolioManager.UpdatePortfolio(simulation.Portfolio, simulation.AssetBalances);
             var trade = new AssetPortfolioTrade()
             {
                 BaseAsset = request.BaseAsset,

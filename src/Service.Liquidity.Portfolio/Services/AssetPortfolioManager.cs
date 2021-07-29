@@ -63,7 +63,7 @@ namespace Service.Liquidity.Portfolio.Services
             }
         }
 
-        private void UpdatePortfolio(AssetPortfolio portfolio, List<AssetBalance> assetBalances)
+        public void UpdatePortfolio(AssetPortfolio portfolio, List<AssetBalance> assetBalances)
         {
             var assetBalanceCopy = new List<AssetBalance>();
             assetBalances.ForEach(elem =>
