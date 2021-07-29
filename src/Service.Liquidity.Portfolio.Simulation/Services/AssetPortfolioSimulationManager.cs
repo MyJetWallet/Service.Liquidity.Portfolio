@@ -55,15 +55,24 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             
             var baseAssetBalance = _assetPortfolioManager.GetBalanceEntity(simulation?.AssetBalances,
                 AssetPortfolioManager.Broker, request.WalletName, request.BaseAsset);
-            
-            var baseAssetDiff = new AssetBalanceDifference(AssetPortfolioManager.Broker, request.WalletName, request.BaseAsset,
-                request.BaseVolume, request.BaseVolume * _indexPricesClientMock.PriceMap[request.BaseAsset], _indexPricesClientMock.PriceMap[request.BaseAsset]);
-            
             var quoteAssetBalance = _assetPortfolioManager.GetBalanceEntity(simulation?.AssetBalances,
                 AssetPortfolioManager.Broker, request.WalletName, request.QuoteAsset);
+
+            decimal baseAssetPrice, quoteAssetPrice;
+            try
+            {
+                baseAssetPrice = _indexPricesClientMock.PriceMap[request.BaseAsset];
+                quoteAssetPrice = _indexPricesClientMock.PriceMap[request.QuoteAsset];
+            }
+            catch (Exception)
+            {
+                throw new Exception("Prices not found.");
+            }
             
+            var baseAssetDiff = new AssetBalanceDifference(AssetPortfolioManager.Broker, request.WalletName, request.BaseAsset,
+                request.BaseVolume, request.BaseVolume * baseAssetPrice, baseAssetPrice);
             var quoteAssetDiff = new AssetBalanceDifference(AssetPortfolioManager.Broker, request.WalletName, request.QuoteAsset,
-                request.QuoteVolume, request.QuoteVolume * _indexPricesClientMock.PriceMap[request.QuoteAsset], _indexPricesClientMock.PriceMap[request.QuoteAsset]);
+                request.QuoteVolume, request.QuoteVolume * quoteAssetPrice, quoteAssetPrice);
             
             _assetPortfolioMath.UpdateBalance(baseAssetBalance, baseAssetDiff);
             _assetPortfolioMath.UpdateBalance(quoteAssetBalance, quoteAssetDiff);
@@ -78,8 +87,8 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
                 BaseVolume = request.BaseVolume,
                 QuoteVolume = request.QuoteVolume,
                 WalletName = request.WalletName,
-                BaseAssetPriceInUsd = _indexPricesClientMock.PriceMap[request.BaseAsset],
-                QuoteAssetPriceInUsd = _indexPricesClientMock.PriceMap[request.QuoteAsset]
+                BaseAssetPriceInUsd = baseAssetPrice,
+                QuoteAssetPriceInUsd = quoteAssetPrice
             };
             
             simulation.Trades.Add(trade);
