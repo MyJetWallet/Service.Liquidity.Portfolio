@@ -16,7 +16,7 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
         private readonly AssetPortfolioManager _assetPortfolioManager;
         private readonly IndexPricesClientMock _indexPricesClientMock;
         
-        private readonly List<PortfolioSimulation> _simulationList = new List<PortfolioSimulation>();
+        private readonly List<PortfolioSimulation> _simulationList = new();
 
         public AssetPortfolioSimulationManager()
         {
@@ -24,11 +24,8 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             _indexPricesClientMock = new IndexPricesClientMock();
             _assetPortfolioMath = new AssetPortfolioMath();
 
-            _indexPricesClientMock.PriceMap[AssetPortfolioManager.UsdAsset] = 1;
-
             _assetPortfolioManager = new AssetPortfolioManager(Program.LogFactory.CreateLogger<AssetPortfolioManager>(),
                 noSqlDataReader, _indexPricesClientMock, _assetPortfolioMath) {_isInit = true};
-
         }
 
         public async Task<PortfolioSimulation> CreateNewSimulation()
@@ -50,8 +47,7 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
 
         public async Task ReportSimulationTrade(ReportSimulationTradeRequest request)
         {
-            SetIndexPrices(request.BaseAsset, request.BaseAssetIndexPrice);
-            SetIndexPrices(request.QuoteAsset, request.QuoteAssetIndexPrice);
+            SetIndexPrices(request.SimulationId);
             
             var simulation = _simulationList.FirstOrDefault(e => e.SimulationId == request.SimulationId);
             if (simulation == null)
@@ -61,13 +57,13 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
                 AssetPortfolioManager.Broker, request.WalletName, request.BaseAsset);
             
             var baseAssetDiff = new AssetBalanceDifference(AssetPortfolioManager.Broker, request.WalletName, request.BaseAsset,
-                request.BaseVolume, request.BaseVolume * request.BaseAssetIndexPrice, request.BaseAssetIndexPrice);
+                request.BaseVolume, request.BaseVolume * _indexPricesClientMock.PriceMap[request.BaseAsset], _indexPricesClientMock.PriceMap[request.BaseAsset]);
             
             var quoteAssetBalance = _assetPortfolioManager.GetBalanceEntity(simulation?.AssetBalances,
                 AssetPortfolioManager.Broker, request.WalletName, request.QuoteAsset);
             
             var quoteAssetDiff = new AssetBalanceDifference(AssetPortfolioManager.Broker, request.WalletName, request.QuoteAsset,
-                request.QuoteVolume, request.QuoteVolume * request.QuoteAssetIndexPrice, request.QuoteAssetIndexPrice);
+                request.QuoteVolume, request.QuoteVolume * _indexPricesClientMock.PriceMap[request.QuoteAsset], _indexPricesClientMock.PriceMap[request.QuoteAsset]);
             
             _assetPortfolioMath.UpdateBalance(baseAssetBalance, baseAssetDiff);
             _assetPortfolioMath.UpdateBalance(quoteAssetBalance, quoteAssetDiff);
@@ -87,9 +83,9 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             simulation.Trades.Add(trade);
         }
 
-        private void SetIndexPrices(string asset, decimal price)
+        private void SetIndexPrices(long simulationId)
         {
-            _indexPricesClientMock.PriceMap[asset] = price;
+            _indexPricesClientMock.PriceMap = _simulationList.First(e => e.SimulationId == simulationId).PriceMap;
         }
 
         private long GenerateNewSimulationId()
@@ -103,6 +99,12 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
         public async Task DeleteSimulation(long simulationId)
         {
             _simulationList.RemoveAll(e => e.SimulationId == simulationId);
+        }
+
+        public async Task SetSimulationPrices(SetSimulationPricesRequest request)
+        {
+            var simulation = _simulationList.FirstOrDefault(e => e.SimulationId == request.SimulationId);
+            if (simulation != null) simulation.PriceMap = request.PriceMap;
         }
     }
 }

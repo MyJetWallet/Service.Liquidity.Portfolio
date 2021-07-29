@@ -21,5 +21,8 @@ namespace Service.Liquidity.Portfolio.Grpc.Simulation
 
         [OperationContract]
         public Task<ReportSimulationTradeResponse> ReportSimulationTrade(ReportSimulationTradeRequest request);
+        
+        [OperationContract]
+        public Task<SetSimulationPricesResponse> SetSimulationPrices(SetSimulationPricesRequest request);
     }
 }

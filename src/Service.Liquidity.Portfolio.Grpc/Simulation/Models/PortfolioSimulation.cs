@@ -18,6 +18,9 @@ namespace Service.Liquidity.Portfolio.Grpc.Simulation.Models
         
         [DataMember(Order = 4)]
         public List<AssetBalance> AssetBalances { get; set; }
+        
+        [DataMember(Order = 5)]
+        public Dictionary<string, decimal> PriceMap = new Dictionary<string, decimal>();
 
         public PortfolioSimulation()
         {
@@ -29,6 +32,10 @@ namespace Service.Liquidity.Portfolio.Grpc.Simulation.Models
             Portfolio = new AssetPortfolio();
             Trades = new List<AssetPortfolioTrade>();
             AssetBalances = new List<AssetBalance>();
+            PriceMap = new Dictionary<string, decimal>()
+            {
+                {"USD", 1}
+            };
         }
     }
 }

@@ -21,11 +21,6 @@ namespace Service.Liquidity.Portfolio.Grpc.Simulation.Models
         public decimal QuoteVolume { get; set; }
         
         [DataMember(Order = 6)]
-        public decimal BaseAssetIndexPrice { get; set; }
-        
-        [DataMember(Order = 7)]
-        public decimal QuoteAssetIndexPrice { get; set; }
-        [DataMember(Order = 8)]
         public string WalletName { get; set; }
     }
 }

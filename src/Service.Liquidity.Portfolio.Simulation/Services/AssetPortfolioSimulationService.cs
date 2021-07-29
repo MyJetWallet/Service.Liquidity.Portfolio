@@ -80,8 +80,6 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
                 string.IsNullOrWhiteSpace(request.QuoteAsset) ||
                 request.BaseVolume == 0 ||
                 request.QuoteVolume == 0 ||
-                request.BaseAssetIndexPrice == 0 ||
-                request.QuoteAssetIndexPrice == 0 ||
                 request.SimulationId == 0)
             {
                 return new ReportSimulationTradeResponse() {Success = false, ErrorText = "Bad request"};
@@ -95,6 +93,19 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
                 return new ReportSimulationTradeResponse() {Success = false, ErrorText = ex.Message};
             }
             return new ReportSimulationTradeResponse() {Success = true};
+        }
+
+        public async Task<SetSimulationPricesResponse> SetSimulationPrices(SetSimulationPricesRequest request)
+        {
+            try
+            {
+                await _assetPortfolioSimulationManager.SetSimulationPrices(request);
+            }
+            catch (Exception ex)
+            {
+                return new SetSimulationPricesResponse() {Success = false, ErrorText = ex.Message};
+            }
+            return new SetSimulationPricesResponse() {Success = true};
         }
     }
 }
