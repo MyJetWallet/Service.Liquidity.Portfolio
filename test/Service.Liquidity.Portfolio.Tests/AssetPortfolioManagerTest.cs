@@ -93,13 +93,16 @@ namespace Service.Liquidity.Portfolio.Tests
             var pnl2 = ExecuteTrade("ETH", "BTC", -10, 0.51m);
             
             Assert.AreEqual(0, pnl1, "Pnl 1");
-            Assert.AreEqual(0.01m * _indexPricesClient.PriceMap["BTC"], pnl2, "Pnl 2");
+            
+            var secondPrice = Math.Abs(_indexPricesClient.PriceMap["ETH"] * -10 / 0.51m);
+            Assert.AreEqual(0.01m * secondPrice, pnl2, "Pnl 2");
 
             var portfolio2 = _assetPortfolioManager.GetPortfolioSnapshot();
             Assert.AreEqual(0.01m, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.NetVolume);
             Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByWallet.Sum(ee => ee.NetUsdVolume));
-            Assert.AreEqual(0, portfolio2.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd));
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.NetVolume);
+            Assert.AreEqual(portfolio2.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd), portfolio2.BalanceByWallet.Sum(ee => ee.NetUsdVolume));
+            
             Assert.AreEqual(-pnl2, 
                 portfolio2.BalanceByAsset
                 .FirstOrDefault(e => e.Asset == AssetPortfolioManager.UsdAsset)?
