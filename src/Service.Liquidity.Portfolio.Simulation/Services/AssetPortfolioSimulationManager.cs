@@ -76,8 +76,7 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             
             simulation.AssetPortfolioMath.UpdateBalance(baseAssetBalance, baseAssetDiff);
             simulation.AssetPortfolioMath.UpdateBalance(quoteAssetBalance, quoteAssetDiff);
-
-            simulation.AssetPortfolioManager.FixReleasedPnl(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
+            
             simulation.AssetPortfolioManager.UpdatePortfolio(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
             var trade = new AssetPortfolioTrade()
             {
@@ -90,7 +89,7 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
                 BaseAssetPriceInUsd = baseAssetPrice,
                 QuoteAssetPriceInUsd = quoteAssetPrice
             };
-            
+            trade.TotalReleasePnl = simulation.AssetPortfolioManager.FixReleasedPnl(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
             simulation.SimulationEntity.Trades.Add(trade);
         }
 
