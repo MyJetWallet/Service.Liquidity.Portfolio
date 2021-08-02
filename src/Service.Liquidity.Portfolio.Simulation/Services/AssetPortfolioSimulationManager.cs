@@ -103,8 +103,6 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             
             simulation.IndexPricesClientMock.PriceMap = _simulationStorages
                 .First(e => e.SimulationEntity.SimulationId == simulationId).SimulationEntity.PriceMap;
-            simulation?.AssetPortfolioManager.FixReleasedPnl(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
-            simulation?.AssetPortfolioManager.UpdatePortfolio(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
         }
 
         private long GenerateNewSimulationId()
@@ -123,7 +121,14 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
         public async Task SetSimulationPrices(SetSimulationPricesRequest request)
         {
             var simulation = _simulationStorages.FirstOrDefault(e => e.SimulationEntity.SimulationId == request.SimulationId);
-            if (simulation != null) simulation.SimulationEntity.PriceMap = request.PriceMap;
+            if (simulation == null)
+                return;
+                
+            simulation.SimulationEntity.PriceMap = request.PriceMap;
+
+            SetIndexPrices(simulation.SimulationEntity.SimulationId);
+            
+            simulation?.AssetPortfolioManager.UpdatePortfolio(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
         }
     }
 }
