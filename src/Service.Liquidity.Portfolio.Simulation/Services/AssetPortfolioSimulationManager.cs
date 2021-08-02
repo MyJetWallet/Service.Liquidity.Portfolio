@@ -98,9 +98,13 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
         {
             var simulation = _simulationStorages.FirstOrDefault(e => e.SimulationEntity.SimulationId == simulationId);
 
-            if (simulation != null)
-                simulation.IndexPricesClientMock.PriceMap = _simulationStorages
-                    .First(e => e.SimulationEntity.SimulationId == simulationId).SimulationEntity.PriceMap;
+            if (simulation == null) 
+                return;
+            
+            simulation.IndexPricesClientMock.PriceMap = _simulationStorages
+                .First(e => e.SimulationEntity.SimulationId == simulationId).SimulationEntity.PriceMap;
+            simulation?.AssetPortfolioManager.FixReleasedPnl(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
+            simulation?.AssetPortfolioManager.UpdatePortfolio(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
         }
 
         private long GenerateNewSimulationId()
