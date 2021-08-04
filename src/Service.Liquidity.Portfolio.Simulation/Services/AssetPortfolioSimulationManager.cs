@@ -88,9 +88,9 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
                 QuoteVolume = request.QuoteVolume,
                 WalletName = request.WalletName,
                 BaseAssetPriceInUsd = baseAssetPrice,
-                QuoteAssetPriceInUsd = quoteAssetPrice
+                QuoteAssetPriceInUsd = Math.Round(quoteAssetPrice, 8)
             };
-            trade.TotalReleasePnl = simulation.AssetPortfolioManager.FixReleasedPnl(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
+            trade.TotalReleasePnl = Math.Round(simulation.AssetPortfolioManager.FixReleasedPnl(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances), 8);
             
             simulation.AssetPortfolioManager.UpdatePortfolio(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
 
