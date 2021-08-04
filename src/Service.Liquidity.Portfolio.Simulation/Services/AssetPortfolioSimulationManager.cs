@@ -58,11 +58,13 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             var quoteAssetBalance = simulation.AssetPortfolioManager.GetBalanceEntity(simulation?.SimulationEntity.AssetBalances,
                 AssetPortfolioManager.Broker, request.WalletName, request.QuoteAsset);
 
-            decimal baseAssetPrice, quoteAssetPrice;
+            decimal baseAssetPrice, quoteAssetVolumeUsd, quoteAssetPrice;
             try
             {
                 baseAssetPrice = simulation.IndexPricesClientMock.PriceMap[request.BaseAsset];
-                quoteAssetPrice = simulation.IndexPricesClientMock.PriceMap[request.QuoteAsset];
+                
+                quoteAssetPrice = Math.Abs(baseAssetPrice * request.BaseVolume / request.QuoteVolume);
+                quoteAssetVolumeUsd = request.QuoteVolume * quoteAssetPrice;
             }
             catch (Exception)
             {
@@ -72,7 +74,7 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             var baseAssetDiff = new AssetBalanceDifference(AssetPortfolioManager.Broker, request.WalletName, request.BaseAsset,
                 request.BaseVolume, request.BaseVolume * baseAssetPrice, baseAssetPrice);
             var quoteAssetDiff = new AssetBalanceDifference(AssetPortfolioManager.Broker, request.WalletName, request.QuoteAsset,
-                request.QuoteVolume, request.QuoteVolume * quoteAssetPrice, quoteAssetPrice);
+                request.QuoteVolume, quoteAssetVolumeUsd, quoteAssetPrice);
             
             simulation.AssetPortfolioMath.UpdateBalance(baseAssetBalance, baseAssetDiff);
             simulation.AssetPortfolioMath.UpdateBalance(quoteAssetBalance, quoteAssetDiff);
