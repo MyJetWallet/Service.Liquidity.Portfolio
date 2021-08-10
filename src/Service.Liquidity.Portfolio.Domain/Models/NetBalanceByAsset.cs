@@ -20,15 +20,20 @@ namespace Service.Liquidity.Portfolio.Domain.Models
 
         public NetBalanceByAsset GetCopy()
         {
-            return new NetBalanceByAsset()
+            var netBalance =  new NetBalanceByAsset()
             {
                 Asset = Asset,
                 NetVolume = NetVolume,
                 NetUsdVolume = NetUsdVolume,
                 OpenPriceAvg = OpenPriceAvg,
                 UnrealisedPnl = UnrealisedPnl,
-                WalletBalances = WalletBalances.Select(e => e.GetCopy()).ToList()
+                WalletBalances = new List<NetBalanceByWallet>()
             };
+
+            if (WalletBalances != null && WalletBalances.Any())
+                netBalance.WalletBalances.AddRange(WalletBalances.Select(e => e.GetCopy()).ToList());
+                    
+            return netBalance;
         }
     }
 }
