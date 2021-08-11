@@ -20,7 +20,7 @@
     <PackageReference Include="MyJetWallet.Sdk.NoSql" Version="1.2.0" />    
     <PackageReference Include="MyJetWallet.Sdk.Service" Version="1.5.5" />
     <PackageReference Include="MyJetWallet.Sdk.ServiceBus" Version="1.0.3" />
-    <PackageReference Include="MyJetWallet.Service.AssetsDictionary.Client" Version="1.6.3" />
+    <PackageReference Include="MyJetWallet.Service.AssetsDictionary.Client" Version="1.6.4" />
     <PackageReference Include="MyJetWallet.Service.BalanceHistory.Client" Version="2.0.7" />
     <PackageReference Include="MyJetWallet.Service.BaseCurrencyConverter.Client" Version="1.0.2" />
     <PackageReference Include="MyJetWallet.Service.IndexPrices.Client" Version="1.0.7" />
