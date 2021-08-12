@@ -53,11 +53,6 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             if (simulation == null)
                 throw new Exception($"Simulation with id {request.SimulationId} not found");
             
-            var baseAssetBalance = simulation.AssetPortfolioManager.GetBalanceEntity(simulation?.SimulationEntity.AssetBalances,
-                AssetPortfolioManager.Broker, request.WalletName, request.BaseAsset);
-            var quoteAssetBalance = simulation.AssetPortfolioManager.GetBalanceEntity(simulation?.SimulationEntity.AssetBalances,
-                AssetPortfolioManager.Broker, request.WalletName, request.QuoteAsset);
-
             decimal baseAssetPrice, quoteAssetVolumeUsd, quoteAssetPrice;
             try
             {
@@ -70,6 +65,11 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             {
                 throw new Exception("Prices not found.");
             }
+            
+            var baseAssetBalance = simulation.AssetPortfolioManager.GetBalanceEntity(simulation?.SimulationEntity.AssetBalances,
+                AssetPortfolioManager.Broker, request.WalletName, request.BaseAsset);
+            var quoteAssetBalance = simulation.AssetPortfolioManager.GetBalanceEntity(simulation?.SimulationEntity.AssetBalances,
+                AssetPortfolioManager.Broker, request.WalletName, request.QuoteAsset);
             
             var baseAssetDiff = new AssetBalanceDifference(AssetPortfolioManager.Broker, request.WalletName, request.BaseAsset,
                 request.BaseVolume, request.BaseVolume * baseAssetPrice, baseAssetPrice);

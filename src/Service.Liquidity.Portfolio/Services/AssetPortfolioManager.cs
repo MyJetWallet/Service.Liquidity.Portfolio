@@ -274,6 +274,9 @@ namespace Service.Liquidity.Portfolio.Services
         
         private decimal GetUsdProjectionByBalance(AssetBalance balance)
         {
+            if (balance.Volume == 0)
+                return 0;
+            
             var (indexPrice, usdVolume) =
                 _indexPricesClient.GetIndexPriceByAssetVolumeAsync(balance.Asset, balance.Volume);
             
