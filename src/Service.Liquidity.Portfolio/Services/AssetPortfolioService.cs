@@ -84,7 +84,7 @@ namespace Service.Liquidity.Portfolio.Services
             return new SetBalanceResponse() {Success = true};
         }
 
-        public async Task<ReportSettlementResponse> ReportSettlement(ManualSettlement request)
+        public async Task<ReportSettlementResponse> ReportSettlement(ReportSettlementRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.BrokerId) ||
                 string.IsNullOrWhiteSpace(request.WalletFrom) ||
@@ -100,31 +100,42 @@ namespace Service.Liquidity.Portfolio.Services
             }
             try
             {
-                request.SettlementDate = DateTime.UtcNow;
+                var manualSettlement = new ManualSettlement()
+                {
+                    BrokerId = request.BrokerId,
+                    WalletFrom = request.WalletFrom,
+                    WalletTo = request.WalletTo,
+                    Asset = request.Asset,
+                    VolumeFrom = request.VolumeFrom,
+                    VolumeTo = request.VolumeTo,
+                    Comment = request.Comment,
+                    User = request.User,
+                    SettlementDate = DateTime.UtcNow
+                };
                 
                 var (fromIndexPrice, fromUsdVolume) =
-                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(request.Asset, request.VolumeFrom);
+                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(manualSettlement.Asset, manualSettlement.VolumeFrom);
 
-                var fromDiff = new AssetBalanceDifference(request.BrokerId, 
-                    request.WalletFrom,
-                    request.Asset, 
-                    request.VolumeFrom, 
+                var fromDiff = new AssetBalanceDifference(manualSettlement.BrokerId, 
+                    manualSettlement.WalletFrom,
+                    manualSettlement.Asset, 
+                    manualSettlement.VolumeFrom, 
                     fromUsdVolume,
                     fromIndexPrice.UsdPrice);
             
                 var (toIndexPrice, toUsdVolume) =
-                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(request.Asset, request.VolumeTo);
+                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(manualSettlement.Asset, manualSettlement.VolumeTo);
             
-                var toDiff = new AssetBalanceDifference(request.BrokerId, 
-                    request.WalletTo,
-                    request.Asset, 
-                    request.VolumeTo, 
+                var toDiff = new AssetBalanceDifference(manualSettlement.BrokerId, 
+                    manualSettlement.WalletTo,
+                    manualSettlement.Asset, 
+                    manualSettlement.VolumeTo, 
                     toUsdVolume,
                     toIndexPrice.UsdPrice);
 
                 _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {fromDiff, toDiff}, false);
 
-                await _portfolioHandler.SaveManualSettlementHistoryAsync(request);
+                await _portfolioHandler.SaveManualSettlementHistoryAsync(manualSettlement);
             }
             catch (Exception exception)
             {

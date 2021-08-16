@@ -11,6 +11,6 @@ namespace Service.Liquidity.Portfolio.Grpc
         [OperationContract]
         Task<SetBalanceResponse> SetBalance(SetBalanceRequest request);
 
-        Task<ReportSettlementResponse> ReportSettlement(ManualSettlement request);
+        Task<ReportSettlementResponse> ReportSettlement(ReportSettlementRequest request);
     }
 }
