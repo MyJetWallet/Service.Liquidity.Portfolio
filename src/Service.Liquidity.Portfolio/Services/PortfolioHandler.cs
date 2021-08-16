@@ -18,6 +18,7 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly TradeCacheStorage _tradeCacheStorage;
         private readonly IPublisher<AssetPortfolioTrade> _tradePublisher;
         private readonly IPublisher<ChangeBalanceHistory> _changeBalanceHistoryPublisher;
+        private readonly IPublisher<ManualSettlement> _manualSettlementPublisher;
         private readonly AssetPortfolioManager _portfolioManager;
         private readonly IIndexPricesClient _indexPricesClient;
         private readonly PortfolioMetrics _portfolioMetrics;
@@ -28,7 +29,8 @@ namespace Service.Liquidity.Portfolio.Services
             AssetPortfolioManager portfolioManager,
             IPublisher<ChangeBalanceHistory> changeBalanceHistoryPublisher,
             IIndexPricesClient indexPricesClient,
-            PortfolioMetrics portfolioMetrics)
+            PortfolioMetrics portfolioMetrics,
+            IPublisher<ManualSettlement> manualSettlementPublisher)
         {
             _logger = logger;
             _tradeCacheStorage = tradeCacheStorage;
@@ -37,6 +39,7 @@ namespace Service.Liquidity.Portfolio.Services
             _changeBalanceHistoryPublisher = changeBalanceHistoryPublisher;
             _indexPricesClient = indexPricesClient;
             _portfolioMetrics = portfolioMetrics;
+            _manualSettlementPublisher = manualSettlementPublisher;
         }
         
         public async ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades)
@@ -163,6 +166,11 @@ namespace Service.Liquidity.Portfolio.Services
         {
             _portfolioMetrics.SetChangeBalanceMetrics(balanceHistory);
             await _changeBalanceHistoryPublisher.PublishAsync(balanceHistory);
+        }
+        
+        public async Task SaveManualSettlementHistoryAsync(ManualSettlement settlement)
+        {
+            await _manualSettlementPublisher.PublishAsync(settlement);
         }
     }
 }

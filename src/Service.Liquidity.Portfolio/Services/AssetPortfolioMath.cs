@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Service.Liquidity.Portfolio.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Services

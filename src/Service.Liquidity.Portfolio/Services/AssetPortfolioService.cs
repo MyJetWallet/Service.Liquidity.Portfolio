@@ -17,7 +17,6 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly ILogger<AssetPortfolioService> _logger;
         private readonly IPortfolioHandler _portfolioHandler;
         private readonly IIndexPricesClient _indexPricesClient;
-
         private readonly AssetPortfolioManager _portfolioManager;
 
         public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
@@ -82,8 +81,57 @@ namespace Service.Liquidity.Portfolio.Services
                 _logger.LogError($"Update failed: {JsonConvert.SerializeObject(exception)}");
                 return new SetBalanceResponse() {Success = false, ErrorMessage = exception.Message};
             }
-
             return new SetBalanceResponse() {Success = true};
+        }
+
+        public async Task<ReportSettlementResponse> ReportSettlement(ManualSettlement request)
+        {
+            if (string.IsNullOrWhiteSpace(request.BrokerId) ||
+                string.IsNullOrWhiteSpace(request.WalletFrom) ||
+                string.IsNullOrWhiteSpace(request.WalletTo) ||
+                string.IsNullOrWhiteSpace(request.Asset) ||
+                string.IsNullOrWhiteSpace(request.Comment) ||
+                string.IsNullOrWhiteSpace(request.User) ||
+                request.VolumeFrom == 0 ||
+                request.VolumeTo == 0)
+            {
+                _logger.LogError($"Bad request entity: {JsonConvert.SerializeObject(request)}");
+                return new ReportSettlementResponse() {Success = false, ErrorMessage = "Incorrect entity"};
+            }
+            try
+            {
+                request.SettlementDate = DateTime.UtcNow;
+                
+                var (fromIndexPrice, fromUsdVolume) =
+                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(request.Asset, request.VolumeFrom);
+
+                var fromDiff = new AssetBalanceDifference(request.BrokerId, 
+                    request.WalletFrom,
+                    request.Asset, 
+                    request.VolumeFrom, 
+                    fromUsdVolume,
+                    fromIndexPrice.UsdPrice);
+            
+                var (toIndexPrice, toUsdVolume) =
+                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(request.Asset, request.VolumeTo);
+            
+                var toDiff = new AssetBalanceDifference(request.BrokerId, 
+                    request.WalletTo,
+                    request.Asset, 
+                    request.VolumeTo, 
+                    toUsdVolume,
+                    toIndexPrice.UsdPrice);
+
+                _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {fromDiff, toDiff}, false);
+
+                await _portfolioHandler.SaveManualSettlementHistoryAsync(request);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"Update failed: {JsonConvert.SerializeObject(exception)}");
+                return new ReportSettlementResponse() {Success = false, ErrorMessage = exception.Message};
+            }
+            return new ReportSettlementResponse() {Success = true};
         }
     }
 }
