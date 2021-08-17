@@ -5,6 +5,7 @@ using MyJetWallet.Sdk.ServiceBus;
 using MyServiceBus.Abstractions;
 using Service.BalanceHistory.Client;
 using Service.Liquidity.Converter.Client;
+using Service.Liquidity.Converter.Domain.Models;
 using Service.Liquidity.Engine.Domain.Models.Portfolio;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Grpc;
@@ -93,8 +94,10 @@ namespace Service.Liquidity.Portfolio.Modules
                 $"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}",
                 TopicQueueType.PermanentWithSingleConnection);
 
-            builder.RegisterLiquidityConverterServiceBusSubscriber(serviceBusClient, 
-                $"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}");
+            builder.RegisterMyServiceBusSubscriberBatch<SwapMessage>(serviceBusClient,
+                SwapMessage.TopicName,
+                $"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}",
+                TopicQueueType.PermanentWithSingleConnection);
         }
     }
 }
