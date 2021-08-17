@@ -24,6 +24,7 @@
     <PackageReference Include="MyJetWallet.Service.BalanceHistory.Client" Version="2.0.8" />
     <PackageReference Include="MyJetWallet.Service.BaseCurrencyConverter.Client" Version="1.0.2" />
     <PackageReference Include="MyJetWallet.Service.IndexPrices.Client" Version="1.1.2" />
+    <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.1.2" />
     <PackageReference Include="MyJetWallet.Service.Liquidity.Engine.Client" Version="1.4.2" />
     <PackageReference Include="MyJetWallet.Service.Liquidity.PortfolioHedger.Client" Version="1.1.5" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.PriceSource.Client" Version="3.0.0" />

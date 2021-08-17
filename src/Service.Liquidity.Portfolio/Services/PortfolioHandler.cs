@@ -47,8 +47,12 @@ namespace Service.Liquidity.Portfolio.Services
         {
             using var activity = MyTelemetry.StartActivity("HandleTradesAsync");
             trades.Count.AddToActivityAsTag("Trades count");
-            
             _logger.LogInformation("Receive trades count: {count}", trades.Count);
+
+            if (!trades.Any())
+            {
+                return;
+            }
 
             await SetUsdProjection(trades);
             

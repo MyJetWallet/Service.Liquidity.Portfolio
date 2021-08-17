@@ -4,9 +4,9 @@ using MyJetWallet.Sdk.Service;
 using MyJetWallet.Sdk.ServiceBus;
 using MyServiceBus.Abstractions;
 using Service.BalanceHistory.Client;
+using Service.Liquidity.Converter.Client;
 using Service.Liquidity.Engine.Domain.Models.Portfolio;
 using Service.Liquidity.Portfolio.Domain.Models;
-using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Jobs;
 using Service.Liquidity.Portfolio.Services;
@@ -31,6 +31,7 @@ namespace Service.Liquidity.Portfolio.Modules
                 true);
             
             builder.RegisterMyNoSqlWriter<AssetPortfolioBalanceNoSql>(Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), AssetPortfolioBalanceNoSql.TableName);
+            
             builder.RegisterMyServiceBusPublisher<AssetPortfolioTrade>(serviceBusClient, AssetPortfolioTrade.TopicName, true);
             builder.RegisterMyServiceBusPublisher<ChangeBalanceHistory>(serviceBusClient, ChangeBalanceHistory.TopicName, true);
             builder.RegisterMyServiceBusPublisher<ManualSettlement>(serviceBusClient, ManualSettlement.TopicName, true);
@@ -52,6 +53,11 @@ namespace Service.Liquidity.Portfolio.Modules
                 .SingleInstance();
             builder
                 .RegisterType<PortfolioHedgerTradeReaderJob>()
+                .As<IStartable>()
+                .AutoActivate()
+                .SingleInstance();
+            builder
+                .RegisterType<ConvertorSwapsReaderJob>()
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
@@ -86,6 +92,9 @@ namespace Service.Liquidity.Portfolio.Modules
                 PortfolioTrade.TopicName,
                 $"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}",
                 TopicQueueType.PermanentWithSingleConnection);
+
+            builder.RegisterLiquidityConverterServiceBusSubscriber(serviceBusClient, 
+                $"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}");
         }
     }
 }
