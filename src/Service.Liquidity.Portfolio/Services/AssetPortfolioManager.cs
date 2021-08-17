@@ -141,7 +141,7 @@ namespace Service.Liquidity.Portfolio.Services
                 var releasedPnl = netUsd - unrPnl;
                 var usdBalance = GetReleasedPnlEntity(assetBalances);
                 usdBalance.Volume -= releasedPnl;
-                return releasedPnl;
+                return Math.Round(releasedPnl, 2);
             }
         }
 
