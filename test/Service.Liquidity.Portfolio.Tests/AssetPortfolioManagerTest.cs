@@ -95,7 +95,7 @@ namespace Service.Liquidity.Portfolio.Tests
             Assert.AreEqual(0, pnl1, "Pnl 1");
             
             var secondPrice = Math.Abs(_indexPricesClient.PriceMap["ETH"] * -10 / 0.51m);
-            Assert.AreEqual(0.01m * secondPrice, pnl2, "Pnl 2");
+            Assert.AreEqual(Math.Round(0.01m * secondPrice,2), pnl2, "Pnl 2");
 
             var portfolio2 = _assetPortfolioManager.GetPortfolioSnapshot();
             Assert.AreEqual(0.01m, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.NetVolume);
@@ -103,12 +103,10 @@ namespace Service.Liquidity.Portfolio.Tests
             Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.NetVolume);
             Assert.AreEqual(portfolio2.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd), portfolio2.BalanceByWallet.Sum(ee => ee.NetUsdVolume));
             
-            Assert.AreEqual(-pnl2, 
-                portfolio2.BalanceByAsset
-                .FirstOrDefault(e => e.Asset == AssetPortfolioManager.UsdAsset)?
+            Assert.AreEqual(-pnl2, Math.Round(portfolio2.BalanceByAsset
+                .FirstOrDefault(e => e.Asset == AssetPortfolioManager.UsdAsset)
                 .WalletBalances
-                .FirstOrDefault(e => e.WalletName == AssetPortfolioManager.PlWalletName)?
-                .NetVolume);
+                .FirstOrDefault(e => e.WalletName == AssetPortfolioManager.PlWalletName).NetVolume, 2));
         }
         
         [Test]
@@ -131,7 +129,7 @@ namespace Service.Liquidity.Portfolio.Tests
             
             Assert.AreEqual(0, pnl1, "Pnl 1");
             var secondPrice = Math.Abs(_indexPricesClient.PriceMap["ETH"] * -10 / 0.51m);
-            Assert.AreEqual(0.01m * secondPrice, pnl2, "Pnl 2");
+            Assert.AreEqual(Math.Round(0.01m * secondPrice, 2), pnl2, "Pnl 2");
 
             var portfolio2 = _assetPortfolioManager.GetPortfolioSnapshot();
             Assert.AreEqual(0.01m, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.NetVolume);
@@ -139,11 +137,11 @@ namespace Service.Liquidity.Portfolio.Tests
             Assert.AreEqual(portfolio2.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd), portfolio2.BalanceByWallet.Sum(ee => ee.NetUsdVolume));
             
             Assert.AreEqual(-pnl2, 
-                portfolio2.BalanceByAsset
-                    .FirstOrDefault(e => e.Asset == AssetPortfolioManager.UsdAsset)?
+                Math.Round(portfolio2.BalanceByAsset
+                    .FirstOrDefault(e => e.Asset == AssetPortfolioManager.UsdAsset)
                     .WalletBalances
-                    .FirstOrDefault(e => e.WalletName == AssetPortfolioManager.PlWalletName)?
-                    .NetVolume);
+                    .FirstOrDefault(e => e.WalletName == AssetPortfolioManager.PlWalletName)
+                    .NetVolume, 2));
         }
         
         [Test]
