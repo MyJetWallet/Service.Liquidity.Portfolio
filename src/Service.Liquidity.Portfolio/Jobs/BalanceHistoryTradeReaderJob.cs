@@ -66,7 +66,9 @@ namespace Service.Liquidity.Portfolio.Jobs
                             Convert.ToDecimal(elem.Trade.BaseVolume), 
                             Convert.ToDecimal(elem.Trade.QuoteVolume), 
                             elem.Trade.DateTime,
-                            "spot-trades"));
+                            "spot-trades",
+                            elem.Trade.FeeAsset,
+                            elem.Trade.FeeVolume));
                     }
                     await _portfolioHandler.HandleTradesAsync(listForSaveByWallet);
                 });

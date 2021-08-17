@@ -48,7 +48,9 @@ namespace Service.Liquidity.Portfolio.Jobs
                     Convert.ToDecimal(elem.Side == OrderSide.Buy ? elem.BaseVolume : -elem.BaseVolume),
                     Convert.ToDecimal(elem.Side == OrderSide.Buy ? -elem.QuoteVolume : elem.QuoteVolume),
                     elem.DateTime,
-                    PortfolioTrade.TopicName));
+                    PortfolioTrade.TopicName,
+                    instrument?.QuoteAsset,
+                    0m));
             }
             await _portfolioHandler.HandleTradesAsync(localTrades);
         }

@@ -30,6 +30,8 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 19)] public string Comment { get; set; }
         [DataMember(Order = 20)] public string User { get; set; }
         [DataMember(Order = 21)] public decimal TotalReleasePnl { get; set; }
+        [DataMember(Order = 22)] public string FeeAsset { get; set; }
+        [DataMember(Order = 23)] public decimal FeeVolume { get; set; }
 
         public AssetPortfolioTrade(string tradeId, 
             string associateBrokerId,
@@ -42,7 +44,9 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             decimal baseVolume,
             decimal quoteVolume, 
             DateTime dateTime, 
-            string source)
+            string source,
+            string feeAsset,
+            decimal feeVolume)
         {
             TradeId = tradeId;
             AssociateBrokerId = associateBrokerId;
@@ -56,6 +60,8 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             QuoteVolume = quoteVolume;
             DateTime = dateTime;
             Source = source;
+            FeeAsset = feeAsset;
+            FeeVolume = feeVolume;
         }
 
         public AssetPortfolioTrade(string associateBrokerId,
@@ -64,7 +70,9 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             string quoteAsset,
             string walletName,
             decimal price, decimal baseVolume,
-            decimal quoteVolume, string comment, string user, string source)
+            decimal quoteVolume, string comment, string user, string source,
+            string feeAsset,
+            decimal feeVolume)
         {
             AssociateBrokerId = associateBrokerId;
             WalletName = walletName;
@@ -77,6 +85,8 @@ namespace Service.Liquidity.Portfolio.Domain.Models
             Source = source;
             Comment = comment;
             User = user;
+            FeeAsset = feeAsset;
+            FeeVolume = feeVolume;
             
             TradeId = Guid.NewGuid().ToString("N");
             DateTime = DateTime.UtcNow;
