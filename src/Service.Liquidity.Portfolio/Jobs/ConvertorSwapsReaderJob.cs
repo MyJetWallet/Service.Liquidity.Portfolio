@@ -50,7 +50,10 @@ namespace Service.Liquidity.Portfolio.Jobs
                         swap.Timestamp,
                         TradeMessage.TopicName,
                         swap.AssetId2,
-                        0));
+                        0)
+                    {
+                        Comment = $"ClientId: {swap.AccountId2}"
+                    });
                 }
                 if (internalWallets.Contains(swap.AccountId2))
                 {
@@ -67,7 +70,10 @@ namespace Service.Liquidity.Portfolio.Jobs
                         swap.Timestamp,
                         TradeMessage.TopicName,
                         swap.AssetId1,
-                        0));
+                        0)
+                    {
+                        Comment = $"ClientId: {swap.AccountId1}"
+                    });
                 }
             }
             await _portfolioHandler.HandleTradesAsync(localTrades);
