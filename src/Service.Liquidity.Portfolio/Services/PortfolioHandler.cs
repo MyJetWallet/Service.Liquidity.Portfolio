@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DotNetCoreDecorators;
+using ME.Contracts.OutgoingMessages;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Newtonsoft.Json;
@@ -157,6 +158,22 @@ namespace Service.Liquidity.Portfolio.Services
             
             balanceList.Add(baseAssetBalance);
             balanceList.Add(quoteAssetBalance);
+
+
+            if (!string.IsNullOrWhiteSpace(assetPortfolioTrade.FeeAsset) && assetPortfolioTrade.FeeVolume != 0)
+            {
+                var (feeIndexPrice, feeUsdVolume) =
+                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(assetPortfolioTrade.FeeAsset, assetPortfolioTrade.FeeVolume);
+                var feeAssetDiff = new AssetBalanceDifference(assetPortfolioTrade.AssociateBrokerId,
+                    assetPortfolioTrade.WalletName,
+                    assetPortfolioTrade.FeeAsset, 
+                    assetPortfolioTrade.FeeVolume, 
+                    feeUsdVolume,
+                    feeIndexPrice.UsdPrice);
+                
+                balanceList.Add(feeAssetDiff);
+            }
+            
              
             _portfolioManager.UpdateBalance(balanceList);
             assetPortfolioTrade.TotalReleasePnl = _portfolioManager.FixReleasedPnl();
