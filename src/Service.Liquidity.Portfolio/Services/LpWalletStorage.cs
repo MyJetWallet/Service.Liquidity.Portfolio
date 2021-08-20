@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using MyNoSqlServer.Abstractions;
@@ -10,7 +11,7 @@ namespace Service.Liquidity.Portfolio.Services
     public class LpWalletStorage : IStartable
     {
         private readonly IMyNoSqlServerDataReader<LpWalletNoSql> _noSqlDataReader;
-        private List<string> Wallets { get; set; } = new List<string>();
+        private int _timerCounter = 0;
 
         public LpWalletStorage(IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader)
         {
@@ -24,17 +25,23 @@ namespace Service.Liquidity.Portfolio.Services
 
         private async Task RefreshData()
         {
-            Wallets = _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
+            var cache = _noSqlDataReader.Get().Select(elem => elem.Wallet.Name);
         }
 
         public List<string> GetWallets()
         {
-            if (Wallets.Any())
+            if (_noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList().Any())
             {
-                return Wallets;
+                return _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
             }
-            RefreshData().GetAwaiter().GetResult();
-            return Wallets;
+
+            if (_timerCounter >= 60) 
+                return _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
+            
+            _timerCounter++;
+            Thread.Sleep(1000);
+
+            return GetWallets();
         }
     }
 }
