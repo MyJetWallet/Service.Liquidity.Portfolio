@@ -20,8 +20,9 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             var noSqlDataReader = new MyNoSqlServerDataReaderMock();
             var indexPricesClientMock = new IndexPricesClientMock();
             var assetPortfolioMath = new AssetPortfolioMath();
+            var lpWalletStorage = new LpWalletStorage(noSqlDataReader);
             var assetPortfolioManager = new AssetPortfolioManager(Program.LogFactory.CreateLogger<AssetPortfolioManager>(),
-                noSqlDataReader, indexPricesClientMock, assetPortfolioMath);
+                indexPricesClientMock, assetPortfolioMath, lpWalletStorage);
             var simulationEntity = new PortfolioSimulation(GenerateNewSimulationId());
 
             await assetPortfolioManager.ReloadBalance(null);

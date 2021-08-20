@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using DotNetCoreDecorators;
 using MyJetWallet.Domain.Orders;
-using MyNoSqlServer.Abstractions;
 using Service.Liquidity.Converter.Domain.Models;
-using Service.Liquidity.Engine.Domain.Models.NoSql;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
+using Service.Liquidity.Portfolio.Services;
 using Service.Liquidity.PortfolioHedger.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Jobs
@@ -17,21 +15,21 @@ namespace Service.Liquidity.Portfolio.Jobs
     public class ConvertorSwapsReaderJob : IStartable
     {
         private readonly IPortfolioHandler _portfolioHandler;
-        private readonly IMyNoSqlServerDataReader<LpWalletNoSql> _noSqlDataReader;
+        private readonly LpWalletStorage _lpWalletStorage;
 
         public ConvertorSwapsReaderJob(ISubscriber<IReadOnlyList<SwapMessage>> subscriber, 
             IPortfolioHandler portfolioHandler,
-            IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader)
+            LpWalletStorage lpWalletStorage)
         {
             _portfolioHandler = portfolioHandler;
-            _noSqlDataReader = noSqlDataReader;
+            _lpWalletStorage = lpWalletStorage;
             subscriber.Subscribe(HandleTrades);
         }
 
         private async ValueTask HandleTrades(IReadOnlyList<SwapMessage> swaps)
         {
             var localTrades = new List<AssetPortfolioTrade>();
-            var internalWallets = _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
+            var internalWallets = _lpWalletStorage.GetWallets();
 
             foreach (var swap in swaps)
             {

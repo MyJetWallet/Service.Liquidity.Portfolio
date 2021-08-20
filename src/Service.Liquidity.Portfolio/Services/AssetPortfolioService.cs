@@ -55,7 +55,7 @@ namespace Service.Liquidity.Portfolio.Services
                     indexPrice.UsdPrice);
                 
                 var balanceBeforeUpdate = _portfolioManager
-                    ._portfolio?
+                    .Portfolio?
                     .BalanceByAsset?
                     .FirstOrDefault(elem => elem.Asset == request.Asset)?
                     .WalletBalances?

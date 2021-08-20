@@ -16,6 +16,7 @@ namespace Service.Liquidity.Portfolio.Tests
         private IndexPricesClientMock _indexPricesClient;
         private AssetPortfolioManager _assetPortfolioManager;
         private AssetPortfolioMath _assetPortfolioMath;
+        private LpWalletStorage _lpWalletStorage;
 
         [SetUp]
         public void SetUpTests()
@@ -31,11 +32,12 @@ namespace Service.Liquidity.Portfolio.Tests
             _indexPricesClient = new IndexPricesClientMock();
             _noSqlDataReader = new MyNoSqlServerDataReaderMock();
             _assetPortfolioMath = new AssetPortfolioMath();
+            _lpWalletStorage = new LpWalletStorage(_noSqlDataReader);
 
             _assetPortfolioManager = new AssetPortfolioManager(_loggerFactory.CreateLogger<AssetPortfolioManager>(),
-                _noSqlDataReader,
                 _indexPricesClient,
-                _assetPortfolioMath);
+                _assetPortfolioMath,
+                _lpWalletStorage);
         }
 
         [Test]
@@ -298,19 +300,36 @@ namespace Service.Liquidity.Portfolio.Tests
             Assert.AreEqual(0, portfolio3.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd));
         }
         
-        private decimal ExecuteTrade(string firstAsset, string secondAsset, decimal firstAmount, decimal secondAmount)
+        [Test]
+        public void Test5()
+        {
+            _assetPortfolioManager.ReloadBalance(null);
+            
+            _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 30000}, {"USD", 1}};
+            var pnl1 = ExecuteTrade("BTC", "USD", 1, -30000);
+            
+            _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 31000}, {"USD", 1}};
+            var pnl2 = ExecuteTrade("BTC", "USD", -0.5m, 15500, "Binance");
+            
+            var portfolio = _assetPortfolioManager.GetPortfolioSnapshot();
+            
+            //Assert.AreEqual(0, pnl1, "Pnl 1");
+            //Assert.AreEqual(500, pnl2, "Pnl 2");
+        }
+        
+        private decimal ExecuteTrade(string firstAsset, string secondAsset, decimal firstAmount, decimal secondAmount, string walletName = "LP")
         {
             Console.WriteLine("Trade:");
             
             var balanceDifference = new List<AssetBalanceDifference>();
 
-            var firstDiff = new AssetBalanceDifference("jetwallet", "LP", firstAsset,
+            var firstDiff = new AssetBalanceDifference("jetwallet", walletName, firstAsset,
                 firstAmount, firstAmount * _indexPricesClient.PriceMap[firstAsset], _indexPricesClient.PriceMap[firstAsset]);
             
             var secondUsdPrice = Math.Abs(_indexPricesClient.PriceMap[firstAsset] * firstAmount / secondAmount);
             var secondUsdVolume = secondAmount * secondUsdPrice;
             
-            var secondDiff = new AssetBalanceDifference("jetwallet", "LP", secondAsset, 
+            var secondDiff = new AssetBalanceDifference("jetwallet", walletName, secondAsset, 
                 secondAmount, secondUsdVolume, secondUsdPrice);
             
             balanceDifference.Add(firstDiff);

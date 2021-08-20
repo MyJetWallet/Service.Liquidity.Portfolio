@@ -4,9 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
-using MyNoSqlServer.Abstractions;
 using Service.IndexPrices.Client;
-using Service.Liquidity.Engine.Domain.Models.NoSql;
 using Service.Liquidity.Portfolio.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Services
@@ -14,11 +12,11 @@ namespace Service.Liquidity.Portfolio.Services
     public class AssetPortfolioManager
     {
         private readonly ILogger<AssetPortfolioManager> _logger;
-        private readonly IMyNoSqlServerDataReader<LpWalletNoSql> _noSqlDataReader;
+        private readonly LpWalletStorage _lpWalletStorage;
         private readonly IIndexPricesClient _indexPricesClient;
         private readonly AssetPortfolioMath _assetPortfolioMath;
 
-        public AssetPortfolio _portfolio = new AssetPortfolio();
+        public AssetPortfolio Portfolio = new AssetPortfolio();
         private List<AssetBalance> _assetBalances = new List<AssetBalance>();
         private readonly object _locker = new object();
         public const string UsdAsset = "USD"; // todo: get from config ASSET AND BROKER
@@ -27,14 +25,14 @@ namespace Service.Liquidity.Portfolio.Services
         private bool _isInit = false;
 
         public AssetPortfolioManager(ILogger<AssetPortfolioManager> logger,
-            IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader,
             IIndexPricesClient indexPricesClient,
-            AssetPortfolioMath assetPortfolioMath)
+            AssetPortfolioMath assetPortfolioMath,
+            LpWalletStorage lpWalletStorage)
         {
             _logger = logger;
-            _noSqlDataReader = noSqlDataReader;
             _indexPricesClient = indexPricesClient;
             _assetPortfolioMath = assetPortfolioMath;
+            _lpWalletStorage = lpWalletStorage;
         }
         
         public AssetPortfolio GetPortfolioSnapshot(AssetPortfolio portfolio = null, List<AssetBalance> assetBalances = null)
@@ -49,7 +47,7 @@ namespace Service.Liquidity.Portfolio.Services
             {
                 if (portfolio == null || assetBalances == null)
                 {
-                    portfolio = _portfolio;
+                    portfolio = Portfolio;
                     assetBalances = _assetBalances;
                 }
                 UpdatePortfolio(portfolio, assetBalances);
@@ -71,7 +69,7 @@ namespace Service.Liquidity.Portfolio.Services
                 assetBalanceCopy.Add(elem.Copy());
             });
             
-            var internalWallets = _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
+            var internalWallets = _lpWalletStorage.GetWallets();
 
             portfolio.BalanceByAsset = GetBalanceByAsset(assetBalanceCopy, internalWallets);
             portfolio.BalanceByWallet = GetBalanceByWallet(portfolio.BalanceByAsset);
@@ -79,8 +77,8 @@ namespace Service.Liquidity.Portfolio.Services
 
         public async Task ReloadBalance(AssetPortfolio balances)
         {
-            _portfolio = balances ?? new AssetPortfolio();
-            ReloadAssetBalances(_portfolio);
+            Portfolio = balances ?? new AssetPortfolio();
+            ReloadAssetBalances(Portfolio);
 
             _isInit = true;
         }
@@ -129,7 +127,7 @@ namespace Service.Liquidity.Portfolio.Services
             {
                 if (portfolio == null || assetBalances == null)
                 {
-                    portfolio = _portfolio;
+                    portfolio = Portfolio;
                     assetBalances = _assetBalances;
                 }
                 
@@ -239,8 +237,7 @@ namespace Service.Liquidity.Portfolio.Services
 
                 if (balanceByAsset.NetVolume != 0)
                 {
-                    balanceByAsset.OpenPriceAvg = balanceByAsset.WalletBalances
-                        .Sum(elem => elem.OpenPrice * elem.NetVolume) / balanceByAsset.NetVolume;
+                    balanceByAsset.OpenPriceAvg = GetOpenPriceAvg(balanceByAsset);
                 }
                 else
                 {
@@ -252,7 +249,19 @@ namespace Service.Liquidity.Portfolio.Services
 
             return balanceByAssetCollection;
         }
-        
+
+        private decimal GetOpenPriceAvg(NetBalanceByAsset balanceByAsset)
+        {
+            if (balanceByAsset.WalletBalances.All(e => e.NetVolume > 0) ||
+                balanceByAsset.WalletBalances.All(e => e.NetVolume < 0))
+            {
+                return balanceByAsset.WalletBalances
+                    .Sum(elem => elem.OpenPrice * elem.NetVolume) / balanceByAsset.NetVolume;
+            }
+            
+            return 0;
+        }
+
         private List<NetBalanceByWallet> GetBalanceByWallet(List<NetBalanceByAsset> balancesByAssets)
         {
             using var a = MyTelemetry.StartActivity("GetBalanceByWallet");

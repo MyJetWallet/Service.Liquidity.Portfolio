@@ -88,6 +88,13 @@ namespace Service.Liquidity.Portfolio.Modules
             builder
                 .RegisterType<AssetPortfolioMath>()
                 .AsSelf();
+            
+            builder
+                .RegisterType<LpWalletStorage>()
+                .AsSelf()
+                .As<IStartable>()
+                .AutoActivate()
+                .SingleInstance();
 
             builder.RegisterMyServiceBusSubscriberBatch<PortfolioTrade>(serviceBusClient,
                 PortfolioTrade.TopicName,
