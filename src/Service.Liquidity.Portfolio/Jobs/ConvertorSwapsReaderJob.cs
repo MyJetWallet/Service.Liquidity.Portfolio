@@ -33,7 +33,7 @@ namespace Service.Liquidity.Portfolio.Jobs
 
             foreach (var swap in swaps)
             {
-                if (internalWallets.Contains(swap.AccountId1))
+                if (internalWallets.Contains(swap.AccountId1) || internalWallets.Contains(swap.WalletId1))
                 {
                     localTrades.Add(new AssetPortfolioTrade(swap.Id,
                         swap.BrokerId,
@@ -53,7 +53,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                         Comment = $"ClientId: {swap.AccountId2}"
                     });
                 }
-                if (internalWallets.Contains(swap.AccountId2))
+                if (internalWallets.Contains(swap.AccountId2) || internalWallets.Contains(swap.WalletId2))
                 {
                     localTrades.Add(new AssetPortfolioTrade(swap.Id,
                         swap.BrokerId,
