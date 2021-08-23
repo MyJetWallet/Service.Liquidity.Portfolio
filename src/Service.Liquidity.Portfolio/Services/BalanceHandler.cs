@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Service.IndexPrices.Client;
+using Service.IndexPrices.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Services
@@ -39,6 +40,8 @@ namespace Service.Liquidity.Portfolio.Services
             }
             using var a = MyTelemetry.StartActivity("GetPortfolioSnapshot");
 
+            var indexPrices = _indexPricesClient.GetIndexPricesAsync();
+            
             lock(_locker)
             {
                 var portfolioCopy = new AssetPortfolio
@@ -46,10 +49,51 @@ namespace Service.Liquidity.Portfolio.Services
                     BalanceByAsset = Portfolio.BalanceByAsset.Select(e => e.GetCopy()).ToList(),
                     BalanceByWallet = Portfolio.BalanceByWallet.Select(e => e.GetCopy()).ToList()
                 };
+
+                SetNetUsd(portfolioCopy, indexPrices);
+                SetUnrPnl(portfolioCopy, indexPrices);
                 return portfolioCopy;
             }
         }
-        
+
+        private void SetNetUsd(AssetPortfolio portfolio, List<IndexPrice> indexPrices)
+        {
+            foreach (var balanceByAsset in portfolio.BalanceByAsset)
+            {
+                var indexPrice = indexPrices.FirstOrDefault(e => e.Asset == balanceByAsset.Asset);
+
+                if (indexPrice != null)
+                {
+                    var netUsd = balanceByAsset.Volume * indexPrice.UsdPrice;
+                    balanceByAsset.UsdVolume = netUsd;
+                }
+                else
+                {
+                    _logger.LogError("Cannot found index price for : {symbol}", balanceByAsset.Asset);
+                    balanceByAsset.UsdVolume = 0;
+                }
+            }
+        }
+
+        private void SetUnrPnl(AssetPortfolio portfolio, List<IndexPrice> indexPrices)
+        {
+            foreach (var balanceByAsset in portfolio.BalanceByAsset)
+            {
+                var indexPrice = indexPrices.FirstOrDefault(e => e.Asset == balanceByAsset.Asset);
+
+                if (indexPrice != null)
+                {
+                    var unrPnl = balanceByAsset.Volume * (indexPrice.UsdPrice - balanceByAsset.OpenPriceAvg);
+                    balanceByAsset.UnrealisedPnl = unrPnl;
+                }
+                else
+                {
+                    _logger.LogError("Cannot found index price for : {symbol}", balanceByAsset.Asset);
+                    balanceByAsset.UnrealisedPnl = 0;
+                }
+            }
+        }
+
         public async Task ReloadBalance(AssetPortfolio balances)
         {
             lock (_locker)
@@ -72,7 +116,7 @@ namespace Service.Liquidity.Portfolio.Services
                     var balanceByAsset = GetBalanceByAsset(difference.Asset);
                     UpdateBalanceByWallet(balanceByAsset, difference, forceSet);
                 }
-                UpdateBalanceByAsset();
+                UpdateBalanceByAsset(); // OPEN PRICE
                 UpdateBalanceByWallet();
             }
         }
@@ -172,27 +216,31 @@ namespace Service.Liquidity.Portfolio.Services
                 return 0;
             
             var indexPrice = _indexPricesClient.GetIndexPriceByAssetAsync(asset);
-            if (balanceByAsset.OpenPriceAvg == 0)
-            {
+            
+            // открытие позиции
+            if (balanceByAsset.LastVolume == 0)
                 return indexPrice.UsdPrice;
-            }
-            // если openPrice = 0, то openPrice = indexPrice 
-            // если openPrice !=0, то его нужно изменить на объем дифференса умноженого на текущий index price
-
-            if (balanceByAsset.WalletBalances.Where(e=> e.Volume != 0).All(e => e.Volume > 0) ||
-                balanceByAsset.WalletBalances.Where(e=> e.Volume != 0).All(e => e.Volume < 0))
+            
+            // закрытие позиции
+            if (balanceByAsset.Volume == 0)
+                return 0;
+           
+            if ((balanceByAsset.LastVolume > 0 && balanceByAsset.Volume > 0) ||
+                (balanceByAsset.LastVolume < 0 && balanceByAsset.Volume < 0))
             {
-                if (balanceByAsset.Volume == 0)
-                    return 0;
-                
-                var diff = Math.Abs(balanceByAsset.Volume - balanceByAsset.LastVolume);
-                var avgPrice = (balanceByAsset.OpenPriceAvg * Math.Abs(balanceByAsset.LastVolume) + indexPrice.UsdPrice * diff) /
-                               Math.Abs(balanceByAsset.Volume);
-
-                return avgPrice;
+                // увеличение позиции
+                if (Math.Abs(balanceByAsset.Volume) > Math.Abs(balanceByAsset.LastVolume))
+                {
+                    var diff = Math.Abs(balanceByAsset.Volume - balanceByAsset.LastVolume);
+                    var avgPrice = (balanceByAsset.OpenPriceAvg * Math.Abs(balanceByAsset.LastVolume) + indexPrice.UsdPrice * diff) /
+                                   Math.Abs(balanceByAsset.Volume);
+                    return avgPrice;
+                }
+                // уменьшение позиции
+                return balanceByAsset.OpenPriceAvg;
             }
-
-            return 0;
+            // закрытие позиции в ноль и открытие новой позиции (переворот)
+            return indexPrice.UsdPrice;
         }
         private void UpdateBalanceByWallet(BalanceByAsset balanceByAsset, AssetBalanceDifference difference, bool forceSet = false)
         {
