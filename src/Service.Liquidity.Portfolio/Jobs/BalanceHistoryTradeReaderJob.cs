@@ -17,15 +17,15 @@ namespace Service.Liquidity.Portfolio.Jobs
 {
     public class BalanceHistoryTradeReaderJob: IStartable
     {
-        private readonly IPortfolioHandler _portfolioHandler;
+        private readonly ITradeHandler _tradeHandler;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
         private readonly IMyNoSqlServerDataReader<LpWalletNoSql> _noSqlDataReader;
         
         public BalanceHistoryTradeReaderJob(ISubscriber<IReadOnlyList<WalletTradeMessage>> subscriber,
-            IPortfolioHandler portfolioHandler, ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
+            ITradeHandler tradeHandler, ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
             IMyNoSqlServerDataReader<LpWalletNoSql> noSqlDataReader)
         {
-            _portfolioHandler = portfolioHandler;
+            _tradeHandler = tradeHandler;
             _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
             _noSqlDataReader = noSqlDataReader;
             subscriber.Subscribe(HandleTrades);
@@ -70,7 +70,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                             elem.Trade.FeeAsset,
                             elem.Trade.FeeVolume));
                     }
-                    await _portfolioHandler.HandleTradesAsync(listForSaveByWallet);
+                    await _tradeHandler.HandleTradesAsync(listForSaveByWallet);
                 });
             }
             catch (Exception exception)

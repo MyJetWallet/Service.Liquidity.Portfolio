@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MyNoSqlServer.Abstractions;
 using Service.Liquidity.Engine.Domain.Models.NoSql;
+using Service.Liquidity.Engine.Domain.Models.Wallets;
 
 namespace Service.Liquidity.Portfolio.Tests
 {
@@ -34,7 +35,16 @@ namespace Service.Liquidity.Portfolio.Tests
 
         public IReadOnlyList<LpWalletNoSql> Get(Func<LpWalletNoSql, bool> condition = null)
         {
-            return new List<LpWalletNoSql>();
+            return new List<LpWalletNoSql>()
+            {
+                new LpWalletNoSql()
+                {
+                    Wallet = new LpWallet()
+                    {
+                        Name = "LP"
+                    }
+                }
+            };
         }
 
         public int Count()

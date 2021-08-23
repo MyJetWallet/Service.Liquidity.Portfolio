@@ -6,26 +6,26 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Service.IndexPrices.Client;
 using Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Models;
-using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
 
-namespace Service.Liquidity.Portfolio.Services
+namespace Service.Liquidity.Portfolio.Services.Grpc
 {
     public class AssetPortfolioService : IAssetPortfolioService
     {
         private readonly ILogger<AssetPortfolioService> _logger;
-        private readonly IPortfolioHandler _portfolioHandler;
+        private readonly ITradeHandler _tradeHandler;
         private readonly IIndexPricesClient _indexPricesClient;
-        private readonly AssetPortfolioManager _portfolioManager;
+        private readonly BalanceHandler _portfolioManager;
 
         public AssetPortfolioService(ILogger<AssetPortfolioService> logger,
-            IPortfolioHandler portfolioHandler,
-            AssetPortfolioManager portfolioManager,
+            ITradeHandler tradeHandler,
+            BalanceHandler portfolioManager,
             IIndexPricesClient indexPricesClient)
         {
             _logger = logger;
-            _portfolioHandler = portfolioHandler;
+            _tradeHandler = tradeHandler;
             _portfolioManager = portfolioManager;
             _indexPricesClient = indexPricesClient;
         }
@@ -60,11 +60,11 @@ namespace Service.Liquidity.Portfolio.Services
                     .FirstOrDefault(elem => elem.Asset == request.Asset)?
                     .WalletBalances?
                     .FirstOrDefault(elem => elem.WalletName == request.WalletName)?
-                    .NetVolume;
+                    .Volume;
                 
                 _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {newBalance}, true);
                 
-                await _portfolioHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
+                await _tradeHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
                 {
                     Asset = request.Asset,
                     BrokerId = request.BrokerId,
@@ -135,7 +135,7 @@ namespace Service.Liquidity.Portfolio.Services
 
                 _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {fromDiff, toDiff}, false);
 
-                await _portfolioHandler.SaveManualSettlementHistoryAsync(manualSettlement);
+                await _tradeHandler.SaveManualSettlementHistoryAsync(manualSettlement);
             }
             catch (Exception exception)
             {

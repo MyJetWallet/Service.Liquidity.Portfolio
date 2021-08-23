@@ -14,17 +14,17 @@ namespace Service.Liquidity.Portfolio.Jobs
     {
         private readonly ILogger<BalancePersistJob> _logger;
         private readonly MyTaskTimer _timer;
-        private readonly AssetPortfolioManager _assetPortfolioManager;
+        private readonly BalanceHandler _balanceHandler;
         private readonly IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> _settingsDataWriter;
         private readonly PortfolioMetrics _portfolioMetrics;
 
         public BalancePersistJob(ILogger<BalancePersistJob> logger,
-            AssetPortfolioManager assetPortfolioManager,
+            BalanceHandler balanceHandler,
             IMyNoSqlServerDataWriter<AssetPortfolioBalanceNoSql> settingsDataWriter,
             PortfolioMetrics portfolioMetrics)
         {
             _logger = logger;
-            _assetPortfolioManager = assetPortfolioManager;
+            _balanceHandler = balanceHandler;
             _settingsDataWriter = settingsDataWriter;
             _portfolioMetrics = portfolioMetrics;
             _timer = new MyTaskTimer(nameof(BalancePersistJob), TimeSpan.FromSeconds(Program.Settings.UpdateNoSqlBalancesTimerInSeconds), _logger, DoTime);
@@ -34,7 +34,7 @@ namespace Service.Liquidity.Portfolio.Jobs
         public async Task Start()
         {
             var nosqlBalance = (await _settingsDataWriter.GetAsync()).FirstOrDefault();
-            await _assetPortfolioManager.ReloadBalance(nosqlBalance?.Balance);
+            await _balanceHandler.ReloadBalance(nosqlBalance?.Balance);
             _timer.Start();
         }
 
@@ -45,7 +45,7 @@ namespace Service.Liquidity.Portfolio.Jobs
 
         private async Task SavePortfolio()
         {
-            var portfolioSnapshot = _assetPortfolioManager.GetPortfolioSnapshot();
+            var portfolioSnapshot = _balanceHandler.GetPortfolioSnapshot();
             
             _portfolioMetrics.SetPortfolioMetrics(portfolioSnapshot);
             

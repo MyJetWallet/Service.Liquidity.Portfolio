@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DotNetCoreDecorators;
-using ME.Contracts.OutgoingMessages;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Newtonsoft.Json;
@@ -13,21 +12,21 @@ using Service.Liquidity.Portfolio.Domain.Services;
 
 namespace Service.Liquidity.Portfolio.Services
 {
-    public class PortfolioHandler : IPortfolioHandler
+    public class TradeHandler : ITradeHandler
     {
-        private readonly ILogger<PortfolioHandler> _logger;
+        private readonly ILogger<TradeHandler> _logger;
         private readonly TradeCacheStorage _tradeCacheStorage;
         private readonly IPublisher<AssetPortfolioTrade> _tradePublisher;
         private readonly IPublisher<ChangeBalanceHistory> _changeBalanceHistoryPublisher;
         private readonly IPublisher<ManualSettlement> _manualSettlementPublisher;
-        private readonly AssetPortfolioManager _portfolioManager;
+        private readonly BalanceHandler _portfolioManager;
         private readonly IIndexPricesClient _indexPricesClient;
         private readonly PortfolioMetrics _portfolioMetrics;
 
-        public PortfolioHandler(ILogger<PortfolioHandler> logger,
+        public TradeHandler(ILogger<TradeHandler> logger,
             TradeCacheStorage tradeCacheStorage,
             IPublisher<AssetPortfolioTrade> tradePublisher,
-            AssetPortfolioManager portfolioManager,
+            BalanceHandler portfolioManager,
             IPublisher<ChangeBalanceHistory> changeBalanceHistoryPublisher,
             IIndexPricesClient indexPricesClient,
             PortfolioMetrics portfolioMetrics,
@@ -163,7 +162,6 @@ namespace Service.Liquidity.Portfolio.Services
             balanceList.Add(baseAssetBalance);
             balanceList.Add(quoteAssetBalance);
 
-
             if (!string.IsNullOrWhiteSpace(assetPortfolioTrade.FeeAsset) && assetPortfolioTrade.FeeVolume != 0)
             {
                 var (feeIndexPrice, feeUsdVolume) =
@@ -177,8 +175,6 @@ namespace Service.Liquidity.Portfolio.Services
                 
                 balanceList.Add(feeAssetDiff);
             }
-            
-             
             _portfolioManager.UpdateBalance(balanceList);
             assetPortfolioTrade.TotalReleasePnl = _portfolioManager.FixReleasedPnl();
         }

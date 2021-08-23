@@ -14,14 +14,14 @@ namespace Service.Liquidity.Portfolio.Jobs
 {
     public class ConvertorSwapsReaderJob : IStartable
     {
-        private readonly IPortfolioHandler _portfolioHandler;
+        private readonly ITradeHandler _tradeHandler;
         private readonly LpWalletStorage _lpWalletStorage;
 
         public ConvertorSwapsReaderJob(ISubscriber<IReadOnlyList<SwapMessage>> subscriber, 
-            IPortfolioHandler portfolioHandler,
+            ITradeHandler tradeHandler,
             LpWalletStorage lpWalletStorage)
         {
-            _portfolioHandler = portfolioHandler;
+            _tradeHandler = tradeHandler;
             _lpWalletStorage = lpWalletStorage;
             subscriber.Subscribe(HandleTrades);
         }
@@ -74,7 +74,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                     });
                 }
             }
-            await _portfolioHandler.HandleTradesAsync(localTrades);
+            await _tradeHandler.HandleTradesAsync(localTrades);
         }
 
         public void Start()

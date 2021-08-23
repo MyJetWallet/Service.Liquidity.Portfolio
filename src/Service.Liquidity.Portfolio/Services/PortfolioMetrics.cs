@@ -148,37 +148,29 @@ namespace Service.Liquidity.Portfolio.Services
 
         private void SetMetricsByTotal(AssetPortfolio portfolio)
         {
-            var totalNetUsd = portfolio.BalanceByWallet.Sum(e => e.NetUsdVolume);
-            var totalPnl = portfolio.BalanceByWallet.Sum(e => e.UnreleasedPnlUsd);
+            var totalNetUsd = portfolio.BalanceByWallet.Sum(e => e.UsdVolume);
+            var totalPnl = portfolio.BalanceByAsset.Sum(e => e.UnrealisedPnl);
             
             VolumeUsdTotal.Set(Convert.ToDouble(totalNetUsd));
             UnreleasedPnlTotal.Set(Convert.ToDouble(totalPnl));
         }
 
-        private void SetMetricsByWallet(NetBalanceByWallet balanceByWallet)
+        private void SetMetricsByWallet(BalanceByWallet balanceByWallet)
         {
             VolumeByWallet
                 .WithLabels(balanceByWallet.WalletName)
-                .Set(Convert.ToDouble(balanceByWallet.NetVolume));
-                    
-            OpenPriceByWallet
-                .WithLabels(balanceByWallet.WalletName)
-                .Set(Convert.ToDouble(balanceByWallet.OpenPrice));
-                    
+                .Set(Convert.ToDouble(balanceByWallet.Volume));
+
             VolumeUsdByWallet
                 .WithLabels(balanceByWallet.WalletName)
-                .Set(Convert.ToDouble(balanceByWallet.NetUsdVolume));
-                    
-            UnreleasedPnlByWallet
-                .WithLabels(balanceByWallet.WalletName)
-                .Set(Convert.ToDouble(balanceByWallet.UnreleasedPnlUsd));
+                .Set(Convert.ToDouble(balanceByWallet.UsdVolume));
         }
 
-        private void SetMetricsByAsset(NetBalanceByAsset balanceByAsset)
+        private void SetMetricsByAsset(BalanceByAsset balanceByAsset)
         {
             VolumeByAsset
                 .WithLabels(balanceByAsset.Asset)
-                .Set(Convert.ToDouble(balanceByAsset.NetVolume));
+                .Set(Convert.ToDouble(balanceByAsset.Volume));
                     
             OpenPriceByAsset
                 .WithLabels(balanceByAsset.Asset)
@@ -186,30 +178,30 @@ namespace Service.Liquidity.Portfolio.Services
                     
             VolumeUsdByAsset
                 .WithLabels(balanceByAsset.Asset)
-                .Set(Convert.ToDouble(balanceByAsset.NetUsdVolume));
+                .Set(Convert.ToDouble(balanceByAsset.UsdVolume));
                     
             UnreleasedPnlByAsset
                 .WithLabels(balanceByAsset.Asset)
                 .Set(Convert.ToDouble(balanceByAsset.UnrealisedPnl));
         }
 
-        private void SetMetricsByAssetAndWallet(NetBalanceByAsset balanceByAsset, NetBalanceByWallet balanceByWallet)
+        private void SetMetricsByAssetAndWallet(BalanceByAsset balanceByAsset, BalanceByWallet balanceByWallet)
         {
             VolumeByAssetAndWallet
                 .WithLabels(balanceByAsset.Asset, balanceByWallet.WalletName)
-                .Set(Convert.ToDouble(balanceByWallet.NetVolume));
+                .Set(Convert.ToDouble(balanceByWallet.Volume));
                     
             OpenPriceByAssetAndWallet
                 .WithLabels(balanceByAsset.Asset, balanceByWallet.WalletName)
-                .Set(Convert.ToDouble(balanceByWallet.OpenPrice));
+                .Set(Convert.ToDouble(balanceByAsset.OpenPriceAvg));
                     
             VolumeUsdByAssetAndWallet
                 .WithLabels(balanceByAsset.Asset, balanceByWallet.WalletName)
-                .Set(Convert.ToDouble(balanceByWallet.NetUsdVolume));
+                .Set(Convert.ToDouble(balanceByWallet.UsdVolume));
                     
             UnreleasedPnlByAssetAndWallet
                 .WithLabels(balanceByAsset.Asset, balanceByWallet.WalletName)
-                .Set(Convert.ToDouble(balanceByWallet.UnreleasedPnlUsd));
+                .Set(Convert.ToDouble(balanceByAsset.UnrealisedPnl));
         }
     }
 }

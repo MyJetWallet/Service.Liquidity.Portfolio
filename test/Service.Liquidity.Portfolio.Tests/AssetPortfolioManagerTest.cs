@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
-using Service.AssetsDictionary.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Services;
 
@@ -12,11 +11,10 @@ namespace Service.Liquidity.Portfolio.Tests
     public class AssetPortfolioManagerTest
     {
         private static ILoggerFactory _loggerFactory;
-        private MyNoSqlServerDataReaderMock _noSqlDataReader;
-        private IndexPricesClientMock _indexPricesClient;
-        private AssetPortfolioManager _assetPortfolioManager;
-        private AssetPortfolioMath _assetPortfolioMath;
-        private LpWalletStorage _lpWalletStorage;
+        protected MyNoSqlServerDataReaderMock _noSqlDataReader;
+        protected IndexPricesClientMock _indexPricesClient;
+        protected BalanceHandler BalanceHandler;
+        protected LpWalletStorage _lpWalletStorage;
 
         [SetUp]
         public void SetUpTests()
@@ -31,19 +29,17 @@ namespace Service.Liquidity.Portfolio.Tests
                     }));
             _indexPricesClient = new IndexPricesClientMock();
             _noSqlDataReader = new MyNoSqlServerDataReaderMock();
-            _assetPortfolioMath = new AssetPortfolioMath();
             _lpWalletStorage = new LpWalletStorage(_noSqlDataReader);
 
-            _assetPortfolioManager = new AssetPortfolioManager(_loggerFactory.CreateLogger<AssetPortfolioManager>(),
+            BalanceHandler = new BalanceHandler(_loggerFactory.CreateLogger<BalanceHandler>(),
                 _indexPricesClient,
-                _assetPortfolioMath,
                 _lpWalletStorage);
         }
 
         [Test]
         public void Test1()
         {
-            _assetPortfolioManager.ReloadBalance(null);
+            BalanceHandler.ReloadBalance(null);
 
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 35000}, {"ETH", 1750}, {"USD", 1}};
             var pnl1 = ExecuteTrade("ETH", "BTC", 10, -0.5m);
@@ -58,7 +54,7 @@ namespace Service.Liquidity.Portfolio.Tests
         [Test]
         public void Test1_1()
         {
-            _assetPortfolioManager.ReloadBalance(null);
+            BalanceHandler.ReloadBalance(null);
 
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 35000}, {"ETH", 1750}, {"USD", 1}};
             var pnl1 = ExecuteTrade("ETH", "BTC", 10, -0.5m);
@@ -73,7 +69,7 @@ namespace Service.Liquidity.Portfolio.Tests
         [Test]
         public void Test1_2()
         {
-            _assetPortfolioManager.ReloadBalance(null);
+            BalanceHandler.ReloadBalance(null);
 
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 35000}, {"ETH", 1750}, {"USD", 1}};
             var pnl1 = ExecuteTrade("ETH", "BTC", 12, -0.5m);
@@ -84,12 +80,12 @@ namespace Service.Liquidity.Portfolio.Tests
         [Test]
         public void Test2()
         {
-            _assetPortfolioManager.ReloadBalance(null);
+            BalanceHandler.ReloadBalance(null);
 
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 35000}, {"ETH", 1750}, {"USD", 1}};
             var pnl1 = ExecuteTrade("ETH", "BTC", 10, -0.5m);
             
-            var portfolio1 = _assetPortfolioManager.GetPortfolioSnapshot();
+            var portfolio1 = BalanceHandler.GetPortfolioSnapshot();
             
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 34313.7254901961M}, {"ETH", 1750}, {"USD", 1}};
             var pnl2 = ExecuteTrade("ETH", "BTC", -10, 0.51m);
@@ -99,33 +95,31 @@ namespace Service.Liquidity.Portfolio.Tests
             var secondPrice = Math.Abs(_indexPricesClient.PriceMap["ETH"] * -10 / 0.51m);
             Assert.AreEqual(Math.Round(0.01m * secondPrice,2), pnl2, "Pnl 2");
 
-            var portfolio2 = _assetPortfolioManager.GetPortfolioSnapshot();
-            Assert.AreEqual(0.01m, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.NetVolume);
-            Assert.AreEqual(portfolio2.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd), portfolio2.BalanceByWallet.Sum(ee => ee.NetUsdVolume));
+            var portfolio2 = BalanceHandler.GetPortfolioSnapshot();
+            Assert.AreEqual(0.01m, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.Volume);
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.Volume);
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.Volume);
             
             Assert.AreEqual(-pnl2, Math.Round(portfolio2.BalanceByAsset
-                .FirstOrDefault(e => e.Asset == AssetPortfolioManager.UsdAsset)
+                .FirstOrDefault(e => e.Asset == BalanceHandler.UsdAsset)
                 .WalletBalances
-                .FirstOrDefault(e => e.WalletName == AssetPortfolioManager.PlWalletName).NetVolume, 2));
+                .FirstOrDefault(e => e.WalletName == BalanceHandler.PlWalletName).Volume, 2));
         }
         
         [Test]
         public void Test3()
         {
-            _assetPortfolioManager.ReloadBalance(null);
+            BalanceHandler.ReloadBalance(null);
 
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 35000}, {"ETH", 1750}, {"USD", 1}};
             var pnl1 = ExecuteTrade("ETH", "BTC", 10, -0.5m);
             
-            var portfolio1 = _assetPortfolioManager.GetPortfolioSnapshot();
+            var portfolio1 = BalanceHandler.GetPortfolioSnapshot();
             
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 34000}, {"ETH", 1750}, {"USD", 1}};
             
-            var snapshot = _assetPortfolioManager.GetPortfolioSnapshot();
-            var netUsd = snapshot.BalanceByWallet.Sum(e => e.NetUsdVolume);
-            var unrPnl = snapshot.BalanceByWallet.Sum(e => e.UnreleasedPnlUsd);
+            var snapshot = BalanceHandler.GetPortfolioSnapshot();
+            var netUsd = snapshot.BalanceByWallet.Sum(e => e.UsdVolume);
             
             var pnl2 = ExecuteTrade("ETH", "BTC", -10, 0.51m);
             
@@ -133,23 +127,22 @@ namespace Service.Liquidity.Portfolio.Tests
             var secondPrice = Math.Abs(_indexPricesClient.PriceMap["ETH"] * -10 / 0.51m);
             Assert.AreEqual(Math.Round(0.01m * secondPrice, 2), pnl2, "Pnl 2");
 
-            var portfolio2 = _assetPortfolioManager.GetPortfolioSnapshot();
-            Assert.AreEqual(0.01m, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.NetVolume);
-            Assert.AreEqual(portfolio2.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd), portfolio2.BalanceByWallet.Sum(ee => ee.NetUsdVolume));
+            var portfolio2 = BalanceHandler.GetPortfolioSnapshot();
+            Assert.AreEqual(0.01m, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.Volume);
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.Volume);
             
             Assert.AreEqual(-pnl2, 
                 Math.Round(portfolio2.BalanceByAsset
-                    .FirstOrDefault(e => e.Asset == AssetPortfolioManager.UsdAsset)
+                    .FirstOrDefault(e => e.Asset == BalanceHandler.UsdAsset)
                     .WalletBalances
-                    .FirstOrDefault(e => e.WalletName == AssetPortfolioManager.PlWalletName)
-                    .NetVolume, 2));
+                    .FirstOrDefault(e => e.WalletName == BalanceHandler.PlWalletName)
+                    .Volume, 2));
         }
         
         [Test]
         public void Test4()
         {
-            _assetPortfolioManager.ReloadBalance(null);
+            BalanceHandler.ReloadBalance(null);
             
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 30000}, {"ETH", 3000}, {"USD", 1}, {"EUR", 1.2m}, {"CHF", 0.8m}};
             var pnl1 = ExecuteTrade("BTC", "EUR", 1, -25000);
@@ -164,28 +157,27 @@ namespace Service.Liquidity.Portfolio.Tests
             Assert.AreEqual(0, pnl2, "Pnl 2");
             Assert.AreEqual(0, pnl3, "Pnl 3");
 
-            var portfolio2 = _assetPortfolioManager.GetPortfolioSnapshot();
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.NetVolume);
-            Assert.AreEqual(-25000, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "EUR")?.NetVolume);
-            Assert.AreEqual(37500, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "CHF")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "USD")?.NetVolume);
+            var portfolio2 = BalanceHandler.GetPortfolioSnapshot();
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.Volume);
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.Volume);
+            Assert.AreEqual(-25000, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "EUR")?.Volume);
+            Assert.AreEqual(37500, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "CHF")?.Volume);
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "USD")?.Volume);
             
-            Assert.AreEqual(0, portfolio2.BalanceByWallet.Sum(ee => ee.NetUsdVolume));
-            Assert.AreEqual(0, portfolio2.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd));
+            Assert.AreEqual(0, portfolio2.BalanceByWallet.Sum(ee => ee.UsdVolume));
             
             Assert.AreEqual(0, 
                 portfolio2.BalanceByAsset
-                    .FirstOrDefault(e => e.Asset == AssetPortfolioManager.UsdAsset)?
+                    .FirstOrDefault(e => e.Asset == BalanceHandler.UsdAsset)?
                     .WalletBalances
-                    .FirstOrDefault(e => e.WalletName == AssetPortfolioManager.PlWalletName)?
-                    .NetVolume);
+                    .FirstOrDefault(e => e.WalletName == BalanceHandler.PlWalletName)?
+                    .Volume);
         }
         
         [Test]
         public void Test4_1()
         {
-            _assetPortfolioManager.ReloadBalance(null);
+            BalanceHandler.ReloadBalance(null);
             
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 30000}, {"ETH", 3000}, {"USD", 1}, {"EUR", 1.2m}, {"CHF", 0.8m}};
             var pnl1 = ExecuteTrade("BTC", "EUR", 1, -25000);
@@ -200,28 +192,27 @@ namespace Service.Liquidity.Portfolio.Tests
             Assert.AreEqual(0, pnl2, "Pnl 2");
             Assert.AreEqual(0, pnl3, "Pnl 3");
 
-            var portfolio2 = _assetPortfolioManager.GetPortfolioSnapshot();
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.NetVolume);
-            Assert.AreEqual(-25000, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "EUR")?.NetVolume);
-            Assert.AreEqual(37500, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "CHF")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "USD")?.NetVolume);
+            var portfolio2 = BalanceHandler.GetPortfolioSnapshot();
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.Volume);
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.Volume);
+            Assert.AreEqual(-25000, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "EUR")?.Volume);
+            Assert.AreEqual(37500, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "CHF")?.Volume);
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "USD")?.Volume);
             
-            Assert.AreEqual(0, portfolio2.BalanceByWallet.Sum(ee => ee.NetUsdVolume));
-            Assert.AreEqual(0, portfolio2.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd));
+            Assert.AreEqual(0, portfolio2.BalanceByWallet.Sum(ee => ee.UsdVolume));
             
             Assert.AreEqual(0, 
                 portfolio2.BalanceByAsset
-                    .FirstOrDefault(e => e.Asset == AssetPortfolioManager.UsdAsset)?
+                    .FirstOrDefault(e => e.Asset == BalanceHandler.UsdAsset)?
                     .WalletBalances
-                    .FirstOrDefault(e => e.WalletName == AssetPortfolioManager.PlWalletName)?
-                    .NetVolume);
+                    .FirstOrDefault(e => e.WalletName == BalanceHandler.PlWalletName)?
+                    .Volume);
         }
         
         [Test]
         public void Test4_2()
         {
-            _assetPortfolioManager.ReloadBalance(null);
+            BalanceHandler.ReloadBalance(null);
             
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 30000}, {"ETH", 3000}, {"USD", 1}, {"EUR", 1.2m}, {"CHF", 0.8m}};
             var pnl1 = ExecuteTrade("BTC", "EUR", 1, -25000);
@@ -231,9 +222,8 @@ namespace Service.Liquidity.Portfolio.Tests
             
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 37500M}, {"ETH", 3000}, {"USD", 1}, {"EUR", 1.2m}, {"CHF", 0.8m}};
             
-            var snapshot = _assetPortfolioManager.GetPortfolioSnapshot();
-            var netUsd = snapshot.BalanceByWallet.Sum(e => e.NetUsdVolume);
-            var unrPnl = snapshot.BalanceByWallet.Sum(e => e.UnreleasedPnlUsd);
+            var snapshot = BalanceHandler.GetPortfolioSnapshot();
+            var netUsd = snapshot.BalanceByWallet.Sum(e => e.UsdVolume);
             
             var pnl3 = ExecuteTrade("ETH", "BTC", 10, -0.8m);
             
@@ -241,21 +231,20 @@ namespace Service.Liquidity.Portfolio.Tests
             Assert.AreEqual(0, pnl2, "Pnl 2");
             Assert.AreEqual(6000, pnl3, "Pnl 3");
 
-            var portfolio2 = _assetPortfolioManager.GetPortfolioSnapshot();
-            Assert.AreEqual(0.2m, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.NetVolume);
-            Assert.AreEqual(-25000, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "EUR")?.NetVolume);
-            Assert.AreEqual(37500, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "CHF")?.NetVolume);
-            Assert.AreEqual(-6000, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "USD")?.NetVolume);
+            var portfolio2 = BalanceHandler.GetPortfolioSnapshot();
+            Assert.AreEqual(0.2m, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.Volume);
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.Volume);
+            Assert.AreEqual(-25000, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "EUR")?.Volume);
+            Assert.AreEqual(37500, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "CHF")?.Volume);
+            Assert.AreEqual(-6000, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "USD")?.Volume);
             
-            Assert.AreEqual(1500, portfolio2.BalanceByWallet.Sum(ee => ee.NetUsdVolume));
-            Assert.AreEqual(1500, portfolio2.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd));
+            Assert.AreEqual(1500, portfolio2.BalanceByWallet.Sum(ee => ee.UsdVolume));
         }
         
         [Test]
         public void Test4_3()
         {
-            _assetPortfolioManager.ReloadBalance(null);
+            BalanceHandler.ReloadBalance(null);
             
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 30000}, {"ETH", 3000}, {"USD", 1}, {"EUR", 1.2m}, {"CHF", 0.8m}};
             var pnl1 = ExecuteTrade("BTC", "EUR", 1, -25000);
@@ -274,50 +263,31 @@ namespace Service.Liquidity.Portfolio.Tests
             Assert.AreEqual(6000, pnl3, "Pnl 3");
             Assert.AreEqual(0, pnl4, "Pnl 4");
 
-            var portfolio2 = _assetPortfolioManager.GetPortfolioSnapshot();
-            Assert.AreEqual(0.2, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "EUR")?.NetVolume);
-            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "CHF")?.NetVolume);
-            Assert.AreEqual(-6000, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "USD")?.NetVolume);
+            var portfolio2 = BalanceHandler.GetPortfolioSnapshot();
+            Assert.AreEqual(0.2, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.Volume);
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.Volume);
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "EUR")?.Volume);
+            Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "CHF")?.Volume);
+            Assert.AreEqual(-6000, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "USD")?.Volume);
             
-            Assert.AreEqual(1500, portfolio2.BalanceByWallet.Sum(ee => ee.NetUsdVolume));
-            Assert.AreEqual(1500, portfolio2.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd));
+            Assert.AreEqual(1500, portfolio2.BalanceByWallet.Sum(ee => ee.UsdVolume));
             
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 37500M}, {"ETH", 3000}, {"USD", 1}, {"EUR", 1.2m}, {"CHF", 0.8m}};
             var pnl5 = ExecuteTrade("BTC", "USD", -0.2m, 7500);
             
             Assert.AreEqual(1500, pnl5, "Pnl 5");
             
-            var portfolio3 = _assetPortfolioManager.GetPortfolioSnapshot();
-            Assert.AreEqual(0, portfolio3.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.NetVolume);
-            Assert.AreEqual(0, portfolio3.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.NetVolume);
-            Assert.AreEqual(0, portfolio3.BalanceByAsset.FirstOrDefault(e => e.Asset == "EUR")?.NetVolume);
-            Assert.AreEqual(0, portfolio3.BalanceByAsset.FirstOrDefault(e => e.Asset == "CHF")?.NetVolume);
-            Assert.AreEqual(0, portfolio3.BalanceByAsset.FirstOrDefault(e => e.Asset == "USD")?.NetVolume);
+            var portfolio3 = BalanceHandler.GetPortfolioSnapshot();
+            Assert.AreEqual(0, portfolio3.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.Volume);
+            Assert.AreEqual(0, portfolio3.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.Volume);
+            Assert.AreEqual(0, portfolio3.BalanceByAsset.FirstOrDefault(e => e.Asset == "EUR")?.Volume);
+            Assert.AreEqual(0, portfolio3.BalanceByAsset.FirstOrDefault(e => e.Asset == "CHF")?.Volume);
+            Assert.AreEqual(0, portfolio3.BalanceByAsset.FirstOrDefault(e => e.Asset == "USD")?.Volume);
             
-            Assert.AreEqual(0, portfolio3.BalanceByWallet.Sum(ee => ee.NetUsdVolume));
-            Assert.AreEqual(0, portfolio3.BalanceByWallet.Sum(ee => ee.UnreleasedPnlUsd));
+            Assert.AreEqual(0, portfolio3.BalanceByWallet.Sum(ee => ee.UsdVolume));
         }
         
-        [Test]
-        public void Test5()
-        {
-            _assetPortfolioManager.ReloadBalance(null);
-            
-            _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 30000}, {"USD", 1}};
-            var pnl1 = ExecuteTrade("BTC", "USD", 1, -30000);
-            
-            _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 31000}, {"USD", 1}};
-            var pnl2 = ExecuteTrade("BTC", "USD", -0.5m, 15500, "Binance");
-            
-            var portfolio = _assetPortfolioManager.GetPortfolioSnapshot();
-            
-            //Assert.AreEqual(0, pnl1, "Pnl 1");
-            //Assert.AreEqual(500, pnl2, "Pnl 2");
-        }
-        
-        private decimal ExecuteTrade(string firstAsset, string secondAsset, decimal firstAmount, decimal secondAmount, string walletName = "LP")
+        protected decimal ExecuteTrade(string firstAsset, string secondAsset, decimal firstAmount, decimal secondAmount, string walletName = "LP")
         {
             Console.WriteLine("Trade:");
             
@@ -335,9 +305,9 @@ namespace Service.Liquidity.Portfolio.Tests
             balanceDifference.Add(firstDiff);
             balanceDifference.Add(secondDiff);
             
-            _assetPortfolioManager.UpdateBalance(balanceDifference);
+            BalanceHandler.UpdateBalance(balanceDifference);
 
-            var releasedPnl = _assetPortfolioManager.FixReleasedPnl();
+            var releasedPnl = BalanceHandler.FixReleasedPnl();
             
             Console.WriteLine($"ReleasedPnl = {releasedPnl}");
             

@@ -5,29 +5,32 @@ using System.Runtime.Serialization;
 namespace Service.Liquidity.Portfolio.Domain.Models
 {
     [DataContract]
-    public class NetBalanceByAsset
+    public class BalanceByAsset
     {
         [DataMember(Order = 1)] public string Asset { get; set; }
-        [DataMember(Order = 2)] public List<NetBalanceByWallet> WalletBalances { get; set; }
-        [DataMember(Order = 4)] public decimal NetVolume { get; set; }
-        [DataMember(Order = 5)] public decimal NetUsdVolume { get; set; }
+        [DataMember(Order = 2)] public List<BalanceByWallet> WalletBalances { get; set; }
+        [DataMember(Order = 4)] public decimal Volume { get; set; }
+        [DataMember(Order = 5)] public decimal UsdVolume { get; set; }
         [DataMember(Order = 6)] public decimal OpenPriceAvg { get; set; }
         [DataMember(Order = 7)] public decimal UnrealisedPnl { get; set; }
-        
-        public NetBalanceByAsset()
+        [DataMember(Order = 8)] public decimal LastVolume { get; set; }
+
+        public BalanceByAsset()
         {
+            WalletBalances = new List<BalanceByWallet>();
         }
 
-        public NetBalanceByAsset GetCopy()
+        public BalanceByAsset GetCopy()
         {
-            var netBalance =  new NetBalanceByAsset()
+            var netBalance =  new BalanceByAsset()
             {
                 Asset = Asset,
-                NetVolume = NetVolume,
-                NetUsdVolume = NetUsdVolume,
+                Volume = Volume,
+                UsdVolume = UsdVolume,
                 OpenPriceAvg = OpenPriceAvg,
                 UnrealisedPnl = UnrealisedPnl,
-                WalletBalances = new List<NetBalanceByWallet>()
+                WalletBalances = new List<BalanceByWallet>(),
+                LastVolume = LastVolume
             };
 
             if (WalletBalances != null && WalletBalances.Any())

@@ -15,13 +15,13 @@ namespace Service.Liquidity.Portfolio.Jobs
 {
     public class LiquidityEngineTradeReaderJob : IStartable
     {
-        private readonly IPortfolioHandler _portfolioHandler;
+        private readonly ITradeHandler _tradeHandler;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
         public LiquidityEngineTradeReaderJob(ISubscriber<IReadOnlyList<PortfolioTrade>> subscriber,
-            IPortfolioHandler portfolioHandler, 
+            ITradeHandler tradeHandler, 
             ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient)
         {
-            _portfolioHandler = portfolioHandler;
+            _tradeHandler = tradeHandler;
             _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
             subscriber.Subscribe(HandleTrades);
         }
@@ -52,7 +52,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                     instrument?.QuoteAsset,
                     0m));
             }
-            await _portfolioHandler.HandleTradesAsync(localTrades);
+            await _tradeHandler.HandleTradesAsync(localTrades);
         }
 
         public void Start()

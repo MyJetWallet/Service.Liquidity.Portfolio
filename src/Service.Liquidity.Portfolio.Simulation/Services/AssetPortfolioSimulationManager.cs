@@ -19,15 +19,14 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
         {
             var noSqlDataReader = new MyNoSqlServerDataReaderMock();
             var indexPricesClientMock = new IndexPricesClientMock();
-            var assetPortfolioMath = new AssetPortfolioMath();
             var lpWalletStorage = new LpWalletStorage(noSqlDataReader);
-            var assetPortfolioManager = new AssetPortfolioManager(Program.LogFactory.CreateLogger<AssetPortfolioManager>(),
-                indexPricesClientMock, assetPortfolioMath, lpWalletStorage);
+            var assetPortfolioManager = new BalanceHandler(Program.LogFactory.CreateLogger<BalanceHandler>(),
+                indexPricesClientMock, lpWalletStorage);
             var simulationEntity = new PortfolioSimulation(GenerateNewSimulationId());
 
             await assetPortfolioManager.ReloadBalance(null);
 
-            var newSimulation = new SimulationStorage(assetPortfolioMath, 
+            var newSimulation = new SimulationStorage(
                 assetPortfolioManager, 
                 indexPricesClientMock,
                 simulationEntity);
@@ -67,18 +66,19 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
                 throw new Exception("Prices not found.");
             }
             
-            var baseAssetBalance = simulation.AssetPortfolioManager.GetBalanceEntity(simulation?.SimulationEntity.AssetBalances,
-                AssetPortfolioManager.Broker, request.WalletName, request.BaseAsset);
-            var quoteAssetBalance = simulation.AssetPortfolioManager.GetBalanceEntity(simulation?.SimulationEntity.AssetBalances,
-                AssetPortfolioManager.Broker, request.WalletName, request.QuoteAsset);
+            var baseAssetBalance = simulation.BalanceHandler.GetBalanceByAsset(request.BaseAsset);
+            var quoteAssetBalance = simulation.BalanceHandler.GetBalanceByAsset(request.QuoteAsset);
             
-            var baseAssetDiff = new AssetBalanceDifference(AssetPortfolioManager.Broker, request.WalletName, request.BaseAsset,
+            var baseAssetDiff = new AssetBalanceDifference(BalanceHandler.Broker, request.WalletName, request.BaseAsset,
                 request.BaseVolume, request.BaseVolume * baseAssetPrice, baseAssetPrice);
-            var quoteAssetDiff = new AssetBalanceDifference(AssetPortfolioManager.Broker, request.WalletName, request.QuoteAsset,
+            var quoteAssetDiff = new AssetBalanceDifference(BalanceHandler.Broker, request.WalletName, request.QuoteAsset,
                 request.QuoteVolume, quoteAssetVolumeUsd, quoteAssetPrice);
-            
-            simulation.AssetPortfolioMath.UpdateBalance(baseAssetBalance, baseAssetDiff);
-            simulation.AssetPortfolioMath.UpdateBalance(quoteAssetBalance, quoteAssetDiff);
+
+            IEnumerable<AssetBalanceDifference> differenceBalances = new List<AssetBalanceDifference>()
+            {
+                {baseAssetDiff}, {quoteAssetDiff}
+            };
+            simulation.BalanceHandler.UpdateBalance(differenceBalances);
             
             var trade = new AssetPortfolioTrade()
             {
@@ -91,10 +91,7 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
                 BaseAssetPriceInUsd = baseAssetPrice,
                 QuoteAssetPriceInUsd = Math.Round(quoteAssetPrice, 8)
             };
-            trade.TotalReleasePnl = Math.Round(simulation.AssetPortfolioManager.FixReleasedPnl(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances), 8);
-            
-            simulation.AssetPortfolioManager.UpdatePortfolio(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
-
+            trade.TotalReleasePnl = Math.Round(simulation.BalanceHandler.FixReleasedPnl(), 8);
             simulation.SimulationEntity.Trades.Add(trade);
         }
 
@@ -131,8 +128,6 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             simulation.SimulationEntity.PriceMap = request.PriceMap;
 
             SetIndexPrices(simulation.SimulationEntity.SimulationId);
-            
-            simulation?.AssetPortfolioManager.UpdatePortfolio(simulation.SimulationEntity.Portfolio, simulation.SimulationEntity.AssetBalances);
         }
     }
 }

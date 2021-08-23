@@ -8,11 +8,12 @@ using Service.Liquidity.Converter.Client;
 using Service.Liquidity.Converter.Domain.Models;
 using Service.Liquidity.Engine.Domain.Models.Portfolio;
 using Service.Liquidity.Portfolio.Domain.Models;
+using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Jobs;
 using Service.Liquidity.Portfolio.Services;
+using Service.Liquidity.Portfolio.Services.Grpc;
 using Service.Liquidity.PortfolioHedger.Client;
-using IPortfolioHandler = Service.Liquidity.Portfolio.Domain.Services.IPortfolioHandler;
 
 namespace Service.Liquidity.Portfolio.Modules
 {
@@ -38,7 +39,7 @@ namespace Service.Liquidity.Portfolio.Modules
             builder.RegisterMyServiceBusPublisher<ManualSettlement>(serviceBusClient, ManualSettlement.TopicName, true);
             
             builder
-                .RegisterType<AssetPortfolioManager>()
+                .RegisterType<BalanceHandler>()
                 .AsSelf()
                 .SingleInstance();
             
@@ -68,8 +69,8 @@ namespace Service.Liquidity.Portfolio.Modules
                 .SingleInstance();
             
             builder
-                .RegisterType<PortfolioHandler>()
-                .As<IPortfolioHandler>()
+                .RegisterType<TradeHandler>()
+                .As<ITradeHandler>()
                 .SingleInstance();
             builder
                 .RegisterType<TradeCacheStorage>()
@@ -84,10 +85,6 @@ namespace Service.Liquidity.Portfolio.Modules
                 .RegisterType<PortfolioMetrics>()
                 .AsSelf()
                 .SingleInstance();
-
-            builder
-                .RegisterType<AssetPortfolioMath>()
-                .AsSelf();
             
             builder
                 .RegisterType<LpWalletStorage>()

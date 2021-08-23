@@ -10,12 +10,12 @@ namespace Service.Liquidity.Portfolio.Jobs
 {
     public class PortfolioHedgerTradeReaderJob : IStartable
     {
-        private readonly IPortfolioHandler _portfolioHandler;
+        private readonly ITradeHandler _tradeHandler;
 
         public PortfolioHedgerTradeReaderJob(ISubscriber<IReadOnlyList<TradeMessage>> subscriber, 
-            IPortfolioHandler portfolioHandler)
+            ITradeHandler tradeHandler)
         {
-            _portfolioHandler = portfolioHandler;
+            _tradeHandler = tradeHandler;
             subscriber.Subscribe(HandleTrades);
         }
 
@@ -44,7 +44,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                     User = elem.User
                 });
             }
-            await _portfolioHandler.HandleTradesAsync(localTrades);
+            await _tradeHandler.HandleTradesAsync(localTrades);
         }
 
         public void Start()
