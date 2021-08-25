@@ -45,7 +45,7 @@ namespace Service.Liquidity.Portfolio.Services
             portfolio.BalanceByWallet = balanceByWallet;
         }
 
-        private void UpdateBalanceByAsset(BalanceByAsset balanceByAsset, decimal lastVolume, decimal currentPrice)
+        private static void UpdateBalanceByAsset(BalanceByAsset balanceByAsset, decimal lastVolume, decimal currentPrice)
         {
             var newVolume = balanceByAsset.WalletBalances.Sum(e => e.Volume);
             

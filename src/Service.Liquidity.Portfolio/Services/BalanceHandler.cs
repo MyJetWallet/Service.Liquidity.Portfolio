@@ -57,7 +57,7 @@ namespace Service.Liquidity.Portfolio.Services
             }
         }
 
-        private void SetNetUsd(AssetPortfolio portfolio, List<IndexPrice> indexPrices)
+        private void SetNetUsd(AssetPortfolio portfolio, IReadOnlyCollection<IndexPrice> indexPrices)
         {
             foreach (var balanceByAsset in portfolio.BalanceByAsset)
             {
@@ -76,7 +76,7 @@ namespace Service.Liquidity.Portfolio.Services
             }
         }
 
-        private void SetUnrPnl(AssetPortfolio portfolio, List<IndexPrice> indexPrices)
+        private void SetUnrPnl(AssetPortfolio portfolio, IReadOnlyCollection<IndexPrice> indexPrices)
         {
             foreach (var balanceByAsset in portfolio.BalanceByAsset)
             {
@@ -127,11 +127,10 @@ namespace Service.Liquidity.Portfolio.Services
 
                 var netUsd = snapshot.BalanceByAsset.Sum(e => e.UsdVolume);
                 var unrPnl = snapshot.BalanceByAsset.Sum(e => e.UnrealisedPnl);
-
                 var releasedPnl = netUsd - unrPnl;
-
+                
                 _balanceUpdater.SetReleasedPnl(snapshot, releasedPnl);
-
+                
                 Portfolio = snapshot;
                 
                 return Math.Round(releasedPnl, 2);
