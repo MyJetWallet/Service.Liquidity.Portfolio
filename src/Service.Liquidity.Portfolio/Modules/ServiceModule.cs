@@ -42,6 +42,10 @@ namespace Service.Liquidity.Portfolio.Modules
                 .RegisterType<BalanceHandler>()
                 .AsSelf()
                 .SingleInstance();
+            builder
+                .RegisterType<BalanceUpdater>()
+                .AsSelf()
+                .SingleInstance();
             
             builder
                 .RegisterType<BalanceHistoryTradeReaderJob>()

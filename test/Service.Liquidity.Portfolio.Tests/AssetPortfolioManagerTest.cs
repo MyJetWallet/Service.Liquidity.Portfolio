@@ -15,6 +15,7 @@ namespace Service.Liquidity.Portfolio.Tests
         protected IndexPricesClientMock _indexPricesClient;
         protected BalanceHandler BalanceHandler;
         protected LpWalletStorage _lpWalletStorage;
+        protected BalanceUpdater _balanceUpdater;
 
         [SetUp]
         public void SetUpTests()
@@ -30,10 +31,12 @@ namespace Service.Liquidity.Portfolio.Tests
             _indexPricesClient = new IndexPricesClientMock();
             _noSqlDataReader = new MyNoSqlServerDataReaderMock();
             _lpWalletStorage = new LpWalletStorage(_noSqlDataReader);
+            _balanceUpdater = new BalanceUpdater(_indexPricesClient);
 
             BalanceHandler = new BalanceHandler(_loggerFactory.CreateLogger<BalanceHandler>(),
                 _indexPricesClient,
-                _lpWalletStorage);
+                _lpWalletStorage,
+                _balanceUpdater);
         }
 
         [Test]
@@ -70,7 +73,7 @@ namespace Service.Liquidity.Portfolio.Tests
         public void Test1_2()
         {
             BalanceHandler.ReloadBalance(null);
-
+            
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 35000}, {"ETH", 1750}, {"USD", 1}};
             var pnl1 = ExecuteTrade("ETH", "BTC", 12, -0.5m);
             
@@ -80,8 +83,6 @@ namespace Service.Liquidity.Portfolio.Tests
         [Test]
         public void Test2()
         {
-            BalanceHandler.ReloadBalance(null);
-
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 35000}, {"ETH", 1750}, {"USD", 1}};
             var pnl1 = ExecuteTrade("ETH", "BTC", 10, -0.5m);
             

@@ -9,14 +9,17 @@ namespace Service.Liquidity.Portfolio.Simulation.Models
         public PortfolioSimulation SimulationEntity { get; set; }
         public readonly BalanceHandler BalanceHandler;
         public readonly IndexPricesClientMock IndexPricesClientMock;
+        public readonly BalanceUpdater BalanceUpdater;
 
         public SimulationStorage(BalanceHandler balanceHandler,
             IndexPricesClientMock indexPricesClientMock,
-            PortfolioSimulation simulationEntity)
+            PortfolioSimulation simulationEntity,
+            BalanceUpdater balanceUpdater)
         {
             BalanceHandler = balanceHandler;
             IndexPricesClientMock = indexPricesClientMock;
             SimulationEntity = simulationEntity;
+            BalanceUpdater = balanceUpdater;
         }
     }
 }

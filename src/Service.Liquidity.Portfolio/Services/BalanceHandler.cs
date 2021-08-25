@@ -15,6 +15,7 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly ILogger<BalanceHandler> _logger;
         private readonly LpWalletStorage _lpWalletStorage;
         private readonly IIndexPricesClient _indexPricesClient;
+        private readonly BalanceUpdater _balanceUpdater;
 
         public AssetPortfolio Portfolio = new AssetPortfolio();
         private readonly object _locker = new object();
@@ -25,11 +26,13 @@ namespace Service.Liquidity.Portfolio.Services
 
         public BalanceHandler(ILogger<BalanceHandler> logger,
             IIndexPricesClient indexPricesClient,
-            LpWalletStorage lpWalletStorage)
+            LpWalletStorage lpWalletStorage,
+            BalanceUpdater balanceUpdater)
         {
             _logger = logger;
             _indexPricesClient = indexPricesClient;
             _lpWalletStorage = lpWalletStorage;
+            _balanceUpdater = balanceUpdater;
         }
         
         public AssetPortfolio GetPortfolioSnapshot()
@@ -113,39 +116,8 @@ namespace Service.Liquidity.Portfolio.Services
             {
                 foreach (var difference in differenceBalances)
                 {
-                    var balanceByAsset = GetBalanceByAsset(difference.Asset);
-                    UpdateBalanceByWallet(balanceByAsset, difference, forceSet);
+                    _balanceUpdater.UpdateBalance(Portfolio, difference, forceSet);
                 }
-                UpdateBalanceByAsset(); // OPEN PRICE
-                UpdateBalanceByWallet();
-            }
-        }
-
-        private void UpdateBalanceByWallet()
-        {
-            using var a = MyTelemetry.StartActivity("UpdateBalanceByWallet");
-
-            var balanceByWallet = Portfolio.BalanceByAsset
-                .SelectMany(elem => elem.WalletBalances)
-                .GroupBy(x => new {x.WalletName, x.BrokerId, x.IsInternal})
-                .Select(group => new BalanceByWallet()
-                {
-                    BrokerId = group.Key.BrokerId,
-                    IsInternal = group.Key.IsInternal,
-                    WalletName = group.Key.WalletName,
-                    UsdVolume = group.Sum(e => e.UsdVolume)
-                }).ToList();
-            Portfolio.BalanceByWallet = balanceByWallet;
-        }
-
-        private void UpdateBalanceByAsset()
-        {
-            foreach (var balanceByAsset in Portfolio.BalanceByAsset)
-            {
-                balanceByAsset.LastVolume = balanceByAsset.Volume;
-                balanceByAsset.Volume = balanceByAsset.WalletBalances.Sum(e => e.Volume);
-                balanceByAsset.UsdVolume = balanceByAsset.WalletBalances.Sum(e => e.UsdVolume);
-                balanceByAsset.OpenPriceAvg = GetOpenPriceAvg(balanceByAsset);
             }
         }
 
@@ -192,97 +164,6 @@ namespace Service.Liquidity.Portfolio.Services
                 balanceByAsset.WalletBalances.Add(balanceByWallet);
             }
             return balanceByWallet;
-        }
-
-        public BalanceByAsset GetBalanceByAsset(string asset)
-        {
-            var balance = Portfolio.BalanceByAsset.FirstOrDefault(elem => elem.Asset == asset);
-            if (balance == null)
-            {
-                balance = new BalanceByAsset()
-                {
-                    Asset = asset
-                };
-                Portfolio.BalanceByAsset.Add(balance);
-            }
-            return balance;
-        }
-
-
-        private decimal GetOpenPriceAvg(BalanceByAsset balanceByAsset)
-        {
-            var asset = balanceByAsset.Asset;
-            if (string.IsNullOrWhiteSpace(asset))
-                return 0;
-            
-            var indexPrice = _indexPricesClient.GetIndexPriceByAssetAsync(asset);
-            
-            // открытие позиции
-            if (balanceByAsset.LastVolume == 0)
-                return indexPrice.UsdPrice;
-            
-            // закрытие позиции
-            if (balanceByAsset.Volume == 0)
-                return 0;
-           
-            if ((balanceByAsset.LastVolume > 0 && balanceByAsset.Volume > 0) ||
-                (balanceByAsset.LastVolume < 0 && balanceByAsset.Volume < 0))
-            {
-                // увеличение позиции
-                if (Math.Abs(balanceByAsset.Volume) > Math.Abs(balanceByAsset.LastVolume))
-                {
-                    var diff = Math.Abs(balanceByAsset.Volume - balanceByAsset.LastVolume);
-                    var avgPrice = (balanceByAsset.OpenPriceAvg * Math.Abs(balanceByAsset.LastVolume) + indexPrice.UsdPrice * diff) /
-                                   Math.Abs(balanceByAsset.Volume);
-                    return avgPrice;
-                }
-                // уменьшение позиции
-                return balanceByAsset.OpenPriceAvg;
-            }
-            // закрытие позиции в ноль и открытие новой позиции (переворот)
-            return indexPrice.UsdPrice;
-        }
-        private void UpdateBalanceByWallet(BalanceByAsset balanceByAsset, AssetBalanceDifference difference, bool forceSet = false)
-        {
-            var balanceByWallet =
-                balanceByAsset.WalletBalances.FirstOrDefault(e => e.WalletName == difference.WalletName);
-
-            if (balanceByWallet == null)
-            {
-                balanceByWallet = new BalanceByWallet()
-                {
-                    WalletName = difference.WalletName,
-                    BrokerId = difference.BrokerId,
-                    Volume = 0,
-                    UsdVolume = 0
-                };
-                balanceByAsset.WalletBalances.Add(balanceByWallet);
-            }
-            
-            // for SetBalance
-            if (forceSet)
-            {
-                balanceByWallet.Volume = 0m;
-            }
-
-            if ((balanceByWallet.Volume >= 0 && difference.Volume > 0) || (balanceByWallet.Volume <= 0 && difference.Volume < 0))
-            {
-                balanceByWallet.Volume += difference.Volume;
-                return;
-            }
-            var originalVolume = balanceByWallet.Volume;
-            var decreaseVolumeAbs = Math.Min(Math.Abs(balanceByWallet.Volume), Math.Abs(difference.Volume));
-            if (decreaseVolumeAbs > 0)
-            {
-                if (balanceByWallet.Volume > 0)
-                    balanceByWallet.Volume -= decreaseVolumeAbs;
-                else
-                    balanceByWallet.Volume += decreaseVolumeAbs;
-            }
-            if (decreaseVolumeAbs < Math.Abs(difference.Volume))
-            {
-                balanceByWallet.Volume = difference.Volume + originalVolume;
-            }
         }
     }
 }

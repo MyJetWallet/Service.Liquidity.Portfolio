@@ -13,7 +13,6 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 5)] public decimal UsdVolume { get; set; }
         [DataMember(Order = 6)] public decimal OpenPriceAvg { get; set; }
         [DataMember(Order = 7)] public decimal UnrealisedPnl { get; set; }
-        [DataMember(Order = 8)] public decimal LastVolume { get; set; }
 
         public BalanceByAsset()
         {
@@ -29,8 +28,7 @@ namespace Service.Liquidity.Portfolio.Domain.Models
                 UsdVolume = UsdVolume,
                 OpenPriceAvg = OpenPriceAvg,
                 UnrealisedPnl = UnrealisedPnl,
-                WalletBalances = new List<BalanceByWallet>(),
-                LastVolume = LastVolume
+                WalletBalances = new List<BalanceByWallet>()
             };
 
             if (WalletBalances != null && WalletBalances.Any())

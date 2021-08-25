@@ -20,8 +20,9 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             var noSqlDataReader = new MyNoSqlServerDataReaderMock();
             var indexPricesClientMock = new IndexPricesClientMock();
             var lpWalletStorage = new LpWalletStorage(noSqlDataReader);
+            var balanceUpdater = new BalanceUpdater(indexPricesClientMock);
             var assetPortfolioManager = new BalanceHandler(Program.LogFactory.CreateLogger<BalanceHandler>(),
-                indexPricesClientMock, lpWalletStorage);
+                indexPricesClientMock, lpWalletStorage, balanceUpdater);
             var simulationEntity = new PortfolioSimulation(GenerateNewSimulationId());
 
             await assetPortfolioManager.ReloadBalance(null);
@@ -29,7 +30,8 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             var newSimulation = new SimulationStorage(
                 assetPortfolioManager, 
                 indexPricesClientMock,
-                simulationEntity);
+                simulationEntity,
+                balanceUpdater);
             _simulationStorages.Add(newSimulation);
             
             return simulationEntity;
@@ -66,8 +68,8 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
                 throw new Exception("Prices not found.");
             }
             
-            var baseAssetBalance = simulation.BalanceHandler.GetBalanceByAsset(request.BaseAsset);
-            var quoteAssetBalance = simulation.BalanceHandler.GetBalanceByAsset(request.QuoteAsset);
+            var baseAssetBalance = simulation.BalanceUpdater.GetBalanceByAsset(simulation.BalanceHandler.Portfolio, request.BaseAsset);
+            var quoteAssetBalance = simulation.BalanceUpdater.GetBalanceByAsset(simulation.BalanceHandler.Portfolio, request.QuoteAsset);
             
             var baseAssetDiff = new AssetBalanceDifference(BalanceHandler.Broker, request.WalletName, request.BaseAsset,
                 request.BaseVolume, request.BaseVolume * baseAssetPrice, baseAssetPrice);
