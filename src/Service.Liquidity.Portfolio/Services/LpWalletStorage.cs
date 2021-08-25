@@ -30,13 +30,13 @@ namespace Service.Liquidity.Portfolio.Services
 
         public List<string> GetWallets()
         {
-            if (_noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList().Any())
+            if (_noSqlDataReader.Get().Select(elem => elem.Wallet.WalletId).ToList().Any())
             {
-                return _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
+                return _noSqlDataReader.Get().Select(elem => elem.Wallet.WalletId).ToList();
             }
 
             if (_timerCounter >= 60) 
-                return _noSqlDataReader.Get().Select(elem => elem.Wallet.Name).ToList();
+                return _noSqlDataReader.Get().Select(elem => elem.Wallet.WalletId).ToList();
             
             _timerCounter++;
             Thread.Sleep(1000);
