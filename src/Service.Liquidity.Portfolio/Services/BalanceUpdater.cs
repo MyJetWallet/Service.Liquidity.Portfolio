@@ -10,6 +10,10 @@ namespace Service.Liquidity.Portfolio.Services
     {
         private readonly IIndexPricesClient _indexPricesClient;
 
+        public const string UsdAsset = "USD"; // todo: get from config ASSET AND BROKER
+        private const string Broker = "jetwallet"; // todo: get from config ASSET AND BROKER
+        public const string PlWalletName = "PL Balance";// todo: get from config
+
         public BalanceUpdater(IIndexPricesClient indexPricesClient)
         {
             _indexPricesClient = indexPricesClient;
@@ -20,7 +24,7 @@ namespace Service.Liquidity.Portfolio.Services
             var balanceByAsset = GetBalanceByAsset(portfolio, difference.Asset);
             var lastVolume = balanceByAsset.Volume;
             UpdateBalanceByAssetAndWallet(balanceByAsset, difference, forceSet);
-            UpdateBalanceByAsset(balanceByAsset, lastVolume); 
+            UpdateBalanceByAsset(balanceByAsset, lastVolume, difference.CurrentPriceInUsd); 
             UpdateBalanceByWallet(portfolio);
         }
         
@@ -40,55 +44,53 @@ namespace Service.Liquidity.Portfolio.Services
                 }).ToList();
             portfolio.BalanceByWallet = balanceByWallet;
         }
-        
-        private void UpdateBalanceByAsset(BalanceByAsset balanceByAsset, decimal lastVolume)
+
+        private void UpdateBalanceByAsset(BalanceByAsset balanceByAsset, decimal lastVolume, decimal currentPrice)
         {
             var newVolume = balanceByAsset.WalletBalances.Sum(e => e.Volume);
             
             balanceByAsset.Volume = newVolume;
             balanceByAsset.UsdVolume = balanceByAsset.WalletBalances.Sum(e => e.UsdVolume);
-            balanceByAsset.OpenPriceAvg = GetOpenPriceAvg(balanceByAsset.Asset, newVolume, lastVolume, balanceByAsset.OpenPriceAvg);
+            balanceByAsset.OpenPriceAvg = GetOpenPriceAvg(balanceByAsset.Asset, newVolume, lastVolume, balanceByAsset.OpenPriceAvg, currentPrice);
         }
         
-        private decimal GetOpenPriceAvg(string asset, decimal volume, decimal lastVolume, decimal lastOpenPriceAvg)
+        public static decimal GetOpenPriceAvg(string asset, decimal newVolume, decimal lastVolume, decimal lastOpenPriceAvg, decimal currentPrice)
         {
             if (string.IsNullOrWhiteSpace(asset))
                 return 0;
             
-            var indexPrice = _indexPricesClient.GetIndexPriceByAssetAsync(asset);
+            // закрытие позиции
+            if (newVolume == 0)
+                return 0;
             
             // открытие позиции
             if (lastVolume == 0)
-                return indexPrice.UsdPrice;
-            
-            // закрытие позиции
-            if (volume == 0)
-                return 0;
-           
-            if ((lastVolume > 0 && volume > 0) ||
-                (lastVolume < 0 && volume < 0))
+                return currentPrice;
+
+            if ((lastVolume > 0 && newVolume > 0) ||
+                (lastVolume < 0 && newVolume < 0))
             {
                 // увеличение позиции
-                if (Math.Abs(volume) > Math.Abs(lastVolume))
+                if (Math.Abs(newVolume) > Math.Abs(lastVolume))
                 {
-                    var diff = Math.Abs(volume - lastVolume);
-                    var avgPrice = (lastOpenPriceAvg * Math.Abs(lastVolume) + indexPrice.UsdPrice * diff) /
-                                   Math.Abs(volume);
+                    var diff = Math.Abs(newVolume - lastVolume);
+                    var avgPrice = (lastOpenPriceAvg * Math.Abs(lastVolume) + currentPrice * diff) /
+                                   Math.Abs(newVolume);
                     return avgPrice;
                 }
                 // уменьшение позиции
                 return lastOpenPriceAvg;
             }
             // закрытие позиции в ноль и открытие новой позиции (переворот)
-            return indexPrice.UsdPrice;
+            return currentPrice;
         }
 
         private void SetBalance(string asset, BalanceByWallet balanceByWallet, decimal volume)
         {
-            var indexPrice = _indexPricesClient.GetIndexPriceByAssetAsync(asset);
+            var (indexPrice, usdVolume) = _indexPricesClient.GetIndexPriceByAssetVolumeAsync(asset, volume);
             
             balanceByWallet.Volume = volume;
-            balanceByWallet.UsdVolume = volume * indexPrice.UsdPrice;
+            balanceByWallet.UsdVolume = usdVolume;
         }
 
         public BalanceByAsset GetBalanceByAsset(AssetPortfolio portfolio, string asset)
@@ -154,6 +156,46 @@ namespace Service.Liquidity.Portfolio.Services
                 var volume = difference.Volume + originalVolume;
                 SetBalance(balanceByAsset.Asset, balanceByWallet, volume);
             }
+        }
+
+        public void SetReleasedPnl(AssetPortfolio portfolio, decimal releasedPnl)
+        {
+            var (balanceByAsset, balanceByWallet) = GetBalanceByPnlWallet(portfolio);
+            var lastVolume = balanceByWallet.Volume;
+            var volume = balanceByWallet.Volume - releasedPnl;
+            SetBalance(UsdAsset, balanceByWallet, volume);
+            
+            UpdateBalanceByAsset(balanceByAsset, lastVolume, 1); 
+            UpdateBalanceByWallet(portfolio);
+        }
+        
+        private (BalanceByAsset, BalanceByWallet) GetBalanceByPnlWallet(AssetPortfolio portfolio)
+        {
+            var balanceByAsset = portfolio.BalanceByAsset.FirstOrDefault(elem => elem.Asset == UsdAsset);
+            if (balanceByAsset == null)
+            {
+                balanceByAsset = new BalanceByAsset()
+                {
+                    Asset = UsdAsset
+                };
+                portfolio.BalanceByAsset.Add(balanceByAsset);
+            }
+
+            var balanceByWallet = balanceByAsset.WalletBalances.FirstOrDefault(e => e.WalletName == PlWalletName);
+
+            if (balanceByWallet == null)
+            {
+                balanceByWallet = new BalanceByWallet()
+                {
+                    WalletName = PlWalletName,
+                    BrokerId = Broker,
+                    Volume = 0,
+                    UsdVolume = 0,
+                    IsInternal = true
+                };
+                balanceByAsset.WalletBalances.Add(balanceByWallet);
+            }
+            return (balanceByAsset, balanceByWallet);
         }
     }
 }

@@ -104,9 +104,9 @@ namespace Service.Liquidity.Portfolio.Tests
             Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.Volume);
             
             Assert.AreEqual(-pnl2, Math.Round(portfolio2.BalanceByAsset
-                .FirstOrDefault(e => e.Asset == BalanceHandler.UsdAsset)
+                .FirstOrDefault(e => e.Asset == BalanceUpdater.UsdAsset)
                 .WalletBalances
-                .FirstOrDefault(e => e.WalletName == BalanceHandler.PlWalletName).Volume, 2));
+                .FirstOrDefault(e => e.WalletName == BalanceUpdater.PlWalletName).Volume, 2));
         }
         
         [Test]
@@ -136,9 +136,9 @@ namespace Service.Liquidity.Portfolio.Tests
             
             Assert.AreEqual(-pnl2, 
                 Math.Round(portfolio2.BalanceByAsset
-                    .FirstOrDefault(e => e.Asset == BalanceHandler.UsdAsset)
+                    .FirstOrDefault(e => e.Asset == BalanceUpdater.UsdAsset)
                     .WalletBalances
-                    .FirstOrDefault(e => e.WalletName == BalanceHandler.PlWalletName)
+                    .FirstOrDefault(e => e.WalletName == BalanceUpdater.PlWalletName)
                     .Volume, 2));
         }
         
@@ -171,9 +171,9 @@ namespace Service.Liquidity.Portfolio.Tests
             
             Assert.AreEqual(0, 
                 portfolio2.BalanceByAsset
-                    .FirstOrDefault(e => e.Asset == BalanceHandler.UsdAsset)?
+                    .FirstOrDefault(e => e.Asset == BalanceUpdater.UsdAsset)?
                     .WalletBalances
-                    .FirstOrDefault(e => e.WalletName == BalanceHandler.PlWalletName)?
+                    .FirstOrDefault(e => e.WalletName == BalanceUpdater.PlWalletName)?
                     .Volume);
         }
         
@@ -206,9 +206,9 @@ namespace Service.Liquidity.Portfolio.Tests
             
             Assert.AreEqual(0, 
                 portfolio2.BalanceByAsset
-                    .FirstOrDefault(e => e.Asset == BalanceHandler.UsdAsset)?
+                    .FirstOrDefault(e => e.Asset == BalanceUpdater.UsdAsset)?
                     .WalletBalances
-                    .FirstOrDefault(e => e.WalletName == BalanceHandler.PlWalletName)?
+                    .FirstOrDefault(e => e.WalletName == BalanceUpdater.PlWalletName)?
                     .Volume);
         }
         
@@ -235,6 +235,7 @@ namespace Service.Liquidity.Portfolio.Tests
             Assert.AreEqual(6000, pnl3, "Pnl 3");
 
             var portfolio2 = BalanceHandler.GetPortfolioSnapshot();
+            
             Assert.AreEqual(0.2m, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.Volume);
             Assert.AreEqual(0, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "ETH")?.Volume);
             Assert.AreEqual(-25000, portfolio2.BalanceByAsset.FirstOrDefault(e => e.Asset == "EUR")?.Volume);
@@ -257,6 +258,8 @@ namespace Service.Liquidity.Portfolio.Tests
             
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 37500M}, {"ETH", 3000}, {"USD", 1}, {"EUR", 1.2m}, {"CHF", 0.8m}};
             var pnl3 = ExecuteTrade("ETH", "BTC", 10, -0.8m);
+            
+            var portfolio4 = BalanceHandler.GetPortfolioSnapshot();
             
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 37500M}, {"ETH", 3000}, {"USD", 1}, {"EUR", 1.2m}, {"CHF", 0.8m}};
             var pnl4 = ExecuteTrade("CHF", "EUR", -37500, 25000);

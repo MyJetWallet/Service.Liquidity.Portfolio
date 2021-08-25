@@ -19,9 +19,7 @@ namespace Service.Liquidity.Portfolio.Services
 
         public AssetPortfolio Portfolio = new AssetPortfolio();
         private readonly object _locker = new object();
-        public const string UsdAsset = "USD"; // todo: get from config ASSET AND BROKER
-        public const string Broker = "jetwallet"; // todo: get from config ASSET AND BROKER
-        public const string PlWalletName = "PL Balance";// todo: get from config
+
         private bool _isInit = false;
 
         public BalanceHandler(ILogger<BalanceHandler> logger,
@@ -131,39 +129,13 @@ namespace Service.Liquidity.Portfolio.Services
                 var unrPnl = snapshot.BalanceByAsset.Sum(e => e.UnrealisedPnl);
 
                 var releasedPnl = netUsd - unrPnl;
-                var usdBalance = GetBalanceByPnlWallet();
-                usdBalance.Volume -= releasedPnl;
+
+                _balanceUpdater.SetReleasedPnl(snapshot, releasedPnl);
+
+                Portfolio = snapshot;
+                
                 return Math.Round(releasedPnl, 2);
             }
-        }
-
-        private BalanceByWallet GetBalanceByPnlWallet()
-        {
-            var balanceByAsset = Portfolio.BalanceByAsset.FirstOrDefault(elem => elem.Asset == UsdAsset);
-            if (balanceByAsset == null)
-            {
-                balanceByAsset = new BalanceByAsset()
-                {
-                    Asset = UsdAsset
-                };
-                Portfolio.BalanceByAsset.Add(balanceByAsset);
-            }
-
-            var balanceByWallet = balanceByAsset.WalletBalances.FirstOrDefault(e => e.WalletName == PlWalletName);
-
-            if (balanceByWallet == null)
-            {
-                balanceByWallet = new BalanceByWallet()
-                {
-                    WalletName = PlWalletName,
-                    BrokerId = Broker,
-                    Volume = 0,
-                    UsdVolume = 0,
-                    IsInternal = true
-                };
-                balanceByAsset.WalletBalances.Add(balanceByWallet);
-            }
-            return balanceByWallet;
         }
     }
 }
