@@ -83,6 +83,8 @@ namespace Service.Liquidity.Portfolio.Tests
         [Test]
         public void Test2()
         {
+            BalanceHandler.ReloadBalance(null);
+            
             _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 35000}, {"ETH", 1750}, {"USD", 1}};
             var pnl1 = ExecuteTrade("ETH", "BTC", 10, -0.5m);
             

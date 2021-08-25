@@ -20,7 +20,7 @@ namespace Service.Liquidity.Portfolio.Services
             var balanceByAsset = GetBalanceByAsset(portfolio, difference.Asset);
             var lastVolume = balanceByAsset.Volume;
             UpdateBalanceByAssetAndWallet(balanceByAsset, difference, forceSet);
-            UpdateBalanceByAsset(balanceByAsset, portfolio, lastVolume); 
+            UpdateBalanceByAsset(balanceByAsset, lastVolume); 
             UpdateBalanceByWallet(portfolio);
         }
         
@@ -41,7 +41,7 @@ namespace Service.Liquidity.Portfolio.Services
             portfolio.BalanceByWallet = balanceByWallet;
         }
         
-        private void UpdateBalanceByAsset(BalanceByAsset balanceByAsset, AssetPortfolio portfolio, decimal lastVolume)
+        private void UpdateBalanceByAsset(BalanceByAsset balanceByAsset, decimal lastVolume)
         {
             var newVolume = balanceByAsset.WalletBalances.Sum(e => e.Volume);
             
@@ -83,6 +83,14 @@ namespace Service.Liquidity.Portfolio.Services
             return indexPrice.UsdPrice;
         }
 
+        private void SetBalance(string asset, BalanceByWallet balanceByWallet, decimal volume)
+        {
+            var indexPrice = _indexPricesClient.GetIndexPriceByAssetAsync(asset);
+            
+            balanceByWallet.Volume = volume;
+            balanceByWallet.UsdVolume = volume * indexPrice.UsdPrice;
+        }
+
         public BalanceByAsset GetBalanceByAsset(AssetPortfolio portfolio, string asset)
         {
             var balance = portfolio.BalanceByAsset.FirstOrDefault(elem => elem.Asset == asset);
@@ -117,26 +125,34 @@ namespace Service.Liquidity.Portfolio.Services
             // for SetBalance
             if (forceSet)
             {
-                balanceByWallet.Volume = 0m;
+                SetBalance(balanceByAsset.Asset, balanceByWallet, 0m);
             }
 
             if ((balanceByWallet.Volume >= 0 && difference.Volume > 0) || (balanceByWallet.Volume <= 0 && difference.Volume < 0))
             {
-                balanceByWallet.Volume += difference.Volume;
+                var volume = balanceByWallet.Volume + difference.Volume;
+                SetBalance(balanceByAsset.Asset, balanceByWallet, volume);
                 return;
             }
             var originalVolume = balanceByWallet.Volume;
             var decreaseVolumeAbs = Math.Min(Math.Abs(balanceByWallet.Volume), Math.Abs(difference.Volume));
             if (decreaseVolumeAbs > 0)
             {
+                decimal volume;
                 if (balanceByWallet.Volume > 0)
-                    balanceByWallet.Volume -= decreaseVolumeAbs;
+                {
+                    volume = balanceByWallet.Volume - decreaseVolumeAbs;
+                }
                 else
-                    balanceByWallet.Volume += decreaseVolumeAbs;
+                {   
+                    volume = balanceByWallet.Volume + decreaseVolumeAbs;
+                }
+                SetBalance(balanceByAsset.Asset, balanceByWallet, volume);
             }
             if (decreaseVolumeAbs < Math.Abs(difference.Volume))
             {
-                balanceByWallet.Volume = difference.Volume + originalVolume;
+                var volume = difference.Volume + originalVolume;
+                SetBalance(balanceByAsset.Asset, balanceByWallet, volume);
             }
         }
     }
