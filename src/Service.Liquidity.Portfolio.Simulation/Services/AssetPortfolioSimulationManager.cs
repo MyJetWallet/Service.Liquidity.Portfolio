@@ -71,9 +71,9 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             var baseAssetBalance = simulation.BalanceUpdater.GetBalanceByAsset(simulation.BalanceHandler.Portfolio, request.BaseAsset);
             var quoteAssetBalance = simulation.BalanceUpdater.GetBalanceByAsset(simulation.BalanceHandler.Portfolio, request.QuoteAsset);
             
-            var baseAssetDiff = new AssetBalanceDifference(BalanceHandler.Broker, request.WalletName, request.BaseAsset,
+            var baseAssetDiff = new AssetBalanceDifference(BalanceUpdater.Broker, request.WalletName, request.BaseAsset,
                 request.BaseVolume, request.BaseVolume * baseAssetPrice, baseAssetPrice);
-            var quoteAssetDiff = new AssetBalanceDifference(BalanceHandler.Broker, request.WalletName, request.QuoteAsset,
+            var quoteAssetDiff = new AssetBalanceDifference(BalanceUpdater.Broker, request.WalletName, request.QuoteAsset,
                 request.QuoteVolume, quoteAssetVolumeUsd, quoteAssetPrice);
 
             IEnumerable<AssetBalanceDifference> differenceBalances = new List<AssetBalanceDifference>()

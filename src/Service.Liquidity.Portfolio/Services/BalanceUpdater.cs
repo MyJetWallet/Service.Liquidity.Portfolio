@@ -11,7 +11,7 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly IIndexPricesClient _indexPricesClient;
 
         public const string UsdAsset = "USD"; // todo: get from config ASSET AND BROKER
-        private const string Broker = "jetwallet"; // todo: get from config ASSET AND BROKER
+        public const string Broker = "jetwallet"; // todo: get from config ASSET AND BROKER
         public const string PlWalletName = "PL Balance";// todo: get from config
 
         public BalanceUpdater(IIndexPricesClient indexPricesClient)
