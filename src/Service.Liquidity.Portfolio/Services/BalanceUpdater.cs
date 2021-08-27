@@ -40,7 +40,8 @@ namespace Service.Liquidity.Portfolio.Services
                     BrokerId = group.Key.BrokerId,
                     IsInternal = group.Key.IsInternal,
                     WalletName = group.Key.WalletName,
-                    UsdVolume = group.Sum(e => e.UsdVolume)
+                    UsdVolume = group.Sum(e => e.UsdVolume),
+                    Volume = group.Sum(e => e.Volume)
                 }).ToList();
             portfolio.BalanceByWallet = balanceByWallet;
         }

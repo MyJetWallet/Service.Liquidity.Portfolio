@@ -87,5 +87,22 @@ namespace Service.Liquidity.Portfolio.Tests
             
             Assert.AreEqual(30500, portfolio.BalanceByAsset.FirstOrDefault(e => e.Asset == "BTC")?.OpenPriceAvg, "Pnl 1");
         }
+        
+        [Test]
+        public void Test6()
+        {
+            BalanceHandler.ReloadBalance(null);
+            
+            _indexPricesClient.PriceMap = new Dictionary<string, decimal>() {{"BTC", 30000}, {"USD", 1}};
+            var pnl1 = ExecuteTrade("BTC", "USD", -0.000333m, -100, "LP");
+
+            var portfolio = BalanceHandler.GetPortfolioSnapshot();
+            
+            portfolio.BalanceByWallet.ForEach(e =>
+            {
+                Assert.NotZero(e.Volume);
+                Assert.NotZero(e.UsdVolume);
+            });
+        }
     }
 }
