@@ -28,15 +28,15 @@ namespace Service.Liquidity.Portfolio.Services
             var cache = _noSqlDataReader.Get().Select(elem => elem.Wallet.Name);
         }
 
-        public List<string> GetWallets()
+        public IEnumerable<LpWallet> GetWallets()
         {
-            if (_noSqlDataReader.Get().Select(elem => elem.Wallet.WalletId).ToList().Any())
+            if (_noSqlDataReader.Get().Any())
             {
-                return _noSqlDataReader.Get().Select(elem => elem.Wallet.WalletId).ToList();
+                return _noSqlDataReader.Get().Select(e => e.Wallet);
             }
 
             if (_timerCounter >= 60) 
-                return _noSqlDataReader.Get().Select(elem => elem.Wallet.WalletId).ToList();
+                return _noSqlDataReader.Get().Select(e => e.Wallet);
             
             _timerCounter++;
             Thread.Sleep(1000);

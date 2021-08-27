@@ -70,19 +70,19 @@ namespace Service.Liquidity.Portfolio.Services
             }
         }
 
-        public void UpdateBalanceByWallet(AssetPortfolio portfolio)
+        private void UpdateBalanceByWallet(AssetPortfolio portfolio)
         {
             using var a = MyTelemetry.StartActivity("UpdateBalanceByWallet");
 
             var internalWallets = _lpWalletStorage.GetWallets();
-            
+
             var balanceByWallet = portfolio.BalanceByAsset
                 .SelectMany(elem => elem.WalletBalances)
                 .GroupBy(x => new {x.WalletName, x.BrokerId, x.IsInternal})
                 .Select(group => new BalanceByWallet()
                 {
                     BrokerId = group.Key.BrokerId,
-                    IsInternal = (internalWallets.Contains(group.Key.WalletName) || group.Key.WalletName == PlWalletName),
+                    IsInternal = (internalWallets.Select(e=> e.Name).Contains(group.Key.WalletName) || group.Key.WalletName == PlWalletName),
                     WalletName = group.Key.WalletName,
                     UsdVolume = group.Sum(e => e.UsdVolume),
                     Volume = group.Sum(e => e.Volume)
@@ -98,8 +98,8 @@ namespace Service.Liquidity.Portfolio.Services
             balanceByAsset.UsdVolume = balanceByAsset.WalletBalances.Sum(e => e.UsdVolume);
             balanceByAsset.OpenPriceAvg = GetOpenPriceAvg(balanceByAsset.Asset, newVolume, lastVolume, balanceByAsset.OpenPriceAvg, currentPrice);
         }
-        
-        public static decimal GetOpenPriceAvg(string asset, decimal newVolume, decimal lastVolume, decimal lastOpenPriceAvg, decimal currentPrice)
+
+        private static decimal GetOpenPriceAvg(string asset, decimal newVolume, decimal lastVolume, decimal lastOpenPriceAvg, decimal currentPrice)
         {
             if (string.IsNullOrWhiteSpace(asset))
                 return 0;

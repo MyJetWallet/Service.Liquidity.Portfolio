@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using DotNetCoreDecorators;
@@ -29,7 +30,7 @@ namespace Service.Liquidity.Portfolio.Jobs
         private async ValueTask HandleTrades(IReadOnlyList<SwapMessage> swaps)
         {
             var localTrades = new List<AssetPortfolioTrade>();
-            var internalWallets = _lpWalletStorage.GetWallets();
+            var internalWallets = _lpWalletStorage.GetWallets().Select(e=>e.WalletId).ToList();
 
             foreach (var swap in swaps)
             {
