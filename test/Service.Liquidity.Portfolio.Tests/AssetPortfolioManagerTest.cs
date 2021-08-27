@@ -34,7 +34,6 @@ namespace Service.Liquidity.Portfolio.Tests
             _balanceUpdater = new BalanceUpdater(_indexPricesClient, _lpWalletStorage);
 
             BalanceHandler = new BalanceHandler(_loggerFactory.CreateLogger<BalanceHandler>(),
-                _indexPricesClient,
                 _balanceUpdater);
         }
 

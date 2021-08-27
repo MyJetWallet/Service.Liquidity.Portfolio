@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MyJetWallet.Sdk.Service;
 using Service.IndexPrices.Client;
+using Service.IndexPrices.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Services
@@ -31,7 +33,44 @@ namespace Service.Liquidity.Portfolio.Services
             UpdateBalanceByWallet(portfolio);
         }
         
-        private void UpdateBalanceByWallet(AssetPortfolio portfolio)
+        public void UpdateBalance(AssetPortfolio portfolio)
+        {
+            var indexPrices = _indexPricesClient.GetIndexPricesAsync();
+            UpdateBalanceByAssetAndWallet(portfolio, indexPrices);
+            UpdateBalanceByAsset(portfolio, indexPrices); 
+            UpdateBalanceByWallet(portfolio);
+        }
+
+        private void UpdateBalanceByAsset(AssetPortfolio portfolio, List<IndexPrice> indexPrices)
+        {
+            foreach (var balanceByAsset in portfolio.BalanceByAsset)
+            {
+                var indexPrice = indexPrices.FirstOrDefault(e => e.Asset == balanceByAsset.Asset) ?? new IndexPrice()
+                {
+                    UsdPrice = 0
+                };
+                var unrPnl = balanceByAsset.Volume * (indexPrice.UsdPrice - balanceByAsset.OpenPriceAvg);
+                balanceByAsset.UnrealisedPnl = unrPnl;
+                balanceByAsset.UsdVolume = balanceByAsset.WalletBalances.Sum(e => e.UsdVolume);
+            }
+        }
+
+        private void UpdateBalanceByAssetAndWallet(AssetPortfolio portfolio, List<IndexPrice> indexPrices)
+        {
+            foreach (var balanceByAsset in portfolio.BalanceByAsset)
+            {
+                var indexPrice = indexPrices.FirstOrDefault(e => e.Asset == balanceByAsset.Asset) ?? new IndexPrice()
+                {
+                    UsdPrice = 0
+                };
+                foreach (var balanceByWallet in balanceByAsset.WalletBalances)
+                {
+                    balanceByWallet.UsdVolume = balanceByWallet.Volume * indexPrice.UsdPrice;
+                }
+            }
+        }
+
+        public void UpdateBalanceByWallet(AssetPortfolio portfolio)
         {
             using var a = MyTelemetry.StartActivity("UpdateBalanceByWallet");
 

@@ -13,7 +13,6 @@ namespace Service.Liquidity.Portfolio.Services
     public class BalanceHandler
     {
         private readonly ILogger<BalanceHandler> _logger;
-        private readonly IIndexPricesClient _indexPricesClient;
         private readonly BalanceUpdater _balanceUpdater;
 
         public AssetPortfolio Portfolio = new AssetPortfolio();
@@ -22,11 +21,9 @@ namespace Service.Liquidity.Portfolio.Services
         private bool _isInit = false;
 
         public BalanceHandler(ILogger<BalanceHandler> logger,
-            IIndexPricesClient indexPricesClient,
             BalanceUpdater balanceUpdater)
         {
             _logger = logger;
-            _indexPricesClient = indexPricesClient;
             _balanceUpdater = balanceUpdater;
         }
         
@@ -37,8 +34,6 @@ namespace Service.Liquidity.Portfolio.Services
                 throw new Exception($"{nameof(BalanceHandler)} is not init!!!");
             }
             using var a = MyTelemetry.StartActivity("GetPortfolioSnapshot");
-
-            var indexPrices = _indexPricesClient.GetIndexPricesAsync();
             
             lock(_locker)
             {
@@ -47,48 +42,8 @@ namespace Service.Liquidity.Portfolio.Services
                     BalanceByAsset = Portfolio.BalanceByAsset.Select(e => e.GetCopy()).ToList(),
                     BalanceByWallet = Portfolio.BalanceByWallet.Select(e => e.GetCopy()).ToList()
                 };
-
-                SetNetUsd(portfolioCopy, indexPrices);
-                SetUnrPnl(portfolioCopy, indexPrices);
+                _balanceUpdater.UpdateBalance(portfolioCopy);
                 return portfolioCopy;
-            }
-        }
-
-        private void SetNetUsd(AssetPortfolio portfolio, IReadOnlyCollection<IndexPrice> indexPrices)
-        {
-            foreach (var balanceByAsset in portfolio.BalanceByAsset)
-            {
-                var indexPrice = indexPrices.FirstOrDefault(e => e.Asset == balanceByAsset.Asset);
-
-                if (indexPrice != null)
-                {
-                    var netUsd = balanceByAsset.Volume * indexPrice.UsdPrice;
-                    balanceByAsset.UsdVolume = netUsd;
-                }
-                else
-                {
-                    _logger.LogError("Cannot found index price for : {symbol}", balanceByAsset.Asset);
-                    balanceByAsset.UsdVolume = 0;
-                }
-            }
-        }
-
-        private void SetUnrPnl(AssetPortfolio portfolio, IReadOnlyCollection<IndexPrice> indexPrices)
-        {
-            foreach (var balanceByAsset in portfolio.BalanceByAsset)
-            {
-                var indexPrice = indexPrices.FirstOrDefault(e => e.Asset == balanceByAsset.Asset);
-
-                if (indexPrice != null)
-                {
-                    var unrPnl = balanceByAsset.Volume * (indexPrice.UsdPrice - balanceByAsset.OpenPriceAvg);
-                    balanceByAsset.UnrealisedPnl = unrPnl;
-                }
-                else
-                {
-                    _logger.LogError("Cannot found index price for : {symbol}", balanceByAsset.Asset);
-                    balanceByAsset.UnrealisedPnl = 0;
-                }
             }
         }
 

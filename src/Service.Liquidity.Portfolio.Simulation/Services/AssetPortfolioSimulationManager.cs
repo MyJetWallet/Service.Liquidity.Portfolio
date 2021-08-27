@@ -21,8 +21,7 @@ namespace Service.Liquidity.Portfolio.Simulation.Services
             var indexPricesClientMock = new IndexPricesClientMock();
             var lpWalletStorage = new LpWalletStorage(noSqlDataReader);
             var balanceUpdater = new BalanceUpdater(indexPricesClientMock, lpWalletStorage);
-            var assetPortfolioManager = new BalanceHandler(Program.LogFactory.CreateLogger<BalanceHandler>(),
-                indexPricesClientMock, balanceUpdater);
+            var assetPortfolioManager = new BalanceHandler(Program.LogFactory.CreateLogger<BalanceHandler>(), balanceUpdater);
             var simulationEntity = new PortfolioSimulation(GenerateNewSimulationId());
 
             await assetPortfolioManager.ReloadBalance(null);
