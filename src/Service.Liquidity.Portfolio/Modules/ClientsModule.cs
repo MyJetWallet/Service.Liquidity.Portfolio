@@ -3,8 +3,7 @@ using MyJetWallet.Sdk.NoSql;
 using Service.AssetsDictionary.Client;
 using Service.BaseCurrencyConverter.Client;
 using Service.IndexPrices.Client;
-using Service.Liquidity.Engine.Client;
-using Service.Liquidity.Engine.Domain.Models.NoSql;
+using Service.Liquidity.InternalWallets.Domain.Models;
 using Service.MatchingEngine.PriceSource.Client;
 
 namespace Service.Liquidity.Portfolio.Modules

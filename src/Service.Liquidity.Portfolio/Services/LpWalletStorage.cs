@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using MyNoSqlServer.Abstractions;
-using Service.Liquidity.Engine.Domain.Models.NoSql;
+using Service.Liquidity.InternalWallets.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Services
 {

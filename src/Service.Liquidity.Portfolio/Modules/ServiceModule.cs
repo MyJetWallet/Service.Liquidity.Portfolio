@@ -4,9 +4,7 @@ using MyJetWallet.Sdk.Service;
 using MyJetWallet.Sdk.ServiceBus;
 using MyServiceBus.Abstractions;
 using Service.BalanceHistory.Client;
-using Service.Liquidity.Converter.Client;
 using Service.Liquidity.Converter.Domain.Models;
-using Service.Liquidity.Engine.Domain.Models.Portfolio;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 using Service.Liquidity.Portfolio.Grpc;
@@ -52,11 +50,7 @@ namespace Service.Liquidity.Portfolio.Modules
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
-            builder
-                .RegisterType<LiquidityEngineTradeReaderJob>()
-                .As<IStartable>()
-                .AutoActivate()
-                .SingleInstance();
+
             builder
                 .RegisterType<PortfolioHedgerTradeReaderJob>()
                 .As<IStartable>()
@@ -96,11 +90,6 @@ namespace Service.Liquidity.Portfolio.Modules
                 .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
-
-            builder.RegisterMyServiceBusSubscriberBatch<PortfolioTrade>(serviceBusClient,
-                PortfolioTrade.TopicName,
-                $"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}",
-                TopicQueueType.PermanentWithSingleConnection);
 
             builder.RegisterMyServiceBusSubscriberBatch<SwapMessage>(serviceBusClient,
                 SwapMessage.TopicName,

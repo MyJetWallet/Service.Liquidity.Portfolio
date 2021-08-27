@@ -9,7 +9,7 @@ using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.Abstractions;
 using Service.AssetsDictionary.Client;
 using Service.BalanceHistory.ServiceBus;
-using Service.Liquidity.Engine.Domain.Models.NoSql;
+using Service.Liquidity.InternalWallets.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
 

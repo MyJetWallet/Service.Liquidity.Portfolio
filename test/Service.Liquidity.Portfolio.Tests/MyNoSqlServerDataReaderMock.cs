@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MyNoSqlServer.Abstractions;
-using Service.Liquidity.Engine.Domain.Models.NoSql;
-using Service.Liquidity.Engine.Domain.Models.Wallets;
+using Service.Liquidity.InternalWallets.Domain.Models;
 
 namespace Service.Liquidity.Portfolio.Tests
 {
