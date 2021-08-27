@@ -31,11 +31,10 @@ namespace Service.Liquidity.Portfolio.Tests
             _indexPricesClient = new IndexPricesClientMock();
             _noSqlDataReader = new MyNoSqlServerDataReaderMock();
             _lpWalletStorage = new LpWalletStorage(_noSqlDataReader);
-            _balanceUpdater = new BalanceUpdater(_indexPricesClient);
+            _balanceUpdater = new BalanceUpdater(_indexPricesClient, _lpWalletStorage);
 
             BalanceHandler = new BalanceHandler(_loggerFactory.CreateLogger<BalanceHandler>(),
                 _indexPricesClient,
-                _lpWalletStorage,
                 _balanceUpdater);
         }
 

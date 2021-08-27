@@ -9,14 +9,17 @@ namespace Service.Liquidity.Portfolio.Services
     public class BalanceUpdater
     {
         private readonly IIndexPricesClient _indexPricesClient;
-
+        private readonly LpWalletStorage _lpWalletStorage;
+        
         public const string UsdAsset = "USD"; // todo: get from config ASSET AND BROKER
         public const string Broker = "jetwallet"; // todo: get from config ASSET AND BROKER
         public const string PlWalletName = "PL Balance";// todo: get from config
 
-        public BalanceUpdater(IIndexPricesClient indexPricesClient)
+        public BalanceUpdater(IIndexPricesClient indexPricesClient,
+            LpWalletStorage lpWalletStorage)
         {
             _indexPricesClient = indexPricesClient;
+            _lpWalletStorage = lpWalletStorage;
         }
 
         public void UpdateBalance(AssetPortfolio portfolio, AssetBalanceDifference difference, bool forceSet)
@@ -32,13 +35,15 @@ namespace Service.Liquidity.Portfolio.Services
         {
             using var a = MyTelemetry.StartActivity("UpdateBalanceByWallet");
 
+            var internalWallets = _lpWalletStorage.GetWallets();
+            
             var balanceByWallet = portfolio.BalanceByAsset
                 .SelectMany(elem => elem.WalletBalances)
                 .GroupBy(x => new {x.WalletName, x.BrokerId, x.IsInternal})
                 .Select(group => new BalanceByWallet()
                 {
                     BrokerId = group.Key.BrokerId,
-                    IsInternal = group.Key.IsInternal,
+                    IsInternal = (internalWallets.Contains(group.Key.WalletName) || group.Key.WalletName == PlWalletName),
                     WalletName = group.Key.WalletName,
                     UsdVolume = group.Sum(e => e.UsdVolume),
                     Volume = group.Sum(e => e.Volume)

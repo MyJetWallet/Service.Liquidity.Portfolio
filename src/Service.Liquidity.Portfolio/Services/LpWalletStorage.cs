@@ -43,5 +43,10 @@ namespace Service.Liquidity.Portfolio.Services
 
             return GetWallets();
         }
+
+        public string GetWalletNameById(string walletId)
+        {
+            return _noSqlDataReader.Get().FirstOrDefault(elem => elem.Wallet.WalletId == walletId)?.Wallet.Name;
+        }
     }
 }

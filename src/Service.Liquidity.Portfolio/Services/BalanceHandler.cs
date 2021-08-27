@@ -13,7 +13,6 @@ namespace Service.Liquidity.Portfolio.Services
     public class BalanceHandler
     {
         private readonly ILogger<BalanceHandler> _logger;
-        private readonly LpWalletStorage _lpWalletStorage;
         private readonly IIndexPricesClient _indexPricesClient;
         private readonly BalanceUpdater _balanceUpdater;
 
@@ -24,12 +23,10 @@ namespace Service.Liquidity.Portfolio.Services
 
         public BalanceHandler(ILogger<BalanceHandler> logger,
             IIndexPricesClient indexPricesClient,
-            LpWalletStorage lpWalletStorage,
             BalanceUpdater balanceUpdater)
         {
             _logger = logger;
             _indexPricesClient = indexPricesClient;
-            _lpWalletStorage = lpWalletStorage;
             _balanceUpdater = balanceUpdater;
         }
         
