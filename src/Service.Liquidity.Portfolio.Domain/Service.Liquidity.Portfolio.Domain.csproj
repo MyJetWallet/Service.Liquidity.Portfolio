@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.3.0" />
-    <PackageReference Include="MyNoSqlServer.DataWriter" Version="1.4.2" />
   </ItemGroup>
 
   <ItemGroup>

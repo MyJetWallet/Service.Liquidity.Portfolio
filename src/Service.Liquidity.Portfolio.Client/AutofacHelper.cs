@@ -1,10 +1,4 @@
-﻿using System.Collections.Generic;
-using Autofac;
-using DotNetCoreDecorators;
-using MyJetWallet.Sdk.ServiceBus;
-using MyServiceBus.Abstractions;
-using MyServiceBus.TcpClient;
-using Service.Liquidity.Portfolio.Domain.Models;
+﻿using Autofac;
 using Service.Liquidity.Portfolio.Grpc;
 using Service.Liquidity.Portfolio.Grpc.Simulation;
 

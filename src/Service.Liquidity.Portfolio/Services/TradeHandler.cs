@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DotNetCoreDecorators;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
+using MyJetWallet.Sdk.ServiceBus;
 using Newtonsoft.Json;
 using Service.IndexPrices.Client;
 using Service.Liquidity.Portfolio.Domain.Models;
@@ -16,21 +17,21 @@ namespace Service.Liquidity.Portfolio.Services
     {
         private readonly ILogger<TradeHandler> _logger;
         private readonly TradeCacheStorage _tradeCacheStorage;
-        private readonly IPublisher<AssetPortfolioTrade> _tradePublisher;
-        private readonly IPublisher<ChangeBalanceHistory> _changeBalanceHistoryPublisher;
-        private readonly IPublisher<ManualSettlement> _manualSettlementPublisher;
+        private readonly IServiceBusPublisher<AssetPortfolioTrade> _tradePublisher;
+        private readonly IServiceBusPublisher<ChangeBalanceHistory> _changeBalanceHistoryPublisher;
+        private readonly IServiceBusPublisher<ManualSettlement> _manualSettlementPublisher;
         private readonly BalanceHandler _portfolioManager;
         private readonly IIndexPricesClient _indexPricesClient;
         private readonly PortfolioMetrics _portfolioMetrics;
 
         public TradeHandler(ILogger<TradeHandler> logger,
             TradeCacheStorage tradeCacheStorage,
-            IPublisher<AssetPortfolioTrade> tradePublisher,
+            IServiceBusPublisher<AssetPortfolioTrade> tradePublisher,
             BalanceHandler portfolioManager,
-            IPublisher<ChangeBalanceHistory> changeBalanceHistoryPublisher,
+            IServiceBusPublisher<ChangeBalanceHistory> changeBalanceHistoryPublisher,
             IIndexPricesClient indexPricesClient,
             PortfolioMetrics portfolioMetrics,
-            IPublisher<ManualSettlement> manualSettlementPublisher)
+            IServiceBusPublisher<ManualSettlement> manualSettlementPublisher)
         {
             _logger = logger;
             _tradeCacheStorage = tradeCacheStorage;

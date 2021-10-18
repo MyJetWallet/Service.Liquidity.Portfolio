@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.NoSql;
 using MyJetWallet.Sdk.Service;
+using MyJetWallet.Sdk.ServiceBus;
 using MyNoSqlServer.DataReader;
 using MyServiceBus.TcpClient;
 using Service.Liquidity.Portfolio.Jobs;
@@ -12,14 +13,14 @@ namespace Service.Liquidity.Portfolio
     public class ApplicationLifetimeManager : ApplicationLifetimeManagerBase
     {
         private readonly ILogger<ApplicationLifetimeManager> _logger;
-        private readonly MyServiceBusTcpClient _myServiceBusTcpClient;
+        private readonly ServiceBusLifeTime _myServiceBusTcpClient;
         private readonly MyNoSqlTcpClient _myNoSqlTcpClient;
         private readonly BalancePersistJob _balancePersistJob;
         private readonly MyNoSqlClientLifeTime _myNoSqlClientLifeTime;
         
         public ApplicationLifetimeManager(IHostApplicationLifetime appLifetime,
             ILogger<ApplicationLifetimeManager> logger,
-            MyServiceBusTcpClient myServiceBusTcpClient,
+            ServiceBusLifeTime myServiceBusTcpClient,
             MyNoSqlTcpClient myNoSqlTcpClient,
             BalancePersistJob balancePersistJob,
             MyNoSqlClientLifeTime myNoSqlClientLifeTime)
