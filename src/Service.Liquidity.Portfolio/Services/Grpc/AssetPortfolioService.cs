@@ -44,13 +44,13 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
             try
             {
                 var (indexPrice, usdVolume) =
-                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(request.Asset, request.BalanceDifference);
+                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(request.Asset, request.NewBalance);
                 
                 var updateDate = DateTime.UtcNow;
                 var newBalance = new AssetBalanceDifference(request.BrokerId, 
                     request.WalletName,
                     request.Asset, 
-                    request.BalanceDifference, 
+                    request.NewBalance, 
                     usdVolume,
                     indexPrice.UsdPrice);
                 
@@ -71,7 +71,7 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
                     Comment = request.Comment,
                     UpdateDate = updateDate,
                     User = request.User,
-                    VolumeDifference = request.BalanceDifference,
+                    VolumeDifference = request.NewBalance,
                     WalletName = request.WalletName,
                     BalanceBeforeUpdate = balanceBeforeUpdate ?? 0m
                 });
