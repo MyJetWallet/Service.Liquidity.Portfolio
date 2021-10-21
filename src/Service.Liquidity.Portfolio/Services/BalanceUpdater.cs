@@ -88,6 +88,16 @@ namespace Service.Liquidity.Portfolio.Services
                     Volume = group.Sum(e => e.Volume)
                 }).ToList();
             portfolio.BalanceByWallet = balanceByWallet;
+            
+            foreach (var balanceByAsset in portfolio.BalanceByAsset)
+            {
+                foreach (var walletBalance in balanceByAsset.WalletBalances)
+                {
+                    var walletType =
+                        portfolio.BalanceByWallet.FirstOrDefault(e => e.WalletName == walletBalance.WalletName);
+                    walletBalance.IsInternal = walletType?.IsInternal ?? false;
+                }
+            }
         }
 
         private static void UpdateBalanceByAsset(BalanceByAsset balanceByAsset, decimal lastVolume, decimal currentPrice)
