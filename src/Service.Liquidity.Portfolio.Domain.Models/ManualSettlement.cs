@@ -18,5 +18,6 @@ namespace Service.Liquidity.Portfolio.Domain.Models
         [DataMember(Order = 8)] public string Comment { get; set; }
         [DataMember(Order = 9)] public string User { get; set; }
         [DataMember(Order = 10)] public DateTime SettlementDate { get; set; }
+        [DataMember(Order = 11)] public decimal ReleasedPnl { get; set; }
     }
 }

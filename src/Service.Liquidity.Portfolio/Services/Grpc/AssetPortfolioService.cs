@@ -63,7 +63,7 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
                     .Volume;
                 
                 _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {newBalance}, true);
-                
+
                 await _tradeHandler.SaveChangeBalanceHistoryAsync(new ChangeBalanceHistory()
                 {
                     Asset = request.Asset,
@@ -134,7 +134,8 @@ namespace Service.Liquidity.Portfolio.Services.Grpc
                     toIndexPrice.UsdPrice);
 
                 _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {fromDiff, toDiff}, false);
-
+                manualSettlement.ReleasedPnl = _portfolioManager.FixReleasedPnl();
+                
                 await _tradeHandler.SaveManualSettlementHistoryAsync(manualSettlement);
             }
             catch (Exception exception)
