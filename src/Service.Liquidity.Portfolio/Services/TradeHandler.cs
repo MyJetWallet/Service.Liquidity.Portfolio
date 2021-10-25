@@ -114,11 +114,14 @@ namespace Service.Liquidity.Portfolio.Services
                 trade.BaseVolumeInUsd = baseUsdVolume;
                 trade.BaseAssetPriceInUsd = baseIndexPrice.UsdPrice;
                 
-                var secondUsdPrice = Math.Abs(baseIndexPrice.UsdPrice * trade.BaseVolume / trade.QuoteVolume);
-                var secondUsdVolume = trade.QuoteVolume * secondUsdPrice;
+                //var secondUsdPrice = Math.Abs(baseIndexPrice.UsdPrice * trade.BaseVolume / trade.QuoteVolume);
+                //var secondUsdVolume = trade.QuoteVolume * secondUsdPrice;
                 
+                var (secondUsdPrice, secondUsdVolume) =
+                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(trade.QuoteAsset, trade.QuoteVolume);
+
                 trade.QuoteVolumeInUsd = secondUsdVolume;
-                trade.QuoteAssetPriceInUsd = secondUsdPrice; 
+                trade.QuoteAssetPriceInUsd = secondUsdPrice.UsdPrice; 
             });
         }
 
