@@ -217,9 +217,12 @@ namespace Service.Liquidity.Portfolio.Services
         public void SetReleasedPnl(AssetPortfolio portfolio, decimal releasedPnl)
         {
             var (balanceByAsset, balanceByWallet) = GetBalanceByPnlWallet(portfolio);
-            var lastAssetVolume = portfolio.BalanceByAsset.Sum(e => e.Volume);
             var volume = balanceByWallet.Volume - releasedPnl;
             SetBalance(UsdAsset, balanceByWallet, volume);
+            var lastAssetVolume = portfolio
+                .BalanceByAsset
+                .Where(e => e.Asset == balanceByAsset.Asset)
+                .Sum(e => e.Volume);
             
             UpdateBalanceByAsset(balanceByAsset, lastAssetVolume, 1); 
             UpdateBalanceByWallet(portfolio);
