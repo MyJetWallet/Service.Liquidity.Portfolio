@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using DotNetCoreDecorators;
@@ -10,41 +11,47 @@ namespace Service.Liquidity.Portfolio.Jobs
 {
     public class PortfolioHedgerTradeReaderJob : IStartable
     {
+        private static SemaphoreSlim _semaphore;
         private readonly ITradeHandler _tradeHandler;
 
         public PortfolioHedgerTradeReaderJob(ISubscriber<IReadOnlyList<TradeMessage>> subscriber, 
             ITradeHandler tradeHandler)
         {
+            _semaphore = new SemaphoreSlim(1, 1);
             _tradeHandler = tradeHandler;
             subscriber.Subscribe(HandleTrades);
         }
 
         private async ValueTask HandleTrades(IReadOnlyList<TradeMessage> trades)
         {
-            var localTrades = new List<AssetPortfolioTrade>();
-
-            foreach (var elem in trades)
+            await _semaphore.WaitAsync();
+            try
             {
-                localTrades.Add(new AssetPortfolioTrade(elem.Id,
-                    elem.AssociateBrokerId,
-                    elem.AssociateSymbol,
-                    elem.BaseAsset,
-                    elem.QuoteAsset,
-                    elem.AssociateWalletId,
-                    elem.Side,
-                    elem.Price,
-                    elem.Volume,
-                    elem.OppositeVolume,
-                    elem.Timestamp,
-                    TradeMessage.TopicName,
-                    elem.FeeAsset,
-                    elem.FeeVolume)
+                var localTrades = new List<AssetPortfolioTrade>();
+
+                foreach (var elem in trades)
                 {
-                    Comment = elem.Comment,
-                    User = elem.User
-                });
+                    localTrades.Add(new AssetPortfolioTrade(elem.Id,
+                        elem.AssociateBrokerId,
+                        elem.AssociateSymbol,
+                        elem.BaseAsset,
+                        elem.QuoteAsset,
+                        elem.AssociateWalletId,
+                        elem.Side,
+                        elem.Price,
+                        elem.Volume,
+                        elem.OppositeVolume,
+                        elem.Timestamp,
+                        TradeMessage.TopicName,
+                        elem.FeeAsset,
+                        elem.FeeVolume) {Comment = elem.Comment, User = elem.User});
+                }
+                await _tradeHandler.HandleTradesAsync(localTrades);
             }
-            await _tradeHandler.HandleTradesAsync(localTrades);
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         public void Start()

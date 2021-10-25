@@ -107,6 +107,7 @@ namespace Service.Liquidity.Portfolio.Services
             balanceByAsset.Volume = newVolume;
             balanceByAsset.UsdVolume = balanceByAsset.WalletBalances.Sum(e => e.UsdVolume);
             balanceByAsset.OpenPriceAvg = GetOpenPriceAvg(balanceByAsset.Asset, newVolume, lastVolume, balanceByAsset.OpenPriceAvg, currentPrice);
+            Console.WriteLine($"Set open price {balanceByAsset.OpenPriceAvg}; asset {balanceByAsset.Asset}");
         }
 
         private static decimal GetOpenPriceAvg(string asset, decimal newVolume, decimal lastVolume, decimal lastOpenPriceAvg, decimal currentPrice)
@@ -216,11 +217,11 @@ namespace Service.Liquidity.Portfolio.Services
         public void SetReleasedPnl(AssetPortfolio portfolio, decimal releasedPnl)
         {
             var (balanceByAsset, balanceByWallet) = GetBalanceByPnlWallet(portfolio);
-            var lastVolume = balanceByWallet.Volume;
+            var lastAssetVolume = portfolio.BalanceByAsset.Sum(e => e.Volume);
             var volume = balanceByWallet.Volume - releasedPnl;
             SetBalance(UsdAsset, balanceByWallet, volume);
             
-            UpdateBalanceByAsset(balanceByAsset, lastVolume, 1); 
+            UpdateBalanceByAsset(balanceByAsset, lastAssetVolume, 1); 
             UpdateBalanceByWallet(portfolio);
         }
         

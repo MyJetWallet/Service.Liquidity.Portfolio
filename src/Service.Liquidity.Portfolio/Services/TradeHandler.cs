@@ -89,7 +89,6 @@ namespace Service.Liquidity.Portfolio.Services
                 assetPortfolioTrade.ErrorMessage = cache.ErrorMessage;
                 return;
             }
-
             try
             {
                 UpdateBalanceByTrade(assetPortfolioTrade);
