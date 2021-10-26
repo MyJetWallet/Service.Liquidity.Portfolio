@@ -20,6 +20,7 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly IServiceBusPublisher<AssetPortfolioTrade> _tradePublisher;
         private readonly IServiceBusPublisher<ChangeBalanceHistory> _changeBalanceHistoryPublisher;
         private readonly IServiceBusPublisher<ManualSettlement> _manualSettlementPublisher;
+        private readonly IServiceBusPublisher<FeeShareSettlement> _feeShareSettlementPublisher;
         private readonly BalanceHandler _portfolioManager;
         private readonly IIndexPricesClient _indexPricesClient;
         private readonly PortfolioMetrics _portfolioMetrics;
@@ -31,7 +32,8 @@ namespace Service.Liquidity.Portfolio.Services
             IServiceBusPublisher<ChangeBalanceHistory> changeBalanceHistoryPublisher,
             IIndexPricesClient indexPricesClient,
             PortfolioMetrics portfolioMetrics,
-            IServiceBusPublisher<ManualSettlement> manualSettlementPublisher)
+            IServiceBusPublisher<ManualSettlement> manualSettlementPublisher, 
+            IServiceBusPublisher<FeeShareSettlement> feeShareSettlementPublisher)
         {
             _logger = logger;
             _tradeCacheStorage = tradeCacheStorage;
@@ -41,6 +43,7 @@ namespace Service.Liquidity.Portfolio.Services
             _indexPricesClient = indexPricesClient;
             _portfolioMetrics = portfolioMetrics;
             _manualSettlementPublisher = manualSettlementPublisher;
+            _feeShareSettlementPublisher = feeShareSettlementPublisher;
         }
         
         public async ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades)
@@ -191,6 +194,11 @@ namespace Service.Liquidity.Portfolio.Services
         public async Task SaveManualSettlementHistoryAsync(ManualSettlement settlement)
         {
             await _manualSettlementPublisher.PublishAsync(settlement);
+        }
+
+        public async Task SaveFeeShareSettlementHistoryAsync(FeeShareSettlement settlement)
+        {
+            await _feeShareSettlementPublisher.PublishAsync(settlement);
         }
     }
 }

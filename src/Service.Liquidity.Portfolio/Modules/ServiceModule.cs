@@ -4,6 +4,7 @@ using MyJetWallet.Sdk.Service;
 using MyJetWallet.Sdk.ServiceBus;
 using MyServiceBus.Abstractions;
 using Service.BalanceHistory.Client;
+using Service.FeeShareEngine.Client;
 using Service.Liquidity.Converter.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Models;
 using Service.Liquidity.Portfolio.Domain.Services;
@@ -30,12 +31,15 @@ namespace Service.Liquidity.Portfolio.Modules
                 TopicQueueType.PermanentWithSingleConnection,
                 true);
             
+            builder.RegisterFeeShareSubscriber(serviceBusClient,$"LiquidityPortfolio-{Program.Settings.ServiceBusQuerySuffix}");
+            
             builder.RegisterMyNoSqlWriter<AssetPortfolioBalanceNoSql>(Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), AssetPortfolioBalanceNoSql.TableName);
             
             builder.RegisterMyServiceBusPublisher<AssetPortfolioTrade>(serviceBusClient, AssetPortfolioTrade.TopicName, true);
             builder.RegisterMyServiceBusPublisher<ChangeBalanceHistory>(serviceBusClient, ChangeBalanceHistory.TopicName, true);
             builder.RegisterMyServiceBusPublisher<ManualSettlement>(serviceBusClient, ManualSettlement.TopicName, true);
-            
+            builder.RegisterMyServiceBusPublisher<FeeShareSettlement>(serviceBusClient, FeeShareSettlement.TopicName, true);
+
             builder
                 .RegisterType<BalanceHandler>()
                 .AsSelf()
@@ -88,6 +92,12 @@ namespace Service.Liquidity.Portfolio.Modules
                 .RegisterType<LpWalletStorage>()
                 .AsSelf()
                 .As<IStartable>()
+                .AutoActivate()
+                .SingleInstance();
+
+            builder
+                .RegisterType<FeeShareHandler>()
+                .AsSelf()
                 .AutoActivate()
                 .SingleInstance();
 
