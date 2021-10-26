@@ -9,5 +9,6 @@ namespace Service.Liquidity.Portfolio.Domain.Services
         ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades);
         Task SaveChangeBalanceHistoryAsync(ChangeBalanceHistory balanceHistory);
         Task SaveManualSettlementHistoryAsync(ManualSettlement settlement);
+        Task SaveFeeShareSettlementHistoryAsync(FeeShareSettlement settlement);
     }
 }

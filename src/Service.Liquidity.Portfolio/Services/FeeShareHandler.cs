@@ -38,7 +38,7 @@ namespace Service.Liquidity.Portfolio.Services
         {
             try
             {
-                var manualSettlement = new ManualSettlement()
+                var feeShareSettlement = new FeeShareSettlement()
                 {
                     BrokerId = entity.BrokerId,
                     WalletFrom = entity.ConverterWalletId,
@@ -47,7 +47,7 @@ namespace Service.Liquidity.Portfolio.Services
                     VolumeFrom = entity.FeeShareAmount,
                     VolumeTo = entity.FeeShareAmountInUsd,
                     Comment = $"FeeShareSettlement:{entity.OperationId}",
-                    User = entity.ReferrerClientId,
+                    ReferrerClientId = entity.ReferrerClientId,
                     SettlementDate = DateTime.UtcNow
                 };
                 
@@ -69,9 +69,9 @@ namespace Service.Liquidity.Portfolio.Services
                     1);
 
                 _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {fromDiff, toDiff}, false);
-                manualSettlement.ReleasedPnl = _portfolioManager.FixReleasedPnl();
+                feeShareSettlement.ReleasedPnl = _portfolioManager.FixReleasedPnl();
                 
-                await _tradeHandler.SaveManualSettlementHistoryAsync(manualSettlement);
+                await _tradeHandler.SaveFeeShareSettlementHistoryAsync(feeShareSettlement);
             }
             catch (Exception exception)
             {
