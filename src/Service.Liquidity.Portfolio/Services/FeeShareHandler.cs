@@ -18,19 +18,19 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly ITradeHandler _tradeHandler;
         private readonly IIndexPricesClient _indexPricesClient;
         private readonly BalanceHandler _portfolioManager;
-
-        public FeeShareHandler(ILogger<AssetPortfolioService> logger, ITradeHandler tradeHandler, IIndexPricesClient indexPricesClient, BalanceHandler portfolioManager, ISubscriber<IReadOnlyList<FeeShareEntity>> subscriber)
+        private readonly FeeShareOperationCache _feeShareOperationCache;
+        public FeeShareHandler(ILogger<AssetPortfolioService> logger, ITradeHandler tradeHandler, IIndexPricesClient indexPricesClient, BalanceHandler portfolioManager, ISubscriber<FeeShareEntity> subscriber, FeeShareOperationCache feeShareOperationCache)
         {
             _logger = logger;
             _tradeHandler = tradeHandler;
             _indexPricesClient = indexPricesClient;
             _portfolioManager = portfolioManager;
+            _feeShareOperationCache = feeShareOperationCache;
             subscriber.Subscribe(HandleEvents);
         }
 
-        private async ValueTask HandleEvents(IReadOnlyList<FeeShareEntity> events)
+        private async ValueTask HandleEvents(FeeShareEntity feeShareEvent)
         {
-            foreach (var feeShareEvent in events) 
                 await ReportFeeShare(feeShareEvent);
         }
 
@@ -38,6 +38,9 @@ namespace Service.Liquidity.Portfolio.Services
         {
             try
             {
+                if(await _feeShareOperationCache.WasRecorded(entity.OperationId))
+                    return;
+                
                 var feeShareSettlement = new FeeShareSettlement()
                 {
                     BrokerId = entity.BrokerId,
@@ -52,21 +55,21 @@ namespace Service.Liquidity.Portfolio.Services
                     OperationId = entity.OperationId
                 };
                 
-                var (fromIndexPrice, fromUsdVolume) =
+                var (fromIndexPrice, shareVolumeInUsd) =
                     _indexPricesClient.GetIndexPriceByAssetVolumeAsync(entity.FeeShareAsset, entity.FeeShareAmountInTargetAsset);
 
                 var fromDiff = new AssetBalanceDifference(entity.BrokerId, 
                     entity.ConverterWalletId,
                     entity.FeeShareAsset, 
                     entity.FeeShareAmountInTargetAsset, 
-                    fromUsdVolume,
+                    shareVolumeInUsd,
                     fromIndexPrice.UsdPrice);
 
                 var toDiff = new AssetBalanceDifference(entity.BrokerId, 
                     entity.FeeShareWalletId,
                     entity.FeeShareAsset, 
                     entity.FeeShareAmountInTargetAsset, 
-                    fromUsdVolume,
+                    shareVolumeInUsd,
                     1);
 
                 _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {fromDiff, toDiff}, false);

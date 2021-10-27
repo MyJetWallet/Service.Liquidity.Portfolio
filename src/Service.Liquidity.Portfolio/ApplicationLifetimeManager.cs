@@ -7,6 +7,7 @@ using MyJetWallet.Sdk.ServiceBus;
 using MyNoSqlServer.DataReader;
 using MyServiceBus.TcpClient;
 using Service.Liquidity.Portfolio.Jobs;
+using Service.Liquidity.Portfolio.Services;
 
 namespace Service.Liquidity.Portfolio
 {
@@ -17,13 +18,14 @@ namespace Service.Liquidity.Portfolio
         private readonly MyNoSqlTcpClient _myNoSqlTcpClient;
         private readonly BalancePersistJob _balancePersistJob;
         private readonly MyNoSqlClientLifeTime _myNoSqlClientLifeTime;
+        private readonly FeeShareOperationCache _feeShareOperationCache;
         
         public ApplicationLifetimeManager(IHostApplicationLifetime appLifetime,
             ILogger<ApplicationLifetimeManager> logger,
             ServiceBusLifeTime myServiceBusTcpClient,
             MyNoSqlTcpClient myNoSqlTcpClient,
             BalancePersistJob balancePersistJob,
-            MyNoSqlClientLifeTime myNoSqlClientLifeTime)
+            MyNoSqlClientLifeTime myNoSqlClientLifeTime, FeeShareOperationCache feeShareOperationCache)
             : base(appLifetime)
         {
             _logger = logger;
@@ -31,6 +33,7 @@ namespace Service.Liquidity.Portfolio
             _myNoSqlTcpClient = myNoSqlTcpClient;
             _balancePersistJob = balancePersistJob;
             _myNoSqlClientLifeTime = myNoSqlClientLifeTime;
+            _feeShareOperationCache = feeShareOperationCache;
         }
 
         protected override void OnStarted()
@@ -40,6 +43,7 @@ namespace Service.Liquidity.Portfolio
             _myNoSqlTcpClient.Start();
             _myServiceBusTcpClient.Start();
             _myNoSqlClientLifeTime.Start();
+            _feeShareOperationCache.Start();
         }
 
         protected override void OnStopping()
