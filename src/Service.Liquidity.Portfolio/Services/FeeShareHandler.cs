@@ -44,28 +44,29 @@ namespace Service.Liquidity.Portfolio.Services
                     WalletFrom = entity.ConverterWalletId,
                     WalletTo = entity.FeeShareWalletId,
                     Asset = entity.FeeAsset,
-                    VolumeFrom = entity.FeeShareAmount,
-                    VolumeTo = entity.FeeShareAmountInUsd,
+                    VolumeFrom = entity.FeeShareAmountInTargetAsset,
+                    VolumeTo = entity.FeeShareAmountInTargetAsset,
                     Comment = $"FeeShareSettlement:{entity.OperationId}",
                     ReferrerClientId = entity.ReferrerClientId,
-                    SettlementDate = DateTime.UtcNow
+                    SettlementDate = DateTime.UtcNow,
+                    OperationId = entity.OperationId
                 };
                 
                 var (fromIndexPrice, fromUsdVolume) =
-                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(entity.FeeAsset, entity.FeeShareAmount);
+                    _indexPricesClient.GetIndexPriceByAssetVolumeAsync(entity.FeeShareAsset, entity.FeeShareAmountInTargetAsset);
 
                 var fromDiff = new AssetBalanceDifference(entity.BrokerId, 
                     entity.ConverterWalletId,
-                    entity.FeeAsset, 
-                    entity.FeeShareAmount, 
-                    entity.FeeShareAmountInUsd,
+                    entity.FeeShareAsset, 
+                    entity.FeeShareAmountInTargetAsset, 
+                    fromUsdVolume,
                     fromIndexPrice.UsdPrice);
-                
+
                 var toDiff = new AssetBalanceDifference(entity.BrokerId, 
-                    Program.Settings.FeeShareWalletId,
-                    "USD", 
-                    entity.FeeShareAmountInUsd, 
-                    entity.FeeShareAmountInUsd,
+                    entity.FeeShareWalletId,
+                    entity.FeeShareAsset, 
+                    entity.FeeShareAmountInTargetAsset, 
+                    fromUsdVolume,
                     1);
 
                 _portfolioManager.UpdateBalance(new List<AssetBalanceDifference>() {fromDiff, toDiff}, false);
