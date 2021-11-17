@@ -60,6 +60,7 @@ namespace Service.Liquidity.Portfolio.Services
             {
                 throw new Exception($"{nameof(BalanceHandler)} is not init!!!");
             }
+            
             lock (_locker)
             {
                 foreach (var difference in differenceBalances)

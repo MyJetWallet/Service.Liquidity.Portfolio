@@ -22,6 +22,9 @@ namespace Service.Liquidity.Portfolio.Modules
             
             builder.RegisterMyNoSqlReader<LpWalletNoSql>(myNoSqlClient, LpWalletNoSql.TableName);
             builder.RegisterMyNoSqlWriter<FeeShareOperationNoSqlEntity>(Program.ReloadedSettings(e => e.MyNoSqlWriterUrl), FeeShareOperationNoSqlEntity.TableName);
+            
+            builder.RegisterIndexAssetClients(myNoSqlClient);
+            
         }
     }
 }

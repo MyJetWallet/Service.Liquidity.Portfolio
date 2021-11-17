@@ -110,6 +110,11 @@ namespace Service.Liquidity.Portfolio.Modules
                 .RegisterType<FeeShareOperationCache>()
                 .AsSelf()
                 .SingleInstance();
+
+            builder
+                .RegisterType<IndexDecompositionService>()
+                .As<IIndexDecompositionService>()
+                .SingleInstance();
         }
     }
 }

@@ -21,6 +21,7 @@ namespace Service.Liquidity.Portfolio.Services
         private readonly IServiceBusPublisher<ChangeBalanceHistory> _changeBalanceHistoryPublisher;
         private readonly IServiceBusPublisher<ManualSettlement> _manualSettlementPublisher;
         private readonly IServiceBusPublisher<FeeShareSettlement> _feeShareSettlementPublisher;
+        private readonly IIndexDecompositionService _indexDecompositionService;
         private readonly BalanceHandler _portfolioManager;
         private readonly IIndexPricesClient _indexPricesClient;
         private readonly PortfolioMetrics _portfolioMetrics;
@@ -33,7 +34,8 @@ namespace Service.Liquidity.Portfolio.Services
             IIndexPricesClient indexPricesClient,
             PortfolioMetrics portfolioMetrics,
             IServiceBusPublisher<ManualSettlement> manualSettlementPublisher, 
-            IServiceBusPublisher<FeeShareSettlement> feeShareSettlementPublisher)
+            IServiceBusPublisher<FeeShareSettlement> feeShareSettlementPublisher,
+            IIndexDecompositionService indexDecompositionService)
         {
             _logger = logger;
             _tradeCacheStorage = tradeCacheStorage;
@@ -44,11 +46,13 @@ namespace Service.Liquidity.Portfolio.Services
             _portfolioMetrics = portfolioMetrics;
             _manualSettlementPublisher = manualSettlementPublisher;
             _feeShareSettlementPublisher = feeShareSettlementPublisher;
+            _indexDecompositionService = indexDecompositionService;
         }
         
         public async ValueTask HandleTradesAsync(List<AssetPortfolioTrade> trades)
         {
             using var activity = MyTelemetry.StartActivity("HandleTradesAsync");
+            
             trades.Count.AddToActivityAsTag("Trades count");
             _logger.LogInformation("Receive trades count: {count}", trades.Count);
 
@@ -165,13 +169,14 @@ namespace Service.Liquidity.Portfolio.Services
                 assetPortfolioTrade.QuoteVolumeInUsd,
                 assetPortfolioTrade.QuoteAssetPriceInUsd);
             
-            balanceList.Add(baseAssetBalance);
-            balanceList.Add(quoteAssetBalance);
+            balanceList.AddRange(_indexDecompositionService.CheckIndexDecomposition(baseAssetBalance));
+            balanceList.AddRange(_indexDecompositionService.CheckIndexDecomposition(quoteAssetBalance));
 
             if (!string.IsNullOrWhiteSpace(assetPortfolioTrade.FeeAsset) && assetPortfolioTrade.FeeVolume != 0)
             {
                 var (feeIndexPrice, feeUsdVolume) =
                     _indexPricesClient.GetIndexPriceByAssetVolumeAsync(assetPortfolioTrade.FeeAsset, assetPortfolioTrade.FeeVolume);
+                
                 var feeAssetDiff = new AssetBalanceDifference(assetPortfolioTrade.AssociateBrokerId,
                     assetPortfolioTrade.WalletName,
                     assetPortfolioTrade.FeeAsset, 
