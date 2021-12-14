@@ -42,7 +42,7 @@ namespace Service.Liquidity.Portfolio.Jobs
                         elem.Volume,
                         elem.OppositeVolume,
                         elem.Timestamp,
-                        TradeMessage.TopicName,
+                        elem.Source,
                         elem.FeeAsset,
                         elem.FeeVolume) {Comment = elem.Comment, User = elem.User});
                 }
