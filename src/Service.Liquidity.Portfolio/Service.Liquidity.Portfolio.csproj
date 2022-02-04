@@ -21,11 +21,11 @@
     <PackageReference Include="MyJetWallet.Sdk.Service" Version="2.1.6" />
     <PackageReference Include="MyJetWallet.Sdk.ServiceBus" Version="2.1.0" />
     <PackageReference Include="MyJetWallet.Service.AssetsDictionary.Client" Version="2.5.0" />
-    <PackageReference Include="MyJetWallet.Service.BalanceHistory.Client" Version="2.5.4" />
+    <PackageReference Include="MyJetWallet.Service.BalanceHistory.Client" Version="2.5.5" />
     <PackageReference Include="MyJetWallet.Service.BaseCurrencyConverter.Client" Version="1.1.0" />
     <PackageReference Include="MyJetWallet.Service.FeeShareEngine.Client" Version="1.1.0" />
     <PackageReference Include="MyJetWallet.Service.IndexPrices.Client" Version="1.6.3" />
-    <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.2.0" />
+    <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.2.1" />
     <PackageReference Include="MyJetWallet.Service.Liquidity.InternalWallets.Client" Version="1.1.0" />
     <PackageReference Include="MyJetWallet.Service.Liquidity.PortfolioHedger.Client" Version="1.2.0" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.PriceSource.Client" Version="3.0.0" />
